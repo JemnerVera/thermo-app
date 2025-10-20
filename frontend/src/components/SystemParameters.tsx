@@ -468,23 +468,23 @@ const [updateMessage, setUpdateMessage] = useState<Message | null>(null);
 
     }
 
-// Agrupar por nodoid
+// Agrupar por sensorid (Thermos)
 
     const groupedData = data.reduce((acc: any, row: any) => {
 
-      const nodoid = row.nodoid;
+      const sensorid = row.sensorid;
 
-      if (!acc[nodoid]) {
+      if (!acc[sensorid]) {
 
-        // Buscar el nombre del nodo
+        // Buscar el nombre del sensor
 
-        const nodo = nodosData?.find(n => n.nodoid === nodoid);
+        const sensor = sensorsData?.find(s => s.sensorid === sensorid);
 
-acc[nodoid] = {
+acc[sensorid] = {
 
-          nodoid: row.nodoid,
+          sensorid: row.sensorid,
 
-          nodo: nodo?.nodo || `Nodo ${nodoid}`,
+          sensor: sensor?.sensor || `Sensor ${sensorid}`,
 
           tipos: new Set(),
 
@@ -520,13 +520,13 @@ acc[nodoid] = {
 
         if (tipo?.tipo) {
 
-          acc[nodoid].tipos.add(tipo.tipo);
+          acc[sensorid].tipos.add(tipo.tipo);
 
         }
 
 if (metrica?.metrica) {
 
-          acc[nodoid].metricas.add(metrica.metrica);
+          acc[sensorid].metricas.add(metrica.metrica);
 
         }
 
@@ -542,7 +542,7 @@ if (metrica?.metrica) {
 
         metrica: metrica?.metrica || `Métrica ${row.metricaid}`,
 
-        nodo: acc[nodoid].nodo || `Nodo ${row.nodoid}`,
+        sensor: acc[sensorid].sensor || `Sensor ${row.sensorid}`,
 
         entidadid: tipo?.entidadid || row.entidadid // Obtener entidadid del tipo
 
@@ -550,7 +550,7 @@ if (metrica?.metrica) {
 
 // Agregar fila original enriquecida
 
-      acc[nodoid].originalRows.push(enrichedRow);
+      acc[sensorid].originalRows.push(enrichedRow);
 
 return acc;
 
@@ -604,23 +604,23 @@ return {
 
     }
 
-// Agrupar por nodoid
+// Agrupar por sensorid (Thermos)
 
     const groupedData = data.reduce((acc: any, row: any) => {
 
-      const nodoid = row.nodoid;
+      const sensorid = row.sensorid;
 
-      if (!acc[nodoid]) {
+      if (!acc[sensorid]) {
 
-        // Buscar el nombre del nodo
+        // Buscar el nombre del sensor
 
-        const nodo = nodosData?.find(n => n.nodoid === nodoid);
+        const sensor = sensorsData?.find(s => s.sensorid === sensorid);
 
-acc[nodoid] = {
+acc[sensorid] = {
 
-          nodoid: row.nodoid,
+          sensorid: row.sensorid,
 
-          nodo: nodo?.nodo || `Nodo ${nodoid}`,
+          sensor: sensor?.sensor || `Sensor ${sensorid}`,
 
           tipos: new Set(),
 
@@ -652,7 +652,7 @@ acc[nodoid] = {
 
         if (tipo?.tipo) {
 
-          acc[nodoid].tipos.add(tipo.tipo);
+          acc[sensorid].tipos.add(tipo.tipo);
 
         }
 
@@ -666,7 +666,7 @@ acc[nodoid] = {
 
         tipo: tipo?.tipo || `Tipo ${row.tipoid}`,
 
-        nodo: acc[nodoid].nodo || `Nodo ${row.nodoid}`,
+        sensor: acc[sensorid].sensor || `Sensor ${row.sensorid}`,
 
         entidadid: tipo?.entidadid || row.entidadid // Obtener entidadid del tipo
 
@@ -674,7 +674,7 @@ acc[nodoid] = {
 
 // Agregar fila original enriquecida
 
-      acc[nodoid].originalRows.push(enrichedRow);
+      acc[sensorid].originalRows.push(enrichedRow);
 
 return acc;
 
@@ -898,17 +898,17 @@ const [individualRowStatus, setIndividualRowStatus] = useState<{[key: string]: b
 
   const handleReplicateSensor = (nodo: any) => {
 
-    // Obtener todos los sensores del nodo fuente seleccionado
+    // Obtener todos los sensores del sensor fuente seleccionado
 
-    const sensoresDelNodo = tableData.filter(sensor => sensor.nodoid === nodo.nodoid);
+    const sensoresDelSensor = tableData.filter(sensor => sensor.sensorid === sensor.sensorid);
 
-if (sensoresDelNodo.length > 0) {
+if (sensoresDelSensor.length > 0) {
 
       // NO cambiar el nodo destino (mantener el que ya está seleccionado en el formulario)
 
       // Solo extraer los tipos únicos de los sensores del nodo fuente
 
-      const tiposUnicos = Array.from(new Set(sensoresDelNodo.map(sensor => sensor.tipoid)));
+      const tiposUnicos: number[] = Array.from(new Set(sensoresDelSensor.map((sensor: any) => sensor.tipoid)));
 
 // Configurar la cantidad basada en los tipos únicos encontrados
 
@@ -916,9 +916,9 @@ if (sensoresDelNodo.length > 0) {
 
 // Inicializar sensores con los tipos del nodo fuente, pero para el nodo destino actual
 
-      if (selectedNodo) {
+      if (selectedSensors && selectedSensors.length > 0) {
 
-        initializeMultipleSensors(selectedNodo, tiposUnicos.length, tiposUnicos);
+        initializeMultipleSensors(selectedSensors[0], tiposUnicos.length, tiposUnicos);
 
       }
 
@@ -994,9 +994,9 @@ if (metricasDelNodo.length > 0) {
 
 // Inicializar métricas con las métricas del nodo fuente, pero para el nodo destino actual
 
-      if (selectedNodos.length > 0) {
+      if (selectedSensors.length > 0) {
 
-        initializeMultipleMetricas(selectedNodos, metricasUnicas.map(id => id.toString()));
+        initializeMultipleMetricas(selectedSensors, metricasUnicas.map(id => id.toString()));
 
       }
 
@@ -1038,27 +1038,27 @@ if (metricasDelNodo.length > 0) {
 
         // Cargar datos de nodos directamente desde la API
 
-        const nodosResponse = await JoySenseService.getTableData('nodo', 500);
+        const sensorsResponse = await JoySenseService.getTableData('sensor', 500);
 
-        const nodos = Array.isArray(nodosResponse) ? nodosResponse : ((nodosResponse as any)?.data || []);
+        const sensors = Array.isArray(sensorsResponse) ? sensorsResponse : ((sensorsResponse as any)?.data || []);
 
-// Obtener nodos únicos que tienen sensores
+// Obtener sensores únicos que tienen sensores
 
-        const nodosConSensores = Array.from(new Set(tableData.map(sensor => sensor.nodoid)))
+        const sensoresConSensores = Array.from(new Set(tableData.map(sensor => sensor.sensorid)))
 
-          .map(nodoid => {
+          .map(sensorid => {
 
-            const nodo = nodos.find((n: any) => n.nodoid === nodoid);
+            const sensor = sensors.find((s: any) => s.sensorid === sensorid);
 
-            return nodo;
+            return sensor;
 
           })
 
-          .filter(nodo => nodo !== undefined);
+          .filter(sensor => sensor !== undefined);
 
-modalData = nodosConSensores;
+modalData = sensoresConSensores;
 
-        modalTableName = 'nodo';
+        modalTableName = 'sensor';
 
         // Crear columnas específicas para nodo
 
@@ -1074,25 +1074,25 @@ modalData = nodosConSensores;
 
 } catch (error) {
 
-        console.error('Error loading nodos data:', error);
+        console.error('Error loading sensors data:', error);
 
-        // Fallback: usar nodosData si está disponible
+        // Fallback: usar sensorsData si está disponible
 
-        const nodosConSensores = Array.from(new Set(tableData.map(sensor => sensor.nodoid)))
+        const sensoresConSensores = Array.from(new Set(tableData.map(sensor => sensor.sensorid)))
 
-          .map(nodoid => {
+          .map(sensorid => {
 
-            const nodo = nodosData.find((n: any) => n.nodoid === nodoid);
+            const sensor = sensorsData.find((s: any) => s.sensorid === sensorid);
 
-            return nodo;
+            return sensor;
 
           })
 
-          .filter(nodo => nodo !== undefined);
+          .filter(sensor => sensor !== undefined);
 
-modalData = nodosConSensores;
+modalData = sensoresConSensores;
 
-        modalTableName = 'nodo';
+        modalTableName = 'sensor';
 
         // Crear columnas específicas para nodo
 
@@ -1114,25 +1114,25 @@ modalData = nodosConSensores;
 
       try {
 
-        const nodosResponse = await JoySenseService.getTableData('nodo', 500);
+        const sensorsResponse = await JoySenseService.getTableData('sensor', 500);
 
-        const nodos = Array.isArray(nodosResponse) ? nodosResponse : ((nodosResponse as any)?.data || []);
+        const sensors = Array.isArray(sensorsResponse) ? sensorsResponse : ((sensorsResponse as any)?.data || []);
 
-const nodosConMetricas = Array.from(new Set(tableData.map(metrica => metrica.nodoid)))
+const sensoresConMetricas = Array.from(new Set(tableData.map(metrica => metrica.sensorid)))
 
-          .map(nodoid => {
+          .map(sensorid => {
 
-            const nodo = nodos.find((n: any) => n.nodoid === nodoid);
+            const sensor = sensors.find((s: any) => s.sensorid === sensorid);
 
-            return nodo;
+            return sensor;
 
           })
 
-          .filter(nodo => nodo !== undefined);
+          .filter(sensor => sensor !== undefined);
 
-modalData = nodosConMetricas;
+modalData = sensoresConMetricas;
 
-        modalTableName = 'nodo';
+        modalTableName = 'sensor';
 
         modalVisibleColumns = [
 
@@ -1146,25 +1146,25 @@ modalData = nodosConMetricas;
 
       } catch (error) {
 
-        console.error('Error loading nodos data for metricasensor:', error);
+        console.error('Error loading sensors data for metricasensor:', error);
 
-        // Fallback: usar nodosData si está disponible
+        // Fallback: usar sensorsData si está disponible
 
-        const nodosConMetricas = Array.from(new Set(tableData.map(metrica => metrica.nodoid)))
+        const sensoresConMetricas = Array.from(new Set(tableData.map(metrica => metrica.sensorid)))
 
-          .map(nodoid => {
+          .map(sensorid => {
 
-            const nodo = nodosData.find((n: any) => n.nodoid === nodoid);
+            const sensor = sensorsData.find((s: any) => s.sensorid === sensorid);
 
-            return nodo;
+            return sensor;
 
           })
 
-          .filter(nodo => nodo !== undefined);
+          .filter(sensor => sensor !== undefined);
 
-modalData = nodosConMetricas;
+modalData = sensoresConMetricas;
 
-        modalTableName = 'nodo';
+        modalTableName = 'sensor';
 
         modalVisibleColumns = [
 
@@ -1478,7 +1478,7 @@ return hasChanges;
 
       if (selectedTable === 'metricasensor') {
 
-        return selectedNodos.length > 0 || selectedEntidadMetrica !== '' || selectedMetricas.length > 0 || multipleMetricas.length > 0;
+        return selectedSensors.length > 0 || selectedEntidadMetrica !== '' || selectedMetricas.length > 0 || multipleMetricas.length > 0;
 
       }
 
@@ -1615,7 +1615,7 @@ return hasChanges;
 
       if (selectedTable === 'metricasensor') {
 
-        return multipleMetricas.length > 0 || selectedNodos.length > 0 || selectedEntidadMetrica !== '' || selectedMetricas.length > 0;
+        return multipleMetricas.length > 0 || selectedSensors.length > 0 || selectedEntidadMetrica !== '' || selectedMetricas.length > 0;
 
       }
 
@@ -6193,7 +6193,7 @@ return reorderedColumns;
 
    const [multipleMetricas, setMultipleMetricas] = useState<any[]>([]);
 
-   const [selectedNodos, setSelectedNodos] = useState<string[]>([]);
+   const [selectedSensors, setSelectedNodos] = useState<string[]>([]);
 
    const [selectedEntidadMetrica, setSelectedEntidadMetrica] = useState<string>('');
 
@@ -6260,12 +6260,12 @@ return reorderedColumns;
 
   const metricasensorStates = useMemo(() => {
     return selectedTable === 'metricasensor' ? {
-      selectedNodos,
+      selectedSensors,
       selectedEntidadMetrica,
       selectedMetricas,
       multipleMetricas
     } : null;
-  }, [selectedTable, selectedNodos, selectedEntidadMetrica, selectedMetricas, multipleMetricas]);
+  }, [selectedTable, selectedSensors, selectedEntidadMetrica, selectedMetricas, multipleMetricas]);
 
   const memoizedExtendedMultipleData = useMemo(() => {
     return {
@@ -7451,7 +7451,7 @@ try {
 
 // Validar que el nodo seleccionado tenga los sensores necesarios
 
-      const selectedNodoId = selectedNodos[0];
+      const selectedNodoId = selectedSensors[0];
 
       if (selectedNodoId) {
 
@@ -8348,7 +8348,7 @@ const handleCancelModal = () => {
 
                                                                          <MultipleMetricaSensorFormLazyWithBoundary
 
-                          selectedNodos={selectedNodos}
+                          selectedSensors={selectedSensors}
 
                           setSelectedNodos={setSelectedNodos}
 
