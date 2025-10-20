@@ -1860,29 +1860,9 @@ app.get('/api/thermo/metricas', async (req, res) => {
   }
 });
 
-app.get('/api/thermo/nodos', async (req, res) => {
-  try {
-    const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo nodos del schema thermo...`);
-    
-    const { data, error } = await supabase
-      .from('nodo')
-        .select('*')
-      .eq('statusid', 1)
-      .limit(parseInt(limit));
-    
-    if (error) {
-      console.error('❌ Error backend:', error);
-      return res.status(500).json({ error: error.message });
-    }
-    
-    console.log(`✅ Backend: Nodos obtenidos: ${data.length}`);
-    res.json(data);
-  } catch (error) {
-    console.error('❌ Error backend:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// RUTA ELIMINADA: /api/thermo/nodos
+// La tabla 'nodo' no existe en el schema 'thermo'
+// En Thermos usamos 'sensor' directamente para sensores industriales
 
 app.get('/api/thermo/tipos', async (req, res) => {
   try {
@@ -1932,151 +1912,9 @@ app.get('/api/thermo/localizaciones', async (req, res) => {
   }
 });
 
-// Endpoint para obtener nodos con localizaciones completas (para mapa)
-app.get('/api/thermo/nodos-con-localizacion', async (req, res) => {
-  try {
-    const { limit = 1000 } = req.query;
-    console.log(`🔍 Backend: Obteniendo nodos con localizaciones del schema thermo...`);
-    
-    // Estrategia: obtener nodos activos primero, luego sus localizaciones
-    console.log('🔄 Paso 1: Obteniendo nodos activos...');
-    const { data: nodos, error: nodosError } = await supabase
-      .from('nodo')
-      .select('*')
-      .eq('statusid', 1)
-      .limit(parseInt(limit));
-    
-    if (nodosError) {
-      console.error('❌ Error obteniendo nodos:', nodosError);
-      return res.status(500).json({ error: nodosError.message });
-    }
-    
-    console.log(`✅ Nodos obtenidos: ${nodos.length}`);
-    
-    if (nodos.length === 0) {
-      console.log('⚠️ No hay nodos activos');
-      return res.json([]);
-    }
-    
-    // Paso 2: obtener localizaciones para estos nodos
-    console.log('🔄 Paso 2: Obteniendo localizaciones...');
-    const nodoIds = nodos.map(n => n.nodoid);
-    
-    const { data: localizaciones, error: locError } = await supabase
-      .from('localizacion')
-      .select('*')
-      .in('nodoid', nodoIds)
-      .eq('statusid', 1)
-      .not('latitud', 'is', null)
-      .not('longitud', 'is', null);
-    
-    if (locError) {
-      console.error('❌ Error obteniendo localizaciones:', locError);
-      return res.status(500).json({ error: locError.message });
-    }
-    
-    console.log(`✅ Localizaciones obtenidas: ${localizaciones.length}`);
-    
-    // Paso 3: obtener ubicaciones con fundos
-    console.log('🔄 Paso 3: Obteniendo ubicaciones con fundos...');
-    const ubicacionIds = [...new Set(localizaciones.map(l => l.ubicacionid))];
-    
-    const { data: ubicaciones, error: ubiError } = await supabase
-      .from('ubicacion')
-      .select(`
-        *,
-        fundo: fundoid (
-          fundoid,
-          fundo,
-          fundoabrev,
-          empresaid,
-          empresa: empresaid (
-            empresaid,
-            empresa,
-            empresabrev,
-            paisid,
-            pais: paisid (
-              paisid,
-              pais,
-              paisabrev
-            )
-          )
-        )
-      `)
-      .in('ubicacionid', ubicacionIds);
-    
-    if (ubiError) {
-      console.error('❌ Error obteniendo ubicaciones:', ubiError);
-      return res.status(500).json({ error: ubiError.message });
-    }
-    
-    console.log(`✅ Ubicaciones obtenidas: ${ubicaciones.length}`);
-    
-    // Paso 4: obtener entidades
-    console.log('🔄 Paso 4: Obteniendo entidades...');
-    const entidadIds = [...new Set(localizaciones.map(l => l.entidadid).filter(id => id))];
-    
-    const { data: entidades, error: entError } = await supabase
-      .from('entidad')
-      .select('*')
-      .in('entidadid', entidadIds);
-    
-    if (entError) {
-      console.error('❌ Error obteniendo entidades:', entError);
-      return res.status(500).json({ error: entError.message });
-    }
-    
-    console.log(`✅ Entidades obtenidas: ${entidades.length}`);
-    
-    // Paso 5: combinar datos
-    console.log('🔄 Paso 5: Combinando datos...');
-    const resultado = localizaciones.map(loc => {
-      const nodo = nodos.find(n => n.nodoid === loc.nodoid);
-      const ubicacion = ubicaciones.find(u => u.ubicacionid === loc.ubicacionid);
-      const entidad = entidades.find(e => e.entidadid === loc.entidadid);
-      
-      return {
-        nodoid: loc.nodoid,
-        nodo: nodo?.nodo || `Nodo ${loc.nodoid}`,
-        deveui: nodo?.deveui || 'N/A',
-        ubicacionid: loc.ubicacionid,
-        latitud: loc.latitud,
-        longitud: loc.longitud,
-        referencia: loc.referencia,
-        ubicacion: {
-          ubicacion: ubicacion?.ubicacion || `Ubicación ${loc.ubicacionid}`,
-          ubicacionabrev: ubicacion?.ubicacion || `U${loc.ubicacionid}`, // Usar ubicacion como abreviación
-          fundoid: ubicacion?.fundoid || null,
-          fundo: {
-            fundo: ubicacion?.fundo?.fundo || 'N/A',
-            fundoabrev: ubicacion?.fundo?.fundoabrev || 'N/A',
-            empresa: {
-              empresaid: ubicacion?.fundo?.empresa?.empresaid || null,
-              empresa: ubicacion?.fundo?.empresa?.empresa || 'N/A',
-              empresabrev: ubicacion?.fundo?.empresa?.empresabrev || 'N/A',
-              pais: {
-                paisid: ubicacion?.fundo?.empresa?.pais?.paisid || null,
-                pais: ubicacion?.fundo?.empresa?.pais?.pais || 'N/A',
-                paisabrev: ubicacion?.fundo?.empresa?.pais?.paisabrev || 'N/A'
-              }
-            }
-          }
-        },
-        entidad: {
-          entidadid: entidad?.entidadid || loc.entidadid || 1,
-          entidad: entidad?.entidad || 'N/A'
-        }
-      };
-    });
-    
-    console.log(`✅ Backend: Nodos con localizaciones procesados: ${resultado.length}`);
-    res.json(resultado);
-    
-  } catch (error) {
-    console.error('❌ Error backend:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+// RUTA ELIMINADA: /api/thermo/nodos-con-localizacion
+// La tabla 'nodo' no existe en el schema 'thermo'
+// En Thermos usamos 'sensor' y 'localizacionsensor' para sensores industriales
 
 // Ruta para detectar schema disponible (THERMOS)
 app.get('/api/thermo/detect', async (req, res) => {

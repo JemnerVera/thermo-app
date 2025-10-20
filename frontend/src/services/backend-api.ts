@@ -491,13 +491,13 @@ export class JoySenseService {
       
       if (detectedSchema === 'thermo') {
         // Obtener datos básicos para contar
-        const [paises, empresas, fundos, ubicaciones, metricas, nodos, tipos, mediciones] = await Promise.all([
+        const [paises, empresas, fundos, ubicaciones, metricas, sensores, tipos, mediciones] = await Promise.all([
           this.getPaises(),
           this.getEmpresas(),
           this.getFundos(),
           this.getUbicaciones(),
           backendAPI.get('/thermo/metricas'),
-          backendAPI.get('/thermo/nodos'),
+          backendAPI.get('/thermo/sensor'),
           backendAPI.get('/thermo/tipos'),
           this.getMediciones({ limit: 1 })
         ]);
@@ -512,7 +512,7 @@ export class JoySenseService {
           fundo: fundos.length,
           ubicacion: ubicaciones.length,
           metrica: metricas.length,
-          nodo: nodos.length,
+          sensor: sensores.length,
           tipo: tipos.length
         };
       } else {
@@ -600,7 +600,7 @@ export class JoySenseService {
       if (schema === 'public') {
         return ['sensor_value', 'fundo', 'device', 'tipo_sensor', 'unidad'];
       } else if (schema === 'thermo') {
-        return ['medicion', 'pais', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'metrica', 'sensor', 'tipo', 'entidad', 'alerta', 'mensaje', 'usuario'];
+        return ['medicion', 'pais', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'metrica', 'sensor', 'tipo', 'entidad', 'alerta', 'mensaje', 'usuario', 'localizacionsensor', 'mensaje_error'];
       }
       
       return [];
@@ -684,22 +684,28 @@ export class JoySenseService {
     }
   }
 
-  // Obtener nodos
-  static async getNodos(): Promise<any[]> {
+  // Obtener sensores (reemplaza nodos en Thermos)
+  static async getSensores(): Promise<any[]> {
     try {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
       if (detectedSchema === 'thermo') {
-        const data = await backendAPI.get('/thermo/nodos');
+        const data = await backendAPI.get('/thermo/sensor');
         return data || [];
       } else {
         return [];
       }
     } catch (error) {
-      console.error('Error in getNodos:', error);
+      console.error('Error in getSensores:', error);
       throw error;
     }
+  }
+
+  // Mantener getNodos para compatibilidad (deprecated)
+  static async getNodos(): Promise<any[]> {
+    console.warn('⚠️ getNodos() está deprecated. Usa getSensores() en su lugar.');
+    return this.getSensores();
   }
 
   // Obtener tipos
@@ -777,13 +783,13 @@ export class JoySenseService {
       
       if (detectedSchema === 'thermo') {
         // Obtener datos básicos para contar
-        const [paises, empresas, fundos, ubicaciones, metricas, nodos, tipos, mediciones] = await Promise.all([
+        const [paises, empresas, fundos, ubicaciones, metricas, sensores, tipos, mediciones] = await Promise.all([
           this.getPaises(),
           this.getEmpresas(),
           this.getFundos(),
           this.getUbicaciones(),
           backendAPI.get('/thermo/metricas'),
-          backendAPI.get('/thermo/nodos'),
+          backendAPI.get('/thermo/sensor'),
           backendAPI.get('/thermo/tipos'),
           this.getMediciones({ limit: 1 })
         ]);
@@ -929,19 +935,26 @@ export class JoySenseService {
     }
   }
 
-  // Obtener nodos con localizaciones completas (para mapa)
-  static async getNodosConLocalizacion(limit: number = 1000): Promise<any[]> {
+  // Obtener sensores con localizaciones (reemplaza nodos en Thermos)
+  static async getSensoresConLocalizacion(limit: number = 1000): Promise<any[]> {
     try {
       const detectedSchema = await this.detectSchema();
       if (detectedSchema === 'thermo') {
-        const data = await backendAPI.get(`/thermo/nodos-con-localizacion?limit=${limit}`);
+        // En Thermos, usamos localizacionsensor para obtener sensores con ubicaciones
+        const data = await backendAPI.get(`/thermo/localizacionsensor?limit=${limit}`);
         return data || [];
       } else {
         return [];
       }
     } catch (error) {
-      console.error('Error in getNodosConLocalizacion:', error);
+      console.error('Error in getSensoresConLocalizacion:', error);
       throw error;
     }
+  }
+
+  // Mantener getNodosConLocalizacion para compatibilidad (deprecated)
+  static async getNodosConLocalizacion(limit: number = 1000): Promise<any[]> {
+    console.warn('⚠️ getNodosConLocalizacion() está deprecated. Usa getSensoresConLocalizacion() en su lugar.');
+    return this.getSensoresConLocalizacion(limit);
   }
 }
