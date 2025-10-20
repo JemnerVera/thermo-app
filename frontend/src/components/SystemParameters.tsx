@@ -131,13 +131,12 @@ const SystemParameters = forwardRef<SystemParametersRef, SystemParametersProps>(
     ubicacionesData,
     localizacionesData,
     entidadesData,
-    nodosData,
+    sensorsData,
     tiposData,
     metricasData,
     criticidadesData,
     perfilesData,
     umbralesData,
-    sensorsData,
     metricasensorData,
     perfilumbralData,
     contactosData,
@@ -896,11 +895,11 @@ const [individualRowStatus, setIndividualRowStatus] = useState<{[key: string]: b
   // REPLICATION FUNCTIONS
   // ============================================================================
 
-  const handleReplicateSensor = (nodo: any) => {
+  const handleReplicateSensor = (sensor: any) => {
 
     // Obtener todos los sensores del sensor fuente seleccionado
 
-    const sensoresDelSensor = tableData.filter(sensor => sensor.sensorid === sensor.sensorid);
+    const sensoresDelSensor = tableData.filter(s => s.sensorid === sensor.sensorid);
 
 if (sensoresDelSensor.length > 0) {
 
@@ -1204,7 +1203,7 @@ const options = {
 
       // Pasar datos adicionales para búsquedas de nombres
 
-      nodosData: nodosData,
+      sensorsData: sensorsData,
 
       tiposData: tiposData,
 
@@ -2266,7 +2265,7 @@ const getCurrentUserId = () => {
       fundosData,
       ubicacionesData,
       entidadesData,
-      nodosData,
+      nodosData: sensorsData, // Mapear sensorsData a nodosData para compatibilidad
       tiposData,
       metricasData,
       localizacionesData,
@@ -2348,7 +2347,7 @@ const getCurrentUserId = () => {
           existingData = tiposData || [];
           break;
         case 'nodo':
-          existingData = nodosData || [];
+          existingData = sensorsData || [];
           break;
         case 'metrica':
           existingData = metricasData || [];
@@ -2701,19 +2700,19 @@ preparedData.length = 0;
 
       }
 
-// Verificar que los nodoid y tipoid existen
+// Verificar que los sensorid y tipoid existen
 
-      const nodosExistentes = nodosData?.map(n => n.nodoid) || [];
+      const sensoresExistentes = sensorsData?.map(s => s.sensorid) || [];
 
       const tiposExistentes = tiposData?.map(t => t.tipoid) || [];
 
-const nodosInvalidos = preparedData.filter(item => !nodosExistentes.includes(item.nodoid));
+const sensoresInvalidos = preparedData.filter(item => !sensoresExistentes.includes(item.sensorid));
 
       const tiposInvalidos = preparedData.filter(item => !tiposExistentes.includes(item.tipoid));
 
-if (nodosInvalidos.length > 0) {
+if (sensoresInvalidos.length > 0) {
 
-        console.error('❌ Nodos inválidos encontrados:', nodosInvalidos);
+        console.error('❌ Sensores inválidos encontrados:', sensoresInvalidos);
 
       }
 
@@ -3588,15 +3587,15 @@ return entidadResult;
 
       case 'nodoid':
 
-        // Filtrar nodos por filtros globales y por ubicación seleccionada (para umbral)
+        // Filtrar sensores por filtros globales y por ubicación seleccionada (para umbral)
 
-        if (!nodosData || nodosData.length === 0) {
+        if (!sensorsData || sensorsData.length === 0) {
 
 return [];
 
         }
 
-        let filteredNodos = nodosData;
+        let filteredSensors = sensorsData;
 
 // Para umbral masivo, filtrar nodos que tienen sensor pero NO tienen metricasensor (como metrica sensor)
 
@@ -3612,15 +3611,13 @@ return [];
 
             umbralesDataLength: umbralesData.length,
 
-            nodosDataLength: nodosData.length,
-
             filterParams
 
           });
 
 // Obtener nodos que tienen sensor (desde la tabla sensor)
 
-          let nodosConSensor = sensorsData
+          let sensoresConSensor = sensorsData
 
             .filter((s: any) => s.nodoid)
 
@@ -3628,11 +3625,11 @@ return [];
 
 console.log('🔍 Nodos con sensores (todos):', {
 
-            nodosConSensor: nodosConSensor.length,
+            sensoresConSensor: sensoresConSensor.length,
 
-            primeros5: nodosConSensor.slice(0, 5),
+            primeros5: sensoresConSensor.slice(0, 5),
 
-            todosLosNodosConSensor: nodosConSensor
+            todosLosNodosConSensor: sensoresConSensor
 
           });
 
@@ -3666,7 +3663,7 @@ const sensoresConEntidad = sensorsData.filter((s: any) =>
 
             );
 
-            nodosConSensor = sensoresConEntidad
+            sensoresConSensor = sensoresConEntidad
 
               .filter((s: any) => s.nodoid)
 
@@ -3676,9 +3673,9 @@ console.log('🔍 Sensores con entidad:', {
 
               sensoresConEntidad: sensoresConEntidad.length,
 
-              nodosConSensor: nodosConSensor.length,
+              sensoresConSensor: sensoresConSensor.length,
 
-              primeros5: nodosConSensor.slice(0, 5)
+              primeros5: sensoresConSensor.slice(0, 5)
 
             });
 
@@ -3687,89 +3684,89 @@ console.log('🔍 Sensores con entidad:', {
 // Obtener nodos que ya tienen metricasensor (desde la tabla metricasensor)
 
           // Obtener nodos que ya tienen umbrales asignados (no metricasensor)
-          const nodosConUmbral = umbralesData
+          const sensoresConUmbral = umbralesData
             .filter((umbral: any) => umbral && umbral.nodoid)
             .map((umbral: any) => umbral.nodoid);
 
           console.log('🔍 Nodos con umbrales:', {
-            nodosConUmbral: nodosConUmbral.length,
-            primeros5: nodosConUmbral.slice(0, 5),
-            todosLosNodosConUmbral: nodosConUmbral
+            sensoresConUmbral: sensoresConUmbral.length,
+            primeros5: sensoresConUmbral.slice(0, 5),
+            todosLosNodosConUmbral: sensoresConUmbral
           });
 
 // Filtrar nodos que tienen sensor pero NO tienen umbrales asignados
           // Y que tienen ubicación asignada (requerido para umbrales)
 
           // Obtener nodos que tienen localización
-          const nodosConLocalizacion = localizacionesData
+          const sensoresConLocalizacion = localizacionesData
             .filter(loc => loc && loc.nodoid)
             .map(loc => loc.nodoid);
 
           console.log('🔍 Debug localizaciones para umbral masivo:', {
             localizacionesDataLength: localizacionesData?.length || 0,
-            nodosConLocalizacionLength: nodosConLocalizacion.length,
-            primeros5NodosConLocalizacion: nodosConLocalizacion.slice(0, 5),
-            todosLosNodosConLocalizacion: nodosConLocalizacion
+            sensoresConLocalizacionLength: sensoresConLocalizacion.length,
+            primeros5NodosConLocalizacion: sensoresConLocalizacion.slice(0, 5),
+            todosLosNodosConLocalizacion: sensoresConLocalizacion
           });
 
-          let nodosFiltrados = nodosData.filter(nodo => 
+          let sensoresFiltrados = sensorsData.filter(sensor => 
 
-            nodo && nodo.nodoid && 
+            sensor && sensor.sensorid && 
 
-            nodosConSensor.includes(nodo.nodoid) && 
+            sensoresConSensor.includes(sensor.sensorid) && 
 
-            !nodosConUmbral.includes(nodo.nodoid) && // Excluir solo nodos que ya tienen umbrales
+            !sensoresConUmbral.includes(sensor.sensorid) && // Excluir solo sensores que ya tienen umbrales
 
-            nodosConLocalizacion.includes(nodo.nodoid) // Asegurar que el nodo tenga ubicación
+            sensoresConLocalizacion.includes(sensor.sensorid) // Asegurar que el sensor tenga ubicación
 
           );
 
 console.log('🔍 Nodos filtrados (sensor sin umbral):', {
 
-            nodosFiltrados: nodosFiltrados.length,
+            sensoresFiltrados: sensoresFiltrados.length,
 
-            primeros5: nodosFiltrados.slice(0, 5).map(n => ({ nodoid: n.nodoid, nodo: n.nodo })),
+            primeros5: sensoresFiltrados.slice(0, 5).map(n => ({ nodoid: n.nodoid, nodo: n.nodo })),
 
-            todosLosNodosFiltrados: nodosFiltrados.map(n => ({ nodoid: n.nodoid, nodo: n.nodo }))
+            todosLosNodosFiltrados: sensoresFiltrados.map(n => ({ nodoid: n.nodoid, nodo: n.nodo }))
 
           });
 
           // Debug detallado del filtrado
           console.log('🔍 Debug detallado del filtrado:', {
-            totalNodos: nodosData.length,
-            nodosConSensor: nodosConSensor.length,
-            nodosConUmbral: nodosConUmbral.length,
-            nodosConLocalizacion: nodosConLocalizacion.length,
-            nodosFiltrados: nodosFiltrados.length,
+            totalNodos: sensorsData.length,
+            sensoresConSensor: sensoresConSensor.length,
+            sensoresConUmbral: sensoresConUmbral.length,
+            sensoresConLocalizacion: sensoresConLocalizacion.length,
+            sensoresFiltrados: sensoresFiltrados.length,
             criterios: {
-              tieneSensor: nodosData.filter(n => nodosConSensor.includes(n.nodoid)).length,
-              noTieneUmbral: nodosData.filter(n => !nodosConUmbral.includes(n.nodoid)).length,
-              tieneLocalizacion: nodosData.filter(n => nodosConLocalizacion.includes(n.nodoid)).length
+              tieneSensor: sensorsData.filter(n => sensoresConSensor.includes(n.nodoid)).length,
+              noTieneUmbral: sensorsData.filter(n => !sensoresConUmbral.includes(n.nodoid)).length,
+              tieneLocalizacion: sensorsData.filter(n => sensoresConLocalizacion.includes(n.nodoid)).length
             }
           });
 
           // Verificar específicamente los nodos RLS que acabas de crear
-          const nodosRLS = nodosData.filter(n => n.nodo && n.nodo.includes('RLS 333'));
+          const nodosRLS = sensorsData.filter(n => n.nodo && n.nodo.includes('RLS 333'));
           console.log('🔍 Verificación nodos RLS 333x:', {
             nodosRLS: nodosRLS.map(n => ({
               nodoid: n.nodoid,
               nodo: n.nodo,
-              tieneSensor: nodosConSensor.includes(n.nodoid),
-              tieneUmbral: nodosConUmbral.includes(n.nodoid),
-              tieneLocalizacion: nodosConLocalizacion.includes(n.nodoid)
+              tieneSensor: sensoresConSensor.includes(n.nodoid),
+              tieneUmbral: sensoresConUmbral.includes(n.nodoid),
+              tieneLocalizacion: sensoresConLocalizacion.includes(n.nodoid)
             }))
           });
 
           // Verificar TODOS los nodos RLS para encontrar los que creaste
-          const todosLosNodosRLS = nodosData.filter(n => n.nodo && n.nodo.toLowerCase().includes('rls'));
+          const todosLosNodosRLS = sensorsData.filter(n => n.nodo && n.nodo.toLowerCase().includes('rls'));
           console.log('🔍 TODOS los nodos RLS encontrados:', {
             totalNodosRLS: todosLosNodosRLS.length,
             nodosRLS: todosLosNodosRLS.map(n => ({
               nodoid: n.nodoid,
               nodo: n.nodo,
-              tieneSensor: nodosConSensor.includes(n.nodoid),
-              tieneUmbral: nodosConUmbral.includes(n.nodoid),
-              tieneLocalizacion: nodosConLocalizacion.includes(n.nodoid)
+              tieneSensor: sensoresConSensor.includes(n.nodoid),
+              tieneUmbral: sensoresConUmbral.includes(n.nodoid),
+              tieneLocalizacion: sensoresConLocalizacion.includes(n.nodoid)
             }))
           });
 
@@ -3781,13 +3778,13 @@ console.log('🔍 Nodos filtrados (sensor sin umbral):', {
 
           console.log('🔍 Umbral masivo - Sin filtro de fundo aplicado:', {
 
-            nodosFiltrados: nodosFiltrados.length,
+            sensoresFiltrados: sensoresFiltrados.length,
 
-            primeros5: nodosFiltrados.slice(0, 5).map(n => ({ nodoid: n.nodoid, nodo: n.nodo }))
+            primeros5: sensoresFiltrados.slice(0, 5).map(n => ({ nodoid: n.nodoid, nodo: n.nodo }))
 
           });
 
-filteredNodos = nodosFiltrados;
+filteredSensors = sensoresFiltrados;
 
 console.log('🔗 Nodos para umbral masivo (con sensor, sin umbral):', { 
 
@@ -3795,11 +3792,11 @@ console.log('🔗 Nodos para umbral masivo (con sensor, sin umbral):', {
 
             entidadid: filterParams?.entidadid,
 
-            nodosConSensor: nodosConSensor.length,
+            sensoresConSensor: sensoresConSensor.length,
 
-            nodosConUmbral: nodosConUmbral.length,
+            sensoresConUmbral: sensoresConUmbral.length,
 
-            filteredCount: filteredNodos.length 
+            filteredCount: filteredSensors.length 
 
           });
 
@@ -3819,15 +3816,15 @@ console.log('🔗 Nodos para umbral masivo (con sensor, sin umbral):', {
 
 // Filtrar nodos que tienen localización en ubicaciones del fundo seleccionado
 
-            const nodosConLocalizacion = localizacionesData.filter(loc => 
+            const sensoresConLocalizacion = localizacionesData.filter(loc => 
 
               loc && loc.ubicacionid && ubicacionIds.includes(loc.ubicacionid)
 
             );
 
-            const nodoIdsDelFundo = nodosConLocalizacion.map(loc => loc.nodoid);
+            const nodoIdsDelFundo = sensoresConLocalizacion.map(loc => loc.nodoid);
 
-filteredNodos = nodosData.filter(nodo => 
+filteredSensors = sensorsData.filter(nodo => 
 
               nodo && nodo.nodoid && nodo.statusid === 1 && nodoIdsDelFundo.includes(nodo.nodoid)
 
@@ -3841,11 +3838,11 @@ console.log('🔗 Nodos filtrados por fundo:', {
 
               ubicacionIds: ubicacionIds.length,
 
-              nodosConLocalizacion: nodosConLocalizacion.length,
+              sensoresConLocalizacion: sensoresConLocalizacion.length,
 
               nodoIdsDelFundo: nodoIdsDelFundo.length,
 
-              filteredCount: filteredNodos.length 
+              filteredCount: filteredSensors.length 
 
             });
 
@@ -3867,15 +3864,15 @@ console.log('🔗 Nodos filtrados por fundo:', {
 
 // Filtrar nodos que tienen localización en ubicaciones del fundo seleccionado
 
-            const nodosConLocalizacion = localizacionesData.filter(loc => 
+            const sensoresConLocalizacion = localizacionesData.filter(loc => 
 
               loc && loc.ubicacionid && ubicacionIds.includes(loc.ubicacionid)
 
             );
 
-            const nodoIdsDelFundo = nodosConLocalizacion.map(loc => loc.nodoid);
+            const nodoIdsDelFundo = sensoresConLocalizacion.map(loc => loc.nodoid);
 
-filteredNodos = nodosData.filter(nodo => 
+filteredSensors = sensorsData.filter(nodo => 
 
               nodo && nodo.nodoid && nodo.statusid === 1 && nodoIdsDelFundo.includes(nodo.nodoid)
 
@@ -3889,11 +3886,11 @@ console.log('🔗 Filtros globales aplicados a nodos:', {
 
               ubicacionIds: ubicacionIds.length,
 
-              nodosConLocalizacion: nodosConLocalizacion.length,
+              sensoresConLocalizacion: sensoresConLocalizacion.length,
 
               nodoIdsDelFundo: nodoIdsDelFundo.length,
 
-              filteredCount: filteredNodos.length 
+              filteredCount: filteredSensors.length 
 
             });
 
@@ -3905,13 +3902,13 @@ console.log('🔗 Filtros globales aplicados a nodos:', {
 
         if (selectedTable === 'sensor' || selectedTable === 'metricasensor') {
 
-filteredNodos = nodosData.filter(nodo => nodo && nodo.nodoid && nodo.statusid === 1);
+filteredSensors = sensorsData.filter(nodo => nodo && nodo.nodoid && nodo.statusid === 1);
 
 }
 
 // Filtrar nodos según el contexto
 
-        let finalFilteredNodos = filteredNodos;
+        let finalFilteredNodos = filteredSensors;
 
 // Si estamos en el contexto de sensor, filtrar nodos que estén en nodo pero no en sensor
 
@@ -3919,9 +3916,9 @@ filteredNodos = nodosData.filter(nodo => nodo && nodo.nodoid && nodo.statusid ==
 
           // Obtener todos los nodos que ya tienen sensores asignados
 
-          const nodosConSensores = new Set(tableData.map(sensor => sensor.nodoid));
+          const sensoresConSensores = new Set(tableData.map(sensor => sensor.nodoid));
 
-finalFilteredNodos = filteredNodos.filter(nodo => {
+finalFilteredNodos = filteredSensors.filter(nodo => {
 
             // Verificar que el nodo esté activo
 
@@ -3933,7 +3930,7 @@ finalFilteredNodos = filteredNodos.filter(nodo => {
 
 // Verificar que el nodo NO tenga sensores asignados (no esté en tabla sensor)
 
-            const tieneSensores = nodosConSensores.has(nodo.nodoid);
+            const tieneSensores = sensoresConSensores.has(nodo.nodoid);
 
             return !tieneSensores;
 
@@ -3953,7 +3950,7 @@ finalFilteredNodos = filteredNodos.filter(nodo => {
 
           const nodosConMetricasSensor = new Set(tableData.map(ms => ms.nodoid));
 
-finalFilteredNodos = filteredNodos.filter(nodo => {
+finalFilteredNodos = filteredSensors.filter(nodo => {
 
             // Verificar que el nodo esté activo
 
@@ -6472,7 +6469,7 @@ const tipoInfo = tiposData.find(t => t.tipoid === tipoid);
 
              const metricaInfo = metricasData.find(m => m.metricaid.toString() === metricaid);
 
-             const nodoInfo = nodosData.find(n => n.nodoid.toString() === nodoid);
+             const nodoInfo = sensorsData.find(n => n.nodoid.toString() === nodoid);
 
 metricasToCreate.push({
 
@@ -6528,7 +6525,7 @@ if (metricasToCreate.length > 0) {
 
      }
 
-   }, [selectedStatus, tiposData, metricasData, nodosData, setMultipleMetricas, setMessage]);
+   }, [selectedStatus, tiposData, metricasData, sensorsData, setMultipleMetricas, setMessage]);
 
 // Función para manejar inserción múltiple de sensores
 
@@ -6801,7 +6798,7 @@ if (registrosInvalidos.length > 0) {
 
       const ubicacionesExistentes = ubicacionesData?.map(u => u.ubicacionid) || [];
 
-      const nodosExistentes = nodosData?.map(n => n.nodoid) || [];
+      const nodosExistentes = sensorsData?.map(n => n.nodoid) || [];
 
       const tiposExistentes = tiposData?.map(t => t.tipoid) || [];
 
@@ -7893,7 +7890,7 @@ const handleGoToManualUpdateForm = () => {
 
     );
 
-if (needsRelatedData && (!nodosData || !tiposData || !metricasData || !ubicacionesData || !userData || !perfilesData)) {
+if (needsRelatedData && (!sensorsData || !tiposData || !metricasData || !ubicacionesData || !userData || !perfilesData)) {
 
       setMessage({ type: 'warning', text: 'Cargando datos relacionados... Por favor espera un momento.' });
 
@@ -8075,7 +8072,7 @@ const handleCancelModal = () => {
                              fundosData,
                              ubicacionesData,
                              entidadesData,
-                             nodosData,
+                             sensorsData,
                              tiposData,
                              metricasData,
                              criticidadesData,
@@ -8234,7 +8231,7 @@ const handleCancelModal = () => {
 
                       onClear={clearInsertedRecords}
 
-                      nodosData={nodosData}
+                      nodosData={sensorsData}
 
                       tiposData={tiposData}
 
@@ -8282,11 +8279,11 @@ const handleCancelModal = () => {
 
                            setSelectedSensorCount={setSelectedSensorCount}
 
-                           multipleSensors={multipleSensors}
+                            multipleSensors={multipleSensors}
 
-                           nodosData={nodosData}
+                            nodosData={sensorsData}
 
-                           entidadesData={entidadesData}
+                            entidadesData={entidadesData}
 
                            tiposData={tiposData}
 
@@ -8368,7 +8365,7 @@ const handleCancelModal = () => {
 
                           setMultipleMetricas={setMultipleMetricas}
 
-                          nodosData={nodosData}
+                          sensorsData={sensorsData}
 
                           entidadesData={entidadesData}
 
@@ -8376,7 +8373,7 @@ const handleCancelModal = () => {
 
                           tiposData={tiposData}
 
-                          sensorsData={sensorsData}
+                          nodosData={sensorsData}
 
                           loading={loading}
 
@@ -8946,7 +8943,7 @@ return (
 
                           tiposData={tiposData}
 
-                          nodosData={nodosData}
+                          nodosData={sensorsData}
 
                           metricasData={metricasData}
 
@@ -8972,7 +8969,7 @@ return (
 
                           tiposData={tiposData}
 
-                          nodosData={nodosData}
+                          nodosData={sensorsData}
 
                         />
 
@@ -9210,7 +9207,7 @@ setIndividualRowStatus(newIndividualStatus);
                                     fundosData,
                                     ubicacionesData,
                                     entidadesData,
-                                    nodosData,
+                                    sensorsData,
                                     tiposData,
                                     metricasData,
                                     localizacionesData,
