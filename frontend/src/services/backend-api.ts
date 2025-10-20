@@ -4,7 +4,8 @@ import {
 } from '../types';
 
 // Configuración del Backend API
-// URL hardcoded para deploy en Vercel: 'https://lorawan-sense-app.vercel.app/api'
+// URL para desarrollo local: 'http://localhost:3001/api'
+// URL para deploy en Vercel: 'https://thermos-app.vercel.app/api'
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api';
 
 // Cliente para llamadas al backend
@@ -153,17 +154,17 @@ export class JoySenseService {
   private static async performSchemaDetection(): Promise<string> {
     try {
       
-      // Probar schema sense via Backend API
-      const senseResult = await backendAPI.get('/sense/detect');
+      // Probar schema thermo via Backend API
+      const thermoResult = await backendAPI.get('/thermo/detect');
 
 
-      if (senseResult.available) {
-        currentSchema = 'sense';
-        schemaCache = 'sense';
-        return 'sense';
+      if (thermoResult.available) {
+        currentSchema = 'thermo';
+        schemaCache = 'thermo';
+        return 'thermo';
       }
 
-      console.error('Sense error:', senseResult.error);
+      console.error('Thermo error:', thermoResult.error);
       
       currentSchema = 'public';
       schemaCache = 'public';
@@ -178,14 +179,14 @@ export class JoySenseService {
 
   // Obtener el prefijo del schema actual
   static getSchemaPrefix(): string {
-    return currentSchema === 'sense' ? 'sense.' : 'public.';
+    return currentSchema === 'thermo' ? 'thermo.' : 'public.';
   }
 
-  // Autenticación básica con sense.usuario
+  // Autenticación básica con thermo.usuario
   static async authenticateUser(email: string, password: string): Promise<{ user: any | null; error: string | null }> {
     try {
       
-      // Buscar usuario en sense.usuario
+      // Buscar usuario en thermo.usuario
       const users = await this.getTableData('usuario');
       
       const user = users.find((u: any) => u.email === email);
@@ -215,14 +216,14 @@ export class JoySenseService {
     }
   }
 
-  // Obtener países disponibles del schema sense
+  // Obtener países disponibles del schema thermo
   static async getPaises(): Promise<Pais[]> {
     try {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/paises');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/paises');
         return data || [];
       } else {
         // Fallback para schema public
@@ -234,14 +235,14 @@ export class JoySenseService {
     }
   }
 
-  // Obtener empresas disponibles del schema sense
+  // Obtener empresas disponibles del schema thermo
   static async getEmpresas(): Promise<Empresa[]> {
     try {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/empresas');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/empresas');
         return data || [];
       } else {
         // Fallback para schema public
@@ -253,14 +254,14 @@ export class JoySenseService {
     }
   }
 
-  // Obtener empresas por país del schema sense
+  // Obtener empresas por país del schema thermo
   static async getEmpresasByPais(paisId: number): Promise<Empresa[]> {
     try {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get(`/sense/empresas?paisId=${paisId}`);
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get(`/thermo/empresas?paisId=${paisId}`);
         return data || [];
       } else {
         return [];
@@ -271,14 +272,14 @@ export class JoySenseService {
     }
   }
 
-  // Obtener fundos del schema sense
+  // Obtener fundos del schema thermo
   static async getFundos(): Promise<any[]> {
     try {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/fundos');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/fundos');
         return data || [];
       } else {
         return [];
@@ -295,8 +296,8 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get(`/sense/fundos?empresaId=${empresaId}`);
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get(`/thermo/fundos?empresaId=${empresaId}`);
         return data || [];
       } else {
         return [];
@@ -307,14 +308,14 @@ export class JoySenseService {
     }
   }
 
-  // Obtener ubicaciones del schema sense
+  // Obtener ubicaciones del schema thermo
   static async getUbicaciones(): Promise<Ubicacion[]> {
     try {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/ubicaciones');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/ubicaciones');
         return data || [];
       } else {
         return [];
@@ -325,14 +326,14 @@ export class JoySenseService {
     }
   }
 
-  // Obtener ubicaciones por fundo del schema sense
+  // Obtener ubicaciones por fundo del schema thermo
   static async getUbicacionesByFundo(fundoId: number): Promise<Ubicacion[]> {
     try {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get(`/sense/ubicaciones?fundoId=${fundoId}`);
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get(`/thermo/ubicaciones?fundoId=${fundoId}`);
         return data || [];
       } else {
         return [];
@@ -360,7 +361,7 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
+      if (detectedSchema === 'thermo') {
         // Construir query string para el backend
         const params = new URLSearchParams();
         if (filters.ubicacionId) params.append('ubicacionId', filters.ubicacionId.toString());
@@ -382,9 +383,9 @@ export class JoySenseService {
         // Si hay filtro de entidad, usar el endpoint específico
         let endpoint;
         if (filters.entidadId) {
-          endpoint = `/sense/mediciones-con-entidad?${params.toString()}`;
+          endpoint = `/thermo/mediciones-con-entidad?${params.toString()}`;
         } else {
-          endpoint = `/sense/mediciones?${params.toString()}`;
+          endpoint = `/thermo/mediciones?${params.toString()}`;
         }
         
         const data = await backendAPI.get(endpoint);
@@ -409,7 +410,7 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
+      if (detectedSchema === 'thermo') {
         // Obtener datos básicos - sin límite para estadísticas reales
         const mediciones = await this.getMediciones({ getAll: true });
         
@@ -461,8 +462,8 @@ export class JoySenseService {
     try {
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/detect');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/detect');
         return data.available;
       } else {
         return false;
@@ -488,16 +489,16 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
+      if (detectedSchema === 'thermo') {
         // Obtener datos básicos para contar
         const [paises, empresas, fundos, ubicaciones, metricas, nodos, tipos, mediciones] = await Promise.all([
           this.getPaises(),
           this.getEmpresas(),
           this.getFundos(),
           this.getUbicaciones(),
-          backendAPI.get('/sense/metricas'),
-          backendAPI.get('/sense/nodos'),
-          backendAPI.get('/sense/tipos'),
+          backendAPI.get('/thermo/metricas'),
+          backendAPI.get('/thermo/nodos'),
+          backendAPI.get('/thermo/tipos'),
           this.getMediciones({ limit: 1 })
         ]);
 
@@ -571,12 +572,12 @@ export class JoySenseService {
       
       const availableSchemas: string[] = [];
       
-      // Probar schema sense via Backend API
+      // Probar schema thermo via Backend API
       try {
-        const senseResult = await backendAPI.get('/sense/detect');
+        const thermoResult = await backendAPI.get('/thermo/detect');
         
-        if (senseResult.available) {
-          availableSchemas.push('sense');
+        if (thermoResult.available) {
+          availableSchemas.push('thermo');
         } else {
         }
       } catch (error) {
@@ -598,8 +599,8 @@ export class JoySenseService {
       
       if (schema === 'public') {
         return ['sensor_value', 'fundo', 'device', 'tipo_sensor', 'unidad'];
-      } else if (schema === 'sense') {
-        return ['medicion', 'pais', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'metrica', 'nodo', 'tipo', 'entidad'];
+      } else if (schema === 'thermo') {
+        return ['medicion', 'pais', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'metrica', 'sensor', 'tipo', 'entidad', 'alerta', 'mensaje', 'usuario'];
       }
       
       return [];
@@ -615,8 +616,8 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/metricas');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/metricas');
         return data || [];
       } else {
         return [];
@@ -632,8 +633,8 @@ export class JoySenseService {
     try {
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/codigotelefono');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/codigotelefono');
         return data || [];
       } else {
         return [];
@@ -649,8 +650,8 @@ export class JoySenseService {
     try {
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/correo');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/correo');
         return data || [];
       } else {
         return [];
@@ -664,7 +665,7 @@ export class JoySenseService {
   // Insertar correo
   static async insertCorreo(correoData: any): Promise<any> {
     try {
-      const data = await backendAPI.post('/sense/correo', correoData);
+      const data = await backendAPI.post('/thermo/correo', correoData);
       return data;
     } catch (error) {
       console.error('Error in insertCorreo:', error);
@@ -675,7 +676,7 @@ export class JoySenseService {
   // Insertar contacto
   static async insertContacto(contactoData: any): Promise<any> {
     try {
-      const data = await backendAPI.post('/sense/contacto', contactoData);
+      const data = await backendAPI.post('/thermo/contacto', contactoData);
       return data;
     } catch (error) {
       console.error('Error in insertContacto:', error);
@@ -689,8 +690,8 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/nodos');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/nodos');
         return data || [];
       } else {
         return [];
@@ -707,8 +708,8 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/tipos');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/tipos');
         return data || [];
       } else {
         return [];
@@ -725,8 +726,8 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        let endpoint = '/sense/entidades';
+      if (detectedSchema === 'thermo') {
+        let endpoint = '/thermo/entidades';
         if (ubicacionId) {
           endpoint += `?ubicacionId=${ubicacionId}`;
         }
@@ -747,8 +748,8 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get('/sense/localizaciones');
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get('/thermo/localizaciones');
         return data || [];
       } else {
         return [];
@@ -774,16 +775,16 @@ export class JoySenseService {
       // Siempre detectar el schema primero
       const detectedSchema = await this.detectSchema();
       
-      if (detectedSchema === 'sense') {
+      if (detectedSchema === 'thermo') {
         // Obtener datos básicos para contar
         const [paises, empresas, fundos, ubicaciones, metricas, nodos, tipos, mediciones] = await Promise.all([
           this.getPaises(),
           this.getEmpresas(),
           this.getFundos(),
           this.getUbicaciones(),
-          backendAPI.get('/sense/metricas'),
-          backendAPI.get('/sense/nodos'),
-          backendAPI.get('/sense/tipos'),
+          backendAPI.get('/thermo/metricas'),
+          backendAPI.get('/thermo/nodos'),
+          backendAPI.get('/thermo/tipos'),
           this.getMediciones({ limit: 1 })
         ]);
 
@@ -823,7 +824,7 @@ export class JoySenseService {
   static async getTableData(tableName: string, limit: number = 100): Promise<any[]> {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
-      const endpoint = `/sense/${tableName}?limit=${limit}`;
+      const endpoint = `/thermo/${tableName}?limit=${limit}`;
       const data = await backendAPI.get(endpoint);
       return Array.isArray(data) ? data : (data?.data || []);
     } catch (error) {
@@ -836,7 +837,7 @@ export class JoySenseService {
   static async getTableColumns(tableName: string): Promise<any[]> {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
-      const endpoint = `/sense/${tableName}/columns`;
+      const endpoint = `/thermo/${tableName}/columns`;
       const data = await backendAPI.get(endpoint);
       const rawColumns = Array.isArray(data) ? data : (data?.columns || []);
       
@@ -858,7 +859,7 @@ export class JoySenseService {
   static async getTableInfoByName(tableName: string): Promise<any> {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
-      const endpoint = `/sense/${tableName}/info`;
+      const endpoint = `/thermo/${tableName}/info`;
       const data = await backendAPI.get(endpoint);
       return data || {};
     } catch (error) {
@@ -870,7 +871,7 @@ export class JoySenseService {
   static async getTableConstraints(tableName: string): Promise<any[]> {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
-      const endpoint = `/sense/${tableName}/constraints`;
+      const endpoint = `/thermo/${tableName}/constraints`;
       const data = await backendAPI.get(endpoint);
       return Array.isArray(data) ? data : (data?.constraints || []);
     } catch (error) {
@@ -882,7 +883,7 @@ export class JoySenseService {
   static async insertTableRow(tableName: string, data: Record<string, any>): Promise<any> {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
-      const endpoint = `/sense/${tableName}`;
+      const endpoint = `/thermo/${tableName}`;
       const result = await backendAPI.post(endpoint, data);
       return result;
     } catch (error) {
@@ -894,7 +895,7 @@ export class JoySenseService {
   static async updateTableRow(tableName: string, id: string, data: Record<string, any>): Promise<any> {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
-      const endpoint = `/sense/${tableName}/${id}`;
+      const endpoint = `/thermo/${tableName}/${id}`;
       const result = await backendAPI.put(endpoint, data);
       return result;
     } catch (error) {
@@ -907,7 +908,7 @@ export class JoySenseService {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
       const keyParams = new URLSearchParams(compositeKey).toString();
-      const endpoint = `/sense/${tableName}/composite?${keyParams}`;
+      const endpoint = `/thermo/${tableName}/composite?${keyParams}`;
       const result = await backendAPI.put(endpoint, data);
       return result;
     } catch (error) {
@@ -919,7 +920,7 @@ export class JoySenseService {
   static async deleteTableRow(tableName: string, id: string): Promise<any> {
     try {
       // const schemaPrefix = this.getSchemaPrefix(); // No utilizado actualmente
-      const endpoint = `/sense/${tableName}/${id}`;
+      const endpoint = `/thermo/${tableName}/${id}`;
       const result = await backendAPI.delete(endpoint);
       return result;
     } catch (error) {
@@ -932,8 +933,8 @@ export class JoySenseService {
   static async getNodosConLocalizacion(limit: number = 1000): Promise<any[]> {
     try {
       const detectedSchema = await this.detectSchema();
-      if (detectedSchema === 'sense') {
-        const data = await backendAPI.get(`/sense/nodos-con-localizacion?limit=${limit}`);
+      if (detectedSchema === 'thermo') {
+        const data = await backendAPI.get(`/thermo/nodos-con-localizacion?limit=${limit}`);
         return data || [];
       } else {
         return [];

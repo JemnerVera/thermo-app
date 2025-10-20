@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    JoySense Dashboard - Vista Dinamica
+echo    Thermos Dashboard - Sistema de Monitoreo Térmico
 echo ========================================
 echo.
 
@@ -64,7 +64,7 @@ echo.
 
 REM Iniciar Backend
 echo 🚀 Iniciando Backend...
-start "JoySense Backend" cmd /k "cd /d "%~dp0..\backend" && echo Iniciando servidor backend... && "%NPM_PATH%" install && "%NODE_PATH%" server.js"
+start "Thermos Backend" cmd /k "cd /d "%~dp0..\backend" && echo Iniciando servidor backend... && "%NPM_PATH%" install && "%NODE_PATH%" server.js"
 
 REM Esperar un momento para que el backend se inicie
 echo ⏳ Esperando 4 segundos para que el backend se inicie...
@@ -72,11 +72,11 @@ timeout /t 4 /nobreak >nul
 
 REM Iniciar Frontend
 echo 🎨 Iniciando Frontend...
-start "JoySense Frontend" cmd /k "cd /d "%~dp0..\frontend" && echo Iniciando aplicación frontend... && "%NPM_PATH%" install && "%NPM_PATH%" start"
+start "Thermos Frontend" cmd /k "cd /d "%~dp0..\frontend" && echo Iniciando aplicación frontend... && "%NPM_PATH%" install && "%NPM_PATH%" start"
 
 echo.
 echo 🔍 Verificando que los servicios estén funcionando...
-powershell -Command "try { $response = Invoke-RestMethod -Uri 'http://localhost:3001/api/sense/pais' -TimeoutSec 5; Write-Host '✅ Backend funcionando correctamente' } catch { Write-Host '❌ Backend no está respondiendo - revisa la ventana del backend' }"
+powershell -Command "try { $response = Invoke-RestMethod -Uri 'http://localhost:3001/api/thermo/pais' -TimeoutSec 5; Write-Host '✅ Backend funcionando correctamente' } catch { Write-Host '❌ Backend no está respondiendo - revisa la ventana del backend' }"
 
 echo.
 echo ✅ Servicios iniciados correctamente
@@ -84,7 +84,8 @@ echo.
 echo 📋 Información:
 echo    - Backend: http://localhost:3001
 echo    - Frontend: http://localhost:3000
-echo    - Vista Dinámica: Activada por defecto
+echo    - Schema: thermo
+echo    - Supabase: https://tnlbuupmkvqbqcdanldh.supabase.co
 echo.
 echo 🔄 Para detener los servicios, cierra las ventanas de CMD
 echo.

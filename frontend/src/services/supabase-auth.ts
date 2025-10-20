@@ -4,16 +4,20 @@ import { AuthUser, AuthError } from '../types';
 // Declaración para TypeScript
 declare const process: any;
 
-// Configuración de Supabase Auth - SEGURO: Usando publishable key
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://fagswxnjkcavchfrnrhs.supabase.co';
-const supabasePublishableKey = process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_OTw0aSfLWFXIyQkYc-jRzg_KkeFvn3X';
+// Configuración de Supabase Auth - SEGURO: Usando publishable key (THERMOS)
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabasePublishableKey = process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY;
+
+// Validar que las variables de entorno estén configuradas
+if (!supabaseUrl || !supabasePublishableKey) {
+  throw new Error('❌ Variables de entorno de Supabase no configuradas. Verifica REACT_APP_SUPABASE_URL y REACT_APP_SUPABASE_PUBLISHABLE_KEY en tu archivo .env');
+}
 
 // Debug: Verificar variables de entorno
 console.log('🔍 Debug Supabase Auth:');
 console.log('REACT_APP_SUPABASE_URL:', supabaseUrl);
 console.log('REACT_APP_SUPABASE_PUBLISHABLE_KEY:', supabasePublishableKey ? 'Presente' : 'Ausente');
 console.log('process.env keys:', Object.keys(process.env).filter(key => key.startsWith('REACT_APP')));
-console.log('🔧 Usando valores hardcodeados temporalmente');
 
 // Verificar que sea PUBLISHABLE KEY (seguro para frontend)
 const isServiceRole = supabasePublishableKey.includes('service_role');
@@ -35,7 +39,7 @@ export const authService = {
     try {
       
       // Usar el backend para autenticación
-  const backendUrl = 'https://lorawan-sense-app.vercel.app/api';
+  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api';
       const response = await fetch(`${backendUrl}/auth/login`, {
         method: 'POST',
         headers: {

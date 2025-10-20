@@ -1,7 +1,7 @@
 {
-  "name": "joysense-backend",
+  "name": "thermos-backend",
   "version": "1.0.0",
-  "description": "Backend API para JoySense Dashboard",
+  "description": "Backend API para Thermos Dashboard",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -17,11 +17,11 @@
     "nodemon": "^3.0.1"
   },
   "keywords": [
-    "joysense",
+    "thermos",
     "supabase",
     "api",
     "backend"
   ],
-  "author": "JoySense Team",
+  "author": "Thermos Team",
   "license": "MIT"
 }

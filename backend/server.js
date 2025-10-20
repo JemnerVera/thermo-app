@@ -25,15 +25,105 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Middleware de logging para todas las peticiones
+app.use((req, res, next) => {
+  console.log(`📡 ${new Date().toISOString()} - ${req.method} ${req.url}`);
+  console.log(`📋 Headers:`, req.headers);
+  next();
+});
+
+// Ruta de prueba simple
+app.get('/api/test', (req, res) => {
+  console.log('🧪 Ruta de prueba accedida');
+  res.json({ 
+    message: 'Servidor funcionando correctamente', 
+    timestamp: new Date().toISOString(),
+    config: {
+      url: supabaseUrl,
+      schema: dbSchema,
+      hasKey: !!supabaseKey
+    }
+  });
+});
+
 // Configuración de Supabase - Service Role Key (SOLO BACKEND)
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const dbSchema = process.env.DB_SCHEMA || 'sense';
+const dbSchema = process.env.DB_SCHEMA || 'thermo';
 
 // Crear cliente de Supabase con configuración de esquema
 const supabase = createClient(supabaseUrl, supabaseKey, {
   db: { schema: dbSchema }
 });
+
+// Log de configuración inicial
+console.log('🔧 Configuración de Supabase:');
+console.log(`   URL: ${supabaseUrl}`);
+console.log(`   Schema: ${dbSchema}`);
+console.log(`   Key: ${supabaseKey ? '✅ Configurada' : '❌ No configurada'}`);
+console.log(`   Key Preview: ${supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'NO KEY'}`);
+
+// Test de conexión inicial - VERIFICAR ACCESO A TODAS LAS TABLAS
+console.log('🔍 Verificando acceso a todas las tablas del schema thermo...');
+
+// Lista de todas las tablas del schema thermo
+const tablasThermo = [
+  'pais', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'entidad',
+  'sensor', 'metrica', 'tipo', 'criticidad', 'perfil', 'usuario',
+  'contacto', 'correo', 'codigotelefono', 'mensaje', 'mensaje_error',
+  'localizacionsensor', 'metricasensor', 'medicion', 'umbral', 'alerta',
+  'alertaconsolidado', 'usuarioperfil', 'perfilumbral', 'audit_log_umbral',
+  'sensor_valor', 'sensor_valor_error'
+];
+
+console.log(`🧪 Probando acceso a ${tablasThermo.length} tablas...`);
+
+// Función para probar cada tabla
+async function probarTablas() {
+  const resultados = [];
+  
+  for (const tabla of tablasThermo) {
+    try {
+      const { data, error } = await supabase
+        .from(tabla)
+        .select('count')
+        .limit(1);
+      
+      if (error) {
+        console.log(`❌ ${tabla}: ${error.message}`);
+        resultados.push({ tabla, estado: 'ERROR', error: error.message });
+      } else {
+        console.log(`✅ ${tabla}: Acceso OK (${data?.[0]?.count || 0} registros)`);
+        resultados.push({ tabla, estado: 'OK', count: data?.[0]?.count || 0 });
+      }
+    } catch (err) {
+      console.log(`❌ ${tabla}: Error crítico - ${err.message}`);
+      resultados.push({ tabla, estado: 'CRITICAL', error: err.message });
+    }
+  }
+  
+  // Resumen
+  const exitosas = resultados.filter(r => r.estado === 'OK').length;
+  const errores = resultados.filter(r => r.estado !== 'OK').length;
+  
+  console.log('\n📊 RESUMEN:');
+  console.log(`✅ Tablas accesibles: ${exitosas}/${tablasThermo.length}`);
+  console.log(`❌ Tablas con error: ${errores}/${tablasThermo.length}`);
+  
+  if (errores > 0) {
+    console.log('\n❌ Tablas con problemas:');
+    resultados.filter(r => r.estado !== 'OK').forEach(r => {
+      console.log(`   - ${r.tabla}: ${r.error}`);
+    });
+  }
+  
+  if (exitosas === tablasThermo.length) {
+    console.log('\n🎉 ¡TODAS LAS TABLAS SON ACCESIBLES!');
+  }
+}
+
+// Ejecutar las pruebas
+probarTablas();
 
 
 // Cache de metadatos para evitar consultas repetidas
@@ -240,7 +330,7 @@ const createTableRoute = (tableName, orderBy = `${tableName}id`, selectQuery = '
   return async (req, res) => {
     try {
       const { limit = process.env.DEFAULT_LIMIT || 100 } = req.query;
-      logger.debug(`Obteniendo ${tableName} del schema sense...`);
+      logger.debug(`Obteniendo ${tableName} del schema thermo...`);
       
       const { data, error } = await supabase
         .from(tableName)
@@ -256,7 +346,7 @@ const createTableRoute = (tableName, orderBy = `${tableName}id`, selectQuery = '
       logger.debug(`${tableName} obtenido:`, data?.length || 0);
       res.json(data || []);
     } catch (error) {
-      logger.error(`Error in /api/sense/${tableName}:`, error);
+      logger.error(`Error in /api/thermo/${tableName}:`, error);
       res.status(500).json({ error: error.message });
     }
   };
@@ -288,14 +378,14 @@ const verifyAuth = async (req, res, next) => {
 };
 
 // Rutas para tablas en singular - usadas por el frontend de parámetros
-app.get('/api/sense/pais', createTableRoute('pais', 'paisid'));
+app.get('/api/thermo/pais', createTableRoute('pais', 'paisid'));
 
-app.get('/api/sense/empresa', createTableRoute('empresa', 'empresaid'));
+app.get('/api/thermo/empresa', createTableRoute('empresa', 'empresaid'));
 
-app.get('/api/sense/fundo', async (req, res) => {
+app.get('/api/thermo/fundo', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo fundo del schema sense...');
+    console.log('🔍 Backend: Obteniendo fundo del schema thermo...');
     const { data, error } = await supabase
       .from('fundo')
       .select(`
@@ -312,13 +402,13 @@ app.get('/api/sense/fundo', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Fundo obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/fundo:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/fundo:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/ubicacion', async (req, res) => {
+app.get('/api/thermo/ubicacion', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo ubicacion del schema sense...');
+    console.log('🔍 Backend: Obteniendo ubicacion del schema thermo...');
     const { data, error } = await supabase
       .from('ubicacion')
       .select('*')
@@ -327,13 +417,13 @@ app.get('/api/sense/ubicacion', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Ubicacion obtenida:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/ubicacion:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/ubicacion:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/entidad', async (req, res) => {
+app.get('/api/thermo/entidad', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo entidad del schema sense...');
+    console.log('🔍 Backend: Obteniendo entidad del schema thermo...');
     const { data, error } = await supabase
       .from('entidad')
       .select('*')
@@ -342,13 +432,13 @@ app.get('/api/sense/entidad', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Entidad obtenida:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/entidad:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/entidad:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/metrica', async (req, res) => {
+app.get('/api/thermo/metrica', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo metrica del schema sense...');
+    console.log('🔍 Backend: Obteniendo metrica del schema thermo...');
     const { data, error } = await supabase
       .from('metrica')
       .select('*')
@@ -357,13 +447,13 @@ app.get('/api/sense/metrica', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Metrica obtenida:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/metrica:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/metrica:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/tipo', async (req, res) => {
+app.get('/api/thermo/tipo', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo tipo del schema sense...');
+    console.log('🔍 Backend: Obteniendo tipo del schema thermo...');
     const { data, error } = await supabase
       .from('tipo')
       .select('*')
@@ -372,28 +462,15 @@ app.get('/api/sense/tipo', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Tipo obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/tipo:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/tipo:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/nodo', async (req, res) => {
-  try {
-    const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo nodo del schema sense...');
-    const { data, error } = await supabase
-      .from('nodo')
-      .select('*')
-      .order('nodoid')
-      .limit(parseInt(limit));
-    if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Nodo obtenido:', data?.length || 0);
-    res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/nodo:', error); res.status(500).json({ error: error.message }); }
-});
+// Tabla 'nodo' no existe en schema Thermos - eliminada
 
-app.get('/api/sense/criticidad', async (req, res) => {
+app.get('/api/thermo/criticidad', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo criticidad del schema sense...');
+    console.log('🔍 Backend: Obteniendo criticidad del schema thermo...');
     const { data, error } = await supabase
       .from('criticidad')
       .select('*')
@@ -402,13 +479,13 @@ app.get('/api/sense/criticidad', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Criticidad obtenida:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/criticidad:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/criticidad:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/perfil', async (req, res) => {
+app.get('/api/thermo/perfil', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo perfil del schema sense...');
+    console.log('🔍 Backend: Obteniendo perfil del schema thermo...');
     const { data, error } = await supabase
       .from('perfil')
       .select('*')
@@ -417,13 +494,13 @@ app.get('/api/sense/perfil', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Perfil obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/perfil:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/perfil:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/umbral', async (req, res) => {
+app.get('/api/thermo/umbral', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo umbral del schema sense...');
+    console.log('🔍 Backend: Obteniendo umbral del schema thermo...');
     const { data, error } = await supabase
       .from('umbral')
       .select('*')
@@ -432,44 +509,63 @@ app.get('/api/sense/umbral', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Umbral obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/umbral:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/umbral:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/medio', async (req, res) => {
+// Tabla 'medio' no existe en schema Thermos - eliminada
+
+// NUEVAS TABLAS EN THERMOS
+app.get('/api/thermo/localizacionsensor', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo medio del schema sense...');
+    console.log('🔍 Backend: Obteniendo localizacionsensor del schema thermo...');
     const { data, error } = await supabase
-      .from('medio')
+      .from('localizacionsensor')
       .select('*')
-      .order('medioid')
+      .eq('statusid', 1)
+      .order('localizacionsensorid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Medio obtenido:', data?.length || 0);
+    console.log('✅ Backend: Localizacionsensor obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/medio:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/localizacionsensor:', error); res.status(500).json({ error: error.message }); }
 });
 
-app.get('/api/sense/sensor', async (req, res) => {
+app.get('/api/thermo/mensaje_error', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo sensor del schema sense...');
+    console.log('🔍 Backend: Obteniendo mensaje_error del schema thermo...');
+    const { data, error } = await supabase
+      .from('mensaje_error')
+      .select('*')
+      .order('mensaje_errorid')
+      .limit(parseInt(limit));
+    if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
+    console.log('✅ Backend: Mensaje_error obtenido:', data?.length || 0);
+    res.json(data || []);
+  } catch (error) { console.error('❌ Error in /api/thermo/mensaje_error:', error); res.status(500).json({ error: error.message }); }
+});
+
+app.get('/api/thermo/sensor', async (req, res) => {
+  try {
+    const { limit = 100 } = req.query;
+    console.log('🔍 Backend: Obteniendo sensor del schema thermo...');
     const { data, error } = await supabase
       .from('sensor')
       .select('*')
-      .order('nodoid')
+      .order('sensorid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Sensor obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/sensor:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/sensor:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para metricasensor - usada por el frontend
-app.get('/api/sense/metricasensor', async (req, res) => {
+app.get('/api/thermo/metricasensor', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo metricasensor del schema sense...');
+    console.log('🔍 Backend: Obteniendo metricasensor del schema thermo...');
     const { data, error } = await supabase
       .from('metricasensor')
       .select('*')
@@ -478,14 +574,14 @@ app.get('/api/sense/metricasensor', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Metricasensor obtenidos:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/metricasensor:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/metricasensor:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para perfilumbral - usada por el frontend
-app.get('/api/sense/perfilumbral', async (req, res) => {
+app.get('/api/thermo/perfilumbral', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo perfilumbral del schema sense...');
+    console.log('🔍 Backend: Obteniendo perfilumbral del schema thermo...');
     const { data, error } = await supabase
       .from('perfilumbral')
       .select('*')
@@ -494,14 +590,14 @@ app.get('/api/sense/perfilumbral', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Perfilumbral obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/perfilumbral:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/perfilumbral:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para usuarioperfil - usada por el frontend
-app.get('/api/sense/usuarioperfil', async (req, res) => {
+app.get('/api/thermo/usuarioperfil', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo usuarioperfil del schema sense...');
+    console.log('🔍 Backend: Obteniendo usuarioperfil del schema thermo...');
     const { data, error } = await supabase
       .from('usuarioperfil')
       .select('*')
@@ -510,14 +606,14 @@ app.get('/api/sense/usuarioperfil', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Usuarioperfil obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/usuarioperfil:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/usuarioperfil:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para audit_log_umbral - usada por el frontend
-app.get('/api/sense/audit_log_umbral', async (req, res) => {
+app.get('/api/thermo/audit_log_umbral', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo audit_log_umbral del schema sense...');
+    console.log('🔍 Backend: Obteniendo audit_log_umbral del schema thermo...');
     const { data, error } = await supabase
       .from('audit_log_umbral')
       .select('*')
@@ -526,14 +622,14 @@ app.get('/api/sense/audit_log_umbral', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Audit_log_umbral obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/audit_log_umbral:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/audit_log_umbral:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para contacto - usada por el frontend
-app.get('/api/sense/contacto', async (req, res) => {
+app.get('/api/thermo/contacto', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo contacto del schema sense...');
+    console.log('🔍 Backend: Obteniendo contacto del schema thermo...');
     const { data, error } = await supabase
       .from('contacto')
       .select(`
@@ -546,14 +642,14 @@ app.get('/api/sense/contacto', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Contacto obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/contacto:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/contacto:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para codigotelefono - usada por el frontend
-app.get('/api/sense/codigotelefono', async (req, res) => {
+app.get('/api/thermo/codigotelefono', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo codigotelefono del schema sense...');
+    console.log('🔍 Backend: Obteniendo codigotelefono del schema thermo...');
     const { data, error } = await supabase
       .from('codigotelefono')
       .select('*')
@@ -563,14 +659,14 @@ app.get('/api/sense/codigotelefono', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Codigotelefono obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/codigotelefono:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/codigotelefono:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para correo - usada por el frontend
-app.get('/api/sense/correo', async (req, res) => {
+app.get('/api/thermo/correo', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo correo del schema sense...');
+    console.log('🔍 Backend: Obteniendo correo del schema thermo...');
     const { data, error } = await supabase
       .from('correo')
       .select(`
@@ -583,14 +679,14 @@ app.get('/api/sense/correo', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Correo obtenido:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/correo:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/correo:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para localizacion - usada por el frontend
-app.get('/api/sense/localizacion', async (req, res) => {
+app.get('/api/thermo/localizacion', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo localizacion del schema sense...');
+    console.log('🔍 Backend: Obteniendo localizacion del schema thermo...');
     const { data, error } = await supabase
       .from('localizacion')
       .select('*')
@@ -599,14 +695,14 @@ app.get('/api/sense/localizacion', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Localizacion obtenida:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/localizacion:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/localizacion:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para usuario - usada por el frontend
-app.get('/api/sense/usuario', async (req, res) => {
+app.get('/api/thermo/usuario', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Obteniendo usuarios de sense.usuario...');
+    console.log('🔍 Obteniendo usuarios de thermo.usuario...');
     const { data, error } = await supabase
       .from('usuario')
       .select('*')
@@ -615,14 +711,14 @@ app.get('/api/sense/usuario', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Usuarios encontrados:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/usuario:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/usuario:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para alerta - usada por el frontend
-app.get('/api/sense/alerta', async (req, res) => {
+app.get('/api/thermo/alerta', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Obteniendo alertas de sense.alerta...');
+    console.log('🔍 Obteniendo alertas de thermo.alerta...');
     const { data, error } = await supabase
       .from('alerta')
       .select(`
@@ -655,14 +751,14 @@ app.get('/api/sense/alerta', async (req, res) => {
       console.log('🔍 Primera alerta:', JSON.stringify(data[0], null, 2));
     }
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/alerta:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/alerta:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para mensaje - usada por el frontend
-app.get('/api/sense/mensaje', async (req, res) => {
+app.get('/api/thermo/mensaje', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Obteniendo mensajes de sense.mensaje...');
+    console.log('🔍 Obteniendo mensajes de thermo.mensaje...');
     const { data, error } = await supabase
       .from('mensaje')
       .select(`
@@ -682,14 +778,14 @@ app.get('/api/sense/mensaje', async (req, res) => {
       console.log('🔍 Primer mensaje:', JSON.stringify(data[0], null, 2));
     }
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/mensaje:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/mensaje:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Ruta para alertaconsolidado - usada por el frontend
-app.get('/api/sense/alertaconsolidado', async (req, res) => {
+app.get('/api/thermo/alertaconsolidado', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Obteniendo alertas consolidadas de sense.alertaconsolidado...');
+    console.log('🔍 Obteniendo alertas consolidadas de thermo.alertaconsolidado...');
     const { data, error } = await supabase
       .from('alertaconsolidado')
       .select('*')
@@ -698,11 +794,11 @@ app.get('/api/sense/alertaconsolidado', async (req, res) => {
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Alertas consolidadas encontradas:', data?.length || 0);
     res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/sense/alertaconsolidado:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) { console.error('❌ Error in /api/thermo/alertaconsolidado:', error); res.status(500).json({ error: error.message }); }
 });
 
 // Rutas para obtener información de las tablas (usadas por el frontend de parámetros)
-app.get('/api/sense/:tableName/columns', async (req, res) => {
+app.get('/api/thermo/:tableName/columns', async (req, res) => {
   try {
     const { tableName } = req.params;
     console.log(`🔍 Backend: Obteniendo columnas de la tabla ${tableName}...`);
@@ -717,12 +813,12 @@ app.get('/api/sense/:tableName/columns', async (req, res) => {
     console.log(`✅ Backend: Columnas obtenidas para ${tableName}:`, metadata.columns.length);
     res.json(metadata.columns);
   } catch (error) {
-    console.error(`❌ Error in /api/sense/${req.params.tableName}/columns:`, error);
+    console.error(`❌ Error in /api/thermo/${req.params.tableName}/columns:`, error);
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get('/api/sense/:tableName/info', async (req, res) => {
+app.get('/api/thermo/:tableName/info', async (req, res) => {
   try {
     const { tableName } = req.params;
     console.log(`🔍 Backend: Obteniendo información de la tabla ${tableName}...`);
@@ -737,12 +833,12 @@ app.get('/api/sense/:tableName/info', async (req, res) => {
     console.log(`✅ Backend: Información obtenida para ${tableName}`);
     res.json(metadata.info);
   } catch (error) {
-    console.error(`❌ Error in /api/sense/${req.params.tableName}/info:`, error);
+    console.error(`❌ Error in /api/thermo/${req.params.tableName}/info:`, error);
     res.status(500).json({ error: error.message });
   }
 });
 
-app.get('/api/sense/:tableName/constraints', async (req, res) => {
+app.get('/api/thermo/:tableName/constraints', async (req, res) => {
   try {
     const { tableName } = req.params;
     console.log(`🔍 Backend: Obteniendo constraints de la tabla ${tableName}...`);
@@ -757,20 +853,20 @@ app.get('/api/sense/:tableName/constraints', async (req, res) => {
     console.log(`✅ Backend: Constraints obtenidos para ${tableName}:`, metadata.constraints.length);
     res.json(metadata.constraints);
   } catch (error) {
-    console.error(`❌ Error in /api/sense/${req.params.tableName}/constraints:`, error);
+    console.error(`❌ Error in /api/thermo/${req.params.tableName}/constraints:`, error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Ruta para obtener tablas disponibles dinámicamente
-app.get('/api/sense/tables', async (req, res) => {
+app.get('/api/thermo/tables', async (req, res) => {
   try {
-    console.log('🔍 Obteniendo tablas disponibles en schema sense...');
+    console.log('🔍 Obteniendo tablas disponibles en schema thermo...');
     
     const { data: tables, error } = await supabase
       .from('information_schema.tables')
       .select('table_name')
-      .eq('table_schema', 'sense')
+      .eq('table_schema', 'thermo')
       .eq('table_type', 'BASE TABLE');
     
     if (error) {
@@ -792,7 +888,7 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     console.log('🔐 Backend: Intentando autenticar usuario (modo desarrollo):', email);
     
-    // Verificar si el usuario existe en la tabla sense.usuario
+    // Verificar si el usuario existe en la tabla thermo.usuario
     const { data: userData, error: userError } = await supabase
       .from('usuario')
         .select('*')
@@ -800,7 +896,7 @@ app.post('/api/auth/login', async (req, res) => {
       .single();
 
     if (userError || !userData) {
-      console.error('❌ Usuario no encontrado en sense.usuario:', userError);
+      console.error('❌ Usuario no encontrado en thermo.usuario:', userError);
       return res.status(401).json({ 
         success: false,
         error: 'Usuario no encontrado. Verifique el email.' 
@@ -860,7 +956,7 @@ app.get('/api/auth/verify', verifyAuth, (req, res) => {
 });
 
 // Rutas PUT para actualizar registros
-app.put('/api/sense/pais/:id', async (req, res) => {
+app.put('/api/thermo/pais/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -886,7 +982,7 @@ app.put('/api/sense/pais/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/empresa/:id', async (req, res) => {
+app.put('/api/thermo/empresa/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -912,7 +1008,7 @@ app.put('/api/sense/empresa/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/fundo/:id', async (req, res) => {
+app.put('/api/thermo/fundo/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -938,7 +1034,7 @@ app.put('/api/sense/fundo/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/ubicacion/:id', async (req, res) => {
+app.put('/api/thermo/ubicacion/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -965,7 +1061,7 @@ app.put('/api/sense/ubicacion/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/entidad/:id', async (req, res) => {
+app.put('/api/thermo/entidad/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -991,7 +1087,7 @@ app.put('/api/sense/entidad/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/metrica/:id', async (req, res) => {
+app.put('/api/thermo/metrica/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1021,7 +1117,7 @@ app.put('/api/sense/metrica/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/tipo/:id', async (req, res) => {
+app.put('/api/thermo/tipo/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1047,7 +1143,7 @@ app.put('/api/sense/tipo/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/nodo/:id', async (req, res) => {
+app.put('/api/thermo/nodo/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1073,7 +1169,7 @@ app.put('/api/sense/nodo/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/criticidad/:id', async (req, res) => {
+app.put('/api/thermo/criticidad/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1099,7 +1195,7 @@ app.put('/api/sense/criticidad/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/perfil/:id', async (req, res) => {
+app.put('/api/thermo/perfil/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1138,7 +1234,7 @@ app.put('/api/sense/perfil/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/umbral/:id', async (req, res) => {
+app.put('/api/thermo/umbral/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1166,7 +1262,7 @@ app.put('/api/sense/umbral/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/medio/:id', async (req, res) => {
+app.put('/api/thermo/medio/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1198,7 +1294,7 @@ app.put('/api/sense/medio/:id', async (req, res) => {
 // Nota: La tabla metricasensor usa clave compuesta (nodoid, metricaid, tipoid), no ID simple
 // La ruta PUT para metricasensor se maneja con las rutas de clave compuesta
 
-app.put('/api/sense/contacto/:id', async (req, res) => {
+app.put('/api/thermo/contacto/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1225,7 +1321,7 @@ app.put('/api/sense/contacto/:id', async (req, res) => {
 });
 
 // Ruta para actualizar correo
-app.put('/api/sense/correo/:id', async (req, res) => {
+app.put('/api/thermo/correo/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1259,7 +1355,7 @@ app.put('/api/sense/correo/:id', async (req, res) => {
   }
 });
 
-app.put('/api/sense/usuario/:id', async (req, res) => {
+app.put('/api/thermo/usuario/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1286,7 +1382,7 @@ app.put('/api/sense/usuario/:id', async (req, res) => {
 });
 
 // Rutas PUT para tablas con claves compuestas
-app.put('/api/sense/localizacion/:ubicacionid/:nodoid', async (req, res) => {
+app.put('/api/thermo/localizacion/:ubicacionid/:nodoid', async (req, res) => {
   try {
     const { ubicacionid, nodoid } = req.params;
     const updateData = req.body;
@@ -1314,7 +1410,7 @@ app.put('/api/sense/localizacion/:ubicacionid/:nodoid', async (req, res) => {
 });
 
 // Ruta PUT para localizacion con query parameters (para compatibilidad con frontend)
-app.put('/api/sense/localizacion/composite', async (req, res) => {
+app.put('/api/thermo/localizacion/composite', async (req, res) => {
   try {
     const { ubicacionid, nodoid, entidadid } = req.query;
     const updateData = req.body;
@@ -1346,7 +1442,7 @@ app.put('/api/sense/localizacion/composite', async (req, res) => {
   }
 });
 
-app.put('/api/sense/perfilumbral/:perfilid/:umbralid', async (req, res) => {
+app.put('/api/thermo/perfilumbral/:perfilid/:umbralid', async (req, res) => {
   try {
     const { perfilid, umbralid } = req.params;
     const updateData = req.body;
@@ -1374,7 +1470,7 @@ app.put('/api/sense/perfilumbral/:perfilid/:umbralid', async (req, res) => {
 });
 
 // Ruta PUT para perfilumbral con query parameters (para compatibilidad con frontend)
-app.put('/api/sense/perfilumbral/composite', async (req, res) => {
+app.put('/api/thermo/perfilumbral/composite', async (req, res) => {
   try {
     const { perfilid, umbralid } = req.query;
     const updateData = req.body;
@@ -1402,7 +1498,7 @@ app.put('/api/sense/perfilumbral/composite', async (req, res) => {
   }
 });
 
-app.put('/api/sense/usuarioperfil/:usuarioid/:perfilid', async (req, res) => {
+app.put('/api/thermo/usuarioperfil/:usuarioid/:perfilid', async (req, res) => {
   try {
     const { usuarioid, perfilid } = req.params;
     const updateData = req.body;
@@ -1430,7 +1526,7 @@ app.put('/api/sense/usuarioperfil/:usuarioid/:perfilid', async (req, res) => {
 });
 
 // Ruta PUT para usuarioperfil con query parameters (para compatibilidad con frontend)
-app.put('/api/sense/usuarioperfil/composite', async (req, res) => {
+app.put('/api/thermo/usuarioperfil/composite', async (req, res) => {
   try {
     const { usuarioid, perfilid } = req.query;
     const updateData = req.body;
@@ -1459,7 +1555,7 @@ app.put('/api/sense/usuarioperfil/composite', async (req, res) => {
 });
 
 // Ruta PUT para sensor con clave compuesta (path parameters)
-app.put('/api/sense/sensor/:nodoid/:tipoid', async (req, res) => {
+app.put('/api/thermo/sensor/:nodoid/:tipoid', async (req, res) => {
   try {
     const { nodoid, tipoid } = req.params;
     const updateData = req.body;
@@ -1487,7 +1583,7 @@ app.put('/api/sense/sensor/:nodoid/:tipoid', async (req, res) => {
 });
 
 // Ruta PUT para metricasensor con query parameters (para clave compuesta)
-app.put('/api/sense/metricasensor/composite', async (req, res) => {
+app.put('/api/thermo/metricasensor/composite', async (req, res) => {
   try {
     const { nodoid, metricaid, tipoid } = req.query;
     const updateData = req.body;
@@ -1521,7 +1617,7 @@ app.put('/api/sense/metricasensor/composite', async (req, res) => {
 });
 
 // Ruta PUT para sensor con query parameters (para compatibilidad con frontend)
-app.put('/api/sense/sensor/composite', async (req, res) => {
+app.put('/api/thermo/sensor/composite', async (req, res) => {
   try {
     const { nodoid, tipoid } = req.query;
     const updateData = req.body;
@@ -1554,7 +1650,7 @@ app.put('/api/sense/sensor/composite', async (req, res) => {
   }
 });
 
-app.put('/api/sense/audit_log_umbral/:id', async (req, res) => {
+app.put('/api/thermo/audit_log_umbral/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -1585,17 +1681,17 @@ app.get('/api/detect', async (req, res) => {
   try {
     console.log('🔍 Detectando schema disponible...');
     
-    // Probar schema 'sense' usando una tabla conocida
-    const { data: senseData, error: senseError } = await supabase
+    // Probar schema 'thermo' usando una tabla conocida
+    const { data: thermoData, error: thermoError } = await supabase
       .from('pais')
       .select('paisid')
         .limit(1);
 
-    if (!senseError && senseData) {
-      console.log('✅ Schema "sense" detectado y disponible');
-      res.json({ available: true, schema: 'sense' });
+    if (!thermoError && thermoData) {
+      console.log('✅ Schema "thermo" detectado y disponible');
+      res.json({ available: true, schema: 'thermo' });
       } else {
-      console.log('❌ Schema "sense" no disponible, usando "public"');
+      console.log('❌ Schema "thermo" no disponible, usando "public"');
       res.json({ available: false, schema: 'public' });
       }
     } catch (error) {
@@ -1605,10 +1701,10 @@ app.get('/api/detect', async (req, res) => {
 });
 
 // Rutas en plural para filtros globales (usadas por el frontend)
-app.get('/api/sense/paises', async (req, res) => {
+app.get('/api/thermo/paises', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo paises del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo paises del schema thermo...`);
     
     const { data, error } = await supabase
       .from('pais')
@@ -1629,10 +1725,10 @@ app.get('/api/sense/paises', async (req, res) => {
   }
 });
 
-app.get('/api/sense/empresas', async (req, res) => {
+app.get('/api/thermo/empresas', async (req, res) => {
   try {
     const { limit = 100, paisId } = req.query;
-    console.log(`🔍 Backend: Obteniendo empresas del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo empresas del schema thermo...`);
     
     let query = supabase
       .from('empresa')
@@ -1658,10 +1754,10 @@ app.get('/api/sense/empresas', async (req, res) => {
   }
 });
 
-app.get('/api/sense/fundos', async (req, res) => {
+app.get('/api/thermo/fundos', async (req, res) => {
   try {
     const { limit = 100, empresaId } = req.query;
-    console.log(`🔍 Backend: Obteniendo fundos del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo fundos del schema thermo...`);
 
     let query = supabase
       .from('fundo')
@@ -1687,10 +1783,10 @@ app.get('/api/sense/fundos', async (req, res) => {
   }
 });
 
-app.get('/api/sense/ubicaciones', async (req, res) => {
+app.get('/api/thermo/ubicaciones', async (req, res) => {
   try {
     const { limit = 100, fundoId } = req.query;
-    console.log(`🔍 Backend: Obteniendo ubicaciones del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo ubicaciones del schema thermo...`);
     
     let query = supabase
       .from('ubicacion')
@@ -1716,10 +1812,10 @@ app.get('/api/sense/ubicaciones', async (req, res) => {
   }
 });
 
-app.get('/api/sense/entidades', async (req, res) => {
+app.get('/api/thermo/entidades', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo entidades del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo entidades del schema thermo...`);
     
     const { data, error } = await supabase
       .from('entidad')
@@ -1740,10 +1836,10 @@ app.get('/api/sense/entidades', async (req, res) => {
   }
 });
 
-app.get('/api/sense/metricas', async (req, res) => {
+app.get('/api/thermo/metricas', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo metricas del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo metricas del schema thermo...`);
     
     const { data, error } = await supabase
       .from('metrica')
@@ -1764,10 +1860,10 @@ app.get('/api/sense/metricas', async (req, res) => {
   }
 });
 
-app.get('/api/sense/nodos', async (req, res) => {
+app.get('/api/thermo/nodos', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo nodos del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo nodos del schema thermo...`);
     
     const { data, error } = await supabase
       .from('nodo')
@@ -1788,10 +1884,10 @@ app.get('/api/sense/nodos', async (req, res) => {
   }
 });
 
-app.get('/api/sense/tipos', async (req, res) => {
+app.get('/api/thermo/tipos', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo tipos del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo tipos del schema thermo...`);
     
     const { data, error } = await supabase
       .from('tipo')
@@ -1812,10 +1908,10 @@ app.get('/api/sense/tipos', async (req, res) => {
   }
 });
 
-app.get('/api/sense/localizaciones', async (req, res) => {
+app.get('/api/thermo/localizaciones', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo localizaciones del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo localizaciones del schema thermo...`);
     
     const { data, error } = await supabase
       .from('localizacion')
@@ -1837,10 +1933,10 @@ app.get('/api/sense/localizaciones', async (req, res) => {
 });
 
 // Endpoint para obtener nodos con localizaciones completas (para mapa)
-app.get('/api/sense/nodos-con-localizacion', async (req, res) => {
+app.get('/api/thermo/nodos-con-localizacion', async (req, res) => {
   try {
     const { limit = 1000 } = req.query;
-    console.log(`🔍 Backend: Obteniendo nodos con localizaciones del schema sense...`);
+    console.log(`🔍 Backend: Obteniendo nodos con localizaciones del schema thermo...`);
     
     // Estrategia: obtener nodos activos primero, luego sus localizaciones
     console.log('🔄 Paso 1: Obteniendo nodos activos...');
@@ -1982,34 +2078,170 @@ app.get('/api/sense/nodos-con-localizacion', async (req, res) => {
   }
 });
 
-// Ruta para detectar schema disponible (alias para sense)
-app.get('/api/sense/detect', async (req, res) => {
+// Ruta para detectar schema disponible (THERMOS)
+app.get('/api/thermo/detect', async (req, res) => {
   try {
-    console.log('🔍 Detectando schema disponible via /api/sense/detect...');
+    console.log('🔍 Detectando schema disponible via /api/thermo/detect...');
+    console.log(`📊 Configuración actual: URL=${supabaseUrl}, Schema=${dbSchema}`);
+    console.log(`🔑 Service Role Key (primeros 30 chars): ${supabaseKey ? supabaseKey.substring(0, 30) + '...' : 'NO KEY'}`);
     
-    // Probar schema 'sense' usando una tabla conocida
-    const { data: senseData, error: senseError } = await supabase
+    // Probar schema 'thermo' usando una tabla conocida
+    console.log('🔍 Probando conexión al schema thermo con tabla "pais"...');
+    
+    // Test 1: Verificar si la tabla existe
+    console.log('📋 Test 1: Verificando existencia de tabla "pais"...');
+    const { data: thermoData, error: thermoError } = await supabase
       .from('pais')
       .select('paisid')
       .limit(1);
 
-    if (!senseError && senseData) {
-      console.log('✅ Schema "sense" detectado y disponible');
-      res.json({ available: true, schema: 'sense' });
+    console.log('📋 Resultado Test 1:', { 
+      data: thermoData, 
+      error: thermoError,
+      errorMessage: thermoError?.message,
+      errorCode: thermoError?.code,
+      errorDetails: thermoError?.details,
+      errorHint: thermoError?.hint
+    });
+
+    // Test 2: Probar con schema explícito
+    console.log('📋 Test 2: Probando con schema explícito...');
+    const { data: explicitData, error: explicitError } = await supabase
+      .from('thermo.pais')
+      .select('paisid')
+      .limit(1);
+
+    console.log('📋 Resultado Test 2:', { 
+      data: explicitData, 
+      error: explicitError,
+      errorMessage: explicitError?.message,
+      errorCode: explicitError?.code
+    });
+
+    // Test 3: Probar información del schema
+    console.log('📋 Test 3: Verificando información del schema...');
+    let schemaInfo, schemaError;
+    try {
+      const result = await supabase.rpc('get_schema_info', { schema_name: 'thermo' });
+      schemaInfo = result.data;
+      schemaError = result.error;
+    } catch (err) {
+      schemaInfo = null;
+      schemaError = { message: 'RPC no disponible', details: err.message };
+    }
+
+    console.log('📋 Resultado Test 3:', { 
+      data: schemaInfo, 
+      error: schemaError
+    });
+
+    if (!thermoError && thermoData) {
+      console.log('✅ Schema "thermo" detectado y disponible');
+      console.log(`📊 Datos de prueba: ${JSON.stringify(thermoData)}`);
+      res.json({ 
+        available: true, 
+        schema: 'thermo', 
+        data: thermoData,
+        tests: {
+          test1: { success: true, data: thermoData },
+          test2: { success: !explicitError, data: explicitData },
+          test3: { success: !schemaError, data: schemaInfo }
+        }
+      });
     } else {
-      console.log('❌ Schema "sense" no disponible, usando "public"');
-      res.json({ available: false, schema: 'public' });
+      console.log('❌ Schema "thermo" no disponible');
+      console.log(`❌ Error principal: ${JSON.stringify(thermoError)}`);
+      console.log(`❌ Error explícito: ${JSON.stringify(explicitError)}`);
+      res.json({ 
+        available: false, 
+        schema: 'public', 
+        error: thermoError,
+        tests: {
+          test1: { success: false, error: thermoError },
+          test2: { success: !explicitError, error: explicitError },
+          test3: { success: !schemaError, error: schemaError }
+        }
+      });
     }
   } catch (error) {
     console.error('❌ Error detectando schema:', error);
-    res.json({ available: false, schema: 'public' });
+    console.error('❌ Stack trace:', error.stack);
+    res.json({ available: false, schema: 'public', error: error.message, stack: error.stack });
+  }
+});
+
+// Ruta para listar todas las tablas del schema thermo
+app.get('/api/thermo/tables', async (req, res) => {
+  try {
+    console.log('🔍 Listando tablas disponibles en schema thermo...');
+    
+    // Consulta para obtener todas las tablas del schema thermo
+    const { data: tablesData, error: tablesError } = await supabase
+      .rpc('get_schema_tables', { schema_name: 'thermo' });
+
+    if (tablesError) {
+      console.log('⚠️ No se pudo usar RPC, intentando consulta directa...');
+      
+      // Fallback: consulta directa a information_schema
+      const { data: directData, error: directError } = await supabase
+        .from('information_schema.tables')
+        .select('table_name')
+        .eq('table_schema', 'thermo');
+
+      if (directError) {
+        console.log('❌ Error en consulta directa:', directError);
+        // Último fallback: probar tablas conocidas
+        const knownTables = ['pais', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'sensor', 'metrica', 'medicion', 'umbral', 'alerta'];
+        const availableTables = [];
+        
+        for (const table of knownTables) {
+          try {
+            const { error } = await supabase.from(table).select('*').limit(1);
+            if (!error) {
+              availableTables.push(table);
+              console.log(`✅ Tabla "${table}" disponible`);
+            } else {
+              console.log(`❌ Tabla "${table}" no disponible:`, error.message);
+            }
+          } catch (err) {
+            console.log(`❌ Error probando tabla "${table}":`, err.message);
+          }
+        }
+        
+        res.json({ 
+          available: availableTables.length > 0, 
+          schema: 'thermo', 
+          tables: availableTables,
+          method: 'known_tables_fallback'
+        });
+      } else {
+        console.log('✅ Tablas encontradas via consulta directa:', directData);
+        res.json({ 
+          available: true, 
+          schema: 'thermo', 
+          tables: directData.map(t => t.table_name),
+          method: 'information_schema'
+        });
+      }
+    } else {
+      console.log('✅ Tablas encontradas via RPC:', tablesData);
+      res.json({ 
+        available: true, 
+        schema: 'thermo', 
+        tables: tablesData,
+        method: 'rpc'
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error listando tablas:', error);
+    res.json({ available: false, schema: 'thermo', error: error.message });
   }
 });
 
 // ===== RUTAS POST PARA INSERCIÓN DE DATOS =====
 
 // Ruta POST para insertar país
-app.post('/api/sense/pais', async (req, res) => {
+app.post('/api/thermo/pais', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando país...');
@@ -2034,7 +2266,7 @@ app.post('/api/sense/pais', async (req, res) => {
 });
 
 // Ruta POST para insertar empresa
-app.post('/api/sense/empresa', async (req, res) => {
+app.post('/api/thermo/empresa', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando empresa...');
@@ -2059,7 +2291,7 @@ app.post('/api/sense/empresa', async (req, res) => {
 });
 
 // Ruta POST para insertar fundo
-app.post('/api/sense/fundo', async (req, res) => {
+app.post('/api/thermo/fundo', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando fundo...');
@@ -2084,7 +2316,7 @@ app.post('/api/sense/fundo', async (req, res) => {
 });
 
 // Ruta POST para insertar ubicación
-app.post('/api/sense/ubicacion', async (req, res) => {
+app.post('/api/thermo/ubicacion', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando ubicación...');
@@ -2120,7 +2352,7 @@ app.post('/api/sense/ubicacion', async (req, res) => {
 });
 
 // Ruta POST para insertar entidad
-app.post('/api/sense/entidad', async (req, res) => {
+app.post('/api/thermo/entidad', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando entidad...');
@@ -2145,7 +2377,7 @@ app.post('/api/sense/entidad', async (req, res) => {
 });
 
 // Ruta POST para insertar tipo
-app.post('/api/sense/tipo', async (req, res) => {
+app.post('/api/thermo/tipo', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando tipo...');
@@ -2170,7 +2402,7 @@ app.post('/api/sense/tipo', async (req, res) => {
 });
 
 // Ruta POST para insertar nodo
-app.post('/api/sense/nodo', async (req, res) => {
+app.post('/api/thermo/nodo', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando nodo...');
@@ -2195,7 +2427,7 @@ app.post('/api/sense/nodo', async (req, res) => {
 });
 
 // Ruta POST para insertar métrica
-app.post('/api/sense/metrica', async (req, res) => {
+app.post('/api/thermo/metrica', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando métrica...');
@@ -2220,7 +2452,7 @@ app.post('/api/sense/metrica', async (req, res) => {
 });
 
 // Ruta POST para insertar umbral
-app.post('/api/sense/umbral', async (req, res) => {
+app.post('/api/thermo/umbral', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando umbral...');
@@ -2270,7 +2502,7 @@ app.post('/api/sense/umbral', async (req, res) => {
 });
 
 // Ruta POST para insertar criticidad
-app.post('/api/sense/criticidad', async (req, res) => {
+app.post('/api/thermo/criticidad', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando criticidad...');
@@ -2309,7 +2541,7 @@ app.post('/api/sense/criticidad', async (req, res) => {
 });
 
 // Ruta POST para insertar medio
-app.post('/api/sense/medio', async (req, res) => {
+app.post('/api/thermo/medio', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando medio...');
@@ -2344,7 +2576,7 @@ app.post('/api/sense/medio', async (req, res) => {
 });
 
 // Ruta POST para insertar contacto
-app.post('/api/sense/contacto', async (req, res) => {
+app.post('/api/thermo/contacto', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando contacto...');
@@ -2381,7 +2613,7 @@ app.post('/api/sense/contacto', async (req, res) => {
 });
 
 // Ruta POST para insertar correo
-app.post('/api/sense/correo', async (req, res) => {
+app.post('/api/thermo/correo', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando correo...');
@@ -2421,7 +2653,7 @@ app.post('/api/sense/correo', async (req, res) => {
 });
 
 // Ruta POST para insertar usuario
-app.post('/api/sense/usuario', async (req, res) => {
+app.post('/api/thermo/usuario', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando usuario...');
@@ -2458,7 +2690,7 @@ app.post('/api/sense/usuario', async (req, res) => {
 });
 
 // Ruta POST para insertar perfil
-app.post('/api/sense/perfil', async (req, res) => {
+app.post('/api/thermo/perfil', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando perfil...');
@@ -2495,7 +2727,7 @@ app.post('/api/sense/perfil', async (req, res) => {
 });
 
 // Ruta POST para insertar localización (clave compuesta)
-app.post('/api/sense/localizacion', async (req, res) => {
+app.post('/api/thermo/localizacion', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando localización...');
@@ -2520,7 +2752,7 @@ app.post('/api/sense/localizacion', async (req, res) => {
 });
 
 // Ruta POST para insertar perfilumbral (clave compuesta)
-app.post('/api/sense/perfilumbral', async (req, res) => {
+app.post('/api/thermo/perfilumbral', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando perfilumbral...');
@@ -2545,7 +2777,7 @@ app.post('/api/sense/perfilumbral', async (req, res) => {
 });
 
 // Ruta POST para insertar usuarioperfil (clave compuesta)
-app.post('/api/sense/usuarioperfil', async (req, res) => {
+app.post('/api/thermo/usuarioperfil', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando usuarioperfil...');
@@ -2570,7 +2802,7 @@ app.post('/api/sense/usuarioperfil', async (req, res) => {
 });
 
 // Ruta POST para insertar sensor (clave compuesta)
-app.post('/api/sense/sensor', async (req, res) => {
+app.post('/api/thermo/sensor', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando sensor...');
@@ -2595,7 +2827,7 @@ app.post('/api/sense/sensor', async (req, res) => {
 });
 
 // Ruta POST para insertar metricasensor (clave compuesta)
-app.post('/api/sense/metricasensor', async (req, res) => {
+app.post('/api/thermo/metricasensor', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando metricasensor...');
@@ -2620,10 +2852,10 @@ app.post('/api/sense/metricasensor', async (req, res) => {
 });
 
 // Endpoint para obtener mediciones con filtros
-app.get('/api/sense/mediciones', async (req, res) => {
+app.get('/api/thermo/mediciones', async (req, res) => {
   try {
     const { ubicacionId, startDate, endDate, limit, countOnly, getAll } = req.query;
-    console.log('🔍 Backend: Obteniendo mediciones del schema sense...', { ubicacionId, startDate, endDate, limit, countOnly, getAll });
+    console.log('🔍 Backend: Obteniendo mediciones del schema thermo...', { ubicacionId, startDate, endDate, limit, countOnly, getAll });
     
     let query = supabase
       .from('medicion')
@@ -2670,16 +2902,16 @@ app.get('/api/sense/mediciones', async (req, res) => {
       res.json(data || []);
     }
   } catch (error) {
-    console.error('❌ Error in /api/sense/mediciones:', error);
+    console.error('❌ Error in /api/thermo/mediciones:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Endpoint para obtener mediciones con entidad (con JOIN)
-app.get('/api/sense/mediciones-con-entidad', async (req, res) => {
+app.get('/api/thermo/mediciones-con-entidad', async (req, res) => {
   try {
     const { ubicacionId, startDate, endDate, limit, entidadId, countOnly, getAll } = req.query;
-    console.log('🔍 Backend: Obteniendo mediciones con entidad del schema sense...', { ubicacionId, startDate, endDate, limit, entidadId, countOnly, getAll });
+    console.log('🔍 Backend: Obteniendo mediciones con entidad del schema thermo...', { ubicacionId, startDate, endDate, limit, entidadId, countOnly, getAll });
     
     // Query simple primero - solo mediciones
     let query = supabase
@@ -2751,16 +2983,17 @@ app.get('/api/sense/mediciones-con-entidad', async (req, res) => {
       res.json(filteredData);
     }
   } catch (error) {
-    console.error('❌ Error in /api/sense/mediciones-con-entidad:', error);
+    console.error('❌ Error in /api/thermo/mediciones-con-entidad:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 JoySense Backend API running on port ${PORT}`);
+  console.log(`🚀 Thermos Backend API running on port ${PORT}`);
   console.log(`🔑 Using Service Role Key (backend only)`);
   console.log(`🌐 API URL: http://localhost:${PORT}/api`);
+  console.log(`📊 Schema configurado: ${dbSchema}`);
   console.log(`📡 Servidor listo para recibir conexiones...`);
 }).on('error', (error) => {
   console.error('❌ Error al iniciar el servidor:', error);

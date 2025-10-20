@@ -1,8 +1,8 @@
-# 🌱 JoySense Dashboard - Sistema de Monitoreo Agrícola
+# 🌡️ Thermos Dashboard - Sistema de Monitoreo Térmico
 
 ## 📋 Descripción
 
-JoySense Dashboard es una aplicación web moderna para el monitoreo y análisis de sensores agrícolas. Proporciona una interfaz intuitiva para visualizar datos de humedad, temperatura y electroconductividad en tiempo real, con filtros jerárquicos y gráficos interactivos.
+Thermos Dashboard es una aplicación web moderna para el monitoreo y análisis de sensores térmicos. Proporciona una interfaz intuitiva para visualizar datos de temperatura, humedad y otros parámetros térmicos en tiempo real, con filtros jerárquicos y gráficos interactivos.
 
 ## 🚀 Características Principales
 
