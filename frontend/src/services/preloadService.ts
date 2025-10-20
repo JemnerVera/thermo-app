@@ -24,7 +24,7 @@ class PreloadService {
   private preloadConfig: ComponentPreloadConfig = {
     // Componentes críticos - preload inmediato
     'SystemParameters': { priority: 'high', preloadOnIdle: true, preloadOnHover: false },
-    'DashboardMain': { priority: 'high', preloadOnIdle: true, preloadOnHover: false },
+    // 'DashboardMain' eliminado - obsoleto para Thermos
     
     // Componentes de uso frecuente - preload en idle
     'NormalInsertForm': { priority: 'medium', preloadOnIdle: true, preloadOnHover: true },
@@ -167,7 +167,7 @@ class PreloadService {
   private getImportFunction(componentName: string): () => Promise<any> {
     const importMap: { [key: string]: () => Promise<any> } = {
       'SystemParameters': () => import('../components/SystemParameters'),
-      'DashboardMain': () => import('../components/Dashboard/DashboardMain'),
+      // 'DashboardMain' eliminado - obsoleto para Thermos
       'NormalInsertForm': () => import('../components/NormalInsertForm'),
       'MassiveUmbralForm': () => import('../components/MassiveUmbralForm'),
       'MultipleMetricaSensorForm': () => import('../components/MultipleMetricaSensorForm'),

@@ -13,7 +13,7 @@ import LoginForm from './components/LoginForm';
 import SidebarContainer from './components/sidebar/SidebarContainer';
 import { useMainContentLayout } from './hooks/useMainContentLayout';
 // import { DynamicHierarchy } from './components/Dashboard';
-import { DashboardLazy, SystemParametersLazyWithBoundary, usePreloadCriticalComponents } from './components/LazyComponents';
+import { SystemParametersLazyWithBoundary, usePreloadCriticalComponents } from './components/LazyComponents';
 import AlertasMain from './components/Reportes/AlertasMain';
 import MensajesMain from './components/Reportes/MensajesMain';
 import { JoySenseService } from './services/backend-api';
@@ -502,29 +502,19 @@ return hasFormDataChanges || hasMultipleDataChanges;
       switch (reporteTab) {
         case 'dashboard':
           return (
-            <Suspense fallback={
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                  <p className="text-gray-400">Cargando Dashboard...</p>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🌡️</div>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Thermos Dashboard</h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">Dashboard en desarrollo para sensores térmicos industriales</p>
+                <div className="bg-orange-100 dark:bg-orange-900 border border-orange-300 dark:border-orange-700 rounded-lg p-4 max-w-md">
+                  <p className="text-orange-800 dark:text-orange-200 text-sm">
+                    El dashboard de nodos LoRaWAN ha sido eliminado. 
+                    Se está desarrollando un nuevo dashboard específico para sensores térmicos industriales.
+                  </p>
                 </div>
               </div>
-            }>
-              <DashboardLazy
-                selectedPais={null}
-                selectedEmpresa={null}
-                selectedFundo={dashboardSelectedFundo}
-                selectedEntidad={dashboardSelectedEntidad}
-                selectedUbicacion={dashboardSelectedUbicacion}
-                startDate={dashboardStartDate}
-                endDate={dashboardEndDate}
-                onFundoChange={handleDashboardFundoChange}
-                onEntidadChange={handleDashboardEntidadChange}
-                onUbicacionChange={handleDashboardUbicacionChange}
-                onDateFilter={handleDashboardDateFilter}
-                onResetFilters={handleDashboardReset}
-              />
-            </Suspense>
+            </div>
           );
         case 'alertas':
           return <AlertasMain />;
@@ -589,29 +579,19 @@ return hasFormDataChanges || hasMultipleDataChanges;
 
     if (activeTab === 'dashboard') {
       return (
-        <Suspense fallback={
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-              <p className="text-gray-400">Cargando Dashboard...</p>
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="text-6xl mb-4">🌡️</div>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Thermos Dashboard</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">Dashboard en desarrollo para sensores térmicos industriales</p>
+            <div className="bg-orange-100 dark:bg-orange-900 border border-orange-300 dark:border-orange-700 rounded-lg p-4 max-w-md">
+              <p className="text-orange-800 dark:text-orange-200 text-sm">
+                El dashboard de nodos LoRaWAN ha sido eliminado. 
+                Se está desarrollando un nuevo dashboard específico para sensores térmicos industriales.
+              </p>
             </div>
           </div>
-        }>
-          <DashboardLazy
-            selectedPais={null}
-            selectedEmpresa={null}
-            selectedFundo={dashboardSelectedFundo}
-            selectedEntidad={dashboardSelectedEntidad}
-            selectedUbicacion={dashboardSelectedUbicacion}
-            startDate={dashboardStartDate}
-            endDate={dashboardEndDate}
-            onFundoChange={handleDashboardFundoChange}
-            onEntidadChange={handleDashboardEntidadChange}
-            onUbicacionChange={handleDashboardUbicacionChange}
-            onDateFilter={handleDashboardDateFilter}
-            onResetFilters={handleDashboardReset}
-          />
-        </Suspense>
+        </div>
       );
     }
 

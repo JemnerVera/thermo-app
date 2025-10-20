@@ -30,13 +30,7 @@ const UmbralesMainLazy = lazy(() =>
   }))
 );
 
-// Lazy load Dashboard component con preload
-const DashboardLazy = lazy(() => 
-  import('../Dashboard/DashboardMain').then(module => {
-    console.log('📦 Dashboard cargado dinámicamente');
-    return { default: module.default };
-  })
-);
+// Dashboard component eliminado - obsoleto para Thermos
 
 // Lazy load heavy components con preload
 const NormalInsertFormLazy = lazy(() => 
@@ -195,13 +189,7 @@ export const UmbralesMainLazyWithBoundary: React.FC = () => (
   </LazyComponentErrorBoundary>
 );
 
-export const DashboardLazyWithBoundary: React.FC = () => (
-  <LazyComponentErrorBoundary>
-    <LazyComponentWrapper>
-      <DashboardLazy />
-    </LazyComponentWrapper>
-  </LazyComponentErrorBoundary>
-);
+// DashboardLazyWithBoundary eliminado - obsoleto para Thermos
 
 export const ReportsLazyWithBoundary: React.FC = () => (
   <LazyComponentErrorBoundary>
@@ -289,7 +277,7 @@ export {
   SystemParametersLazy,
   ConfigurationLazy,
   UmbralesMainLazy,
-  DashboardLazy,
+  // DashboardLazy eliminado - obsoleto para Thermos
   NormalInsertFormLazy,
   MassiveUmbralFormLazy,
   MultipleMetricaSensorFormLazy,

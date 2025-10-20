@@ -1,6 +1,5 @@
 import React from 'react';
 import { Pais, Empresa } from '../types';
-import { DashboardFilters } from './header/DashboardFilters';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFilters } from '../contexts/FilterContext';
 import { useFilterData } from '../hooks/useFilterData';
@@ -96,41 +95,9 @@ export const UserHeader: React.FC<UserHeaderProps> = ({
   
   
   const renderTabControls = () => {
-    // Mostrar controles del dashboard para la pestaña principal "Dashboard"
-    if (activeTab === 'dashboard') {
-      return (
-        <DashboardFilters
-          onFiltersChange={(filters) => {
-            if (onDashboardFiltersChange) {
-              onDashboardFiltersChange(filters);
-            }
-          }}
-          showDateFilters={false} // No mostrar filtros de fecha en la vista inicial
-        />
-      );
-    }
-
-    // Mostrar controles del dashboard SOLO para la subpestaña "Dashboard"
-    if (activeTab === 'reportes-dashboard') {
-      return (
-        <DashboardFilters
-          onFiltersChange={(filters) => {
-            if (onDashboardFiltersChange) {
-              onDashboardFiltersChange(filters);
-            }
-          }}
-          showDateFilters={false} // No mostrar filtros de fecha en la vista inicial
-        />
-      );
-    }
-    
-    // Casos específicos para otras pestañas
-    switch (activeTab) {
-      case 'parameters':
-        return null; // Los controles de parámetros ahora están en el sidebar auxiliar
-      default:
-        return null;
-    }
+    // Los filtros obsoletos de nodos han sido eliminados
+    // Para Thermos, no necesitamos filtros específicos de dashboard
+    return null;
   };
 
   return (
