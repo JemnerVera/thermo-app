@@ -460,7 +460,7 @@ return {
                     }}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-orange-500 font-mono text-xs font-bold">
+                      <span className="text-blue-600 font-mono text-xs font-bold">
                         GRUPO {groupIndex + 1} - {group.count} TIPO(S)
                       </span>
                       <span className="text-green-600 dark:text-green-400 font-mono text-xs">
@@ -481,12 +481,12 @@ return {
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {group.types.slice(0, 2).map((tipo, tipoIndex) => (
-                        <span key={tipoIndex} className="text-orange-600 dark:text-orange-300 font-mono text-xs bg-orange-100 dark:bg-orange-900 bg-opacity-50 dark:bg-opacity-30 px-2 py-1 rounded">
+                        <span key={tipoIndex} className="text-blue-600 dark:text-blue-300 font-mono text-xs bg-blue-100 dark:bg-blue-900 bg-opacity-50 dark:bg-opacity-30 px-2 py-1 rounded">
                           {tipo}
                         </span>
                       ))}
                       {group.types.length > 2 && (
-                        <span className="text-orange-600 dark:text-orange-300 font-mono text-xs px-2 py-1">
+                        <span className="text-blue-600 dark:text-blue-300 font-mono text-xs px-2 py-1">
                           +{group.types.length - 2} más
                         </span>
                       )}
@@ -538,7 +538,7 @@ return {
           {/* Container 2: Métricas disponibles con checkboxes */}
           <div className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider">
+              <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider">
                 {t('metricsensor.metric')}
               </h4>
               <label className="flex items-center space-x-3 cursor-pointer bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-500/30 rounded-lg px-3 py-2 hover:bg-orange-200 dark:hover:bg-orange-900/30 transition-colors">
@@ -555,11 +555,11 @@ return {
                       setSelectedMetricasCheckboxes([]);
                     }
                   }}
-                  className="w-5 h-5 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-orange-500 rounded focus:ring-orange-500 focus:ring-2"
+                  className="w-5 h-5 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-blue-500 rounded focus:ring-blue-500 focus:ring-2"
                 />
                 <div className="flex items-center space-x-2">
-                  <span className="text-orange-600 dark:text-orange-400 text-lg">📋</span>
-                  <span className="text-orange-600 dark:text-orange-400 font-bold text-sm font-mono tracking-wider">{t('metricsensor.all')}</span>
+                  <span className="text-blue-600 dark:text-blue-400 text-lg">📋</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold text-sm font-mono tracking-wider">{t('metricsensor.all')}</span>
                 </div>
               </label>
             </div>

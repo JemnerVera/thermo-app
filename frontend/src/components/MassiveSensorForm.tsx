@@ -204,12 +204,12 @@ export function MassiveSensorForm({
                     />
                   </div>
                   <div className="col-span-6">
-                    <span className="text-orange-500 text-sm font-mono tracking-wider font-bold">
+                    <span className="text-blue-600 text-sm font-mono tracking-wider font-bold">
                       {t('table_headers.node')}
                     </span>
                   </div>
                   <div className="col-span-5">
-                    <span className="text-orange-500 text-sm font-mono tracking-wider font-bold">
+                    <span className="text-blue-600 text-sm font-mono tracking-wider font-bold">
                       {t('sensor.creation_date')}
                     </span>
                   </div>
@@ -258,7 +258,7 @@ export function MassiveSensorForm({
         {/* Tipos */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider">
+            <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider">
               SENSOR
             </h4>
             {entidadSeleccionada && (
@@ -292,7 +292,7 @@ export function MassiveSensorForm({
                         checked={isSelected}
                         onChange={(e) => handleTipoSelection(parseInt(option.value.toString()), e.target.checked)}
                         disabled={!isAvailable}
-                        className={`w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2 mr-3 ${
+                        className={`w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3 ${
                           !isAvailable ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                       />
@@ -319,20 +319,20 @@ export function MassiveSensorForm({
       {/* Resumen de selección */}
       {isFormValid() && (
         <div className="bg-orange-900 bg-opacity-30 border border-orange-600 rounded-lg p-4">
-          <h5 className="text-lg font-bold text-orange-500 font-mono tracking-wider mb-2">
+          <h5 className="text-lg font-bold text-blue-600 font-mono tracking-wider mb-2">
             {t('sensor.selection_summary')}
           </h5>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-mono">
             <div>
-              <span className="text-orange-400">{t('sensor.selected_nodes')}</span>
+              <span className="text-blue-600">{t('sensor.selected_nodes')}</span>
               <span className="text-white ml-2">{selectedNodesCount}</span>
             </div>
             <div>
-              <span className="text-orange-400">{t('sensor.selected_types')}</span>
+              <span className="text-blue-600">{t('sensor.selected_types')}</span>
               <span className="text-white ml-2">{formData.selectedTipos.length}</span>
             </div>
             <div>
-              <span className="text-orange-400">{t('sensor.total_sensors_to_create')}</span>
+              <span className="text-blue-600">{t('sensor.total_sensors_to_create')}</span>
               <span className="text-white ml-2 font-bold">{totalCombinations}</span>
             </div>
           </div>

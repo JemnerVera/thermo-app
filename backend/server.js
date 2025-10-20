@@ -127,15 +127,16 @@ probarTablas();
 
 
 // Cache de metadatos para evitar consultas repetidas
+// Cache para metadatos de tablas (deshabilitado para usar siempre función dinámica)
 const metadataCache = new Map();
 
 // Función para obtener metadatos dinámicamente usando Stored Procedure
 const getTableMetadata = async (tableName) => {
-  // Verificar cache primero
-  if (metadataCache.has(tableName)) {
-    console.log(`📋 Usando metadatos en cache para tabla: ${tableName}`);
-    return metadataCache.get(tableName);
-  }
+  // Cache deshabilitado temporalmente para usar siempre función dinámica
+  // if (metadataCache.has(tableName)) {
+  //   console.log(`📋 Usando metadatos en cache para tabla: ${tableName}`);
+  //   return metadataCache.get(tableName);
+  // }
   
   try {
     console.log(`🔍 Obteniendo metadatos dinámicos para tabla: ${tableName} usando función Supabase`);
@@ -159,12 +160,10 @@ const getTableMetadata = async (tableName) => {
     }
     
     if (!metadataResult || !metadataResult.columns || metadataResult.columns.length === 0) {
-      console.log(`⚠️ No se encontraron columnas para ${tableName}, usando fallback`);
+      console.log(`⚠️ No se encontraron columnas para ${tableName} via función dinámica`);
       console.log(`🔍 DEBUG: metadataResult es:`, metadataResult);
-      const fallbackMetadata = getHardcodedMetadata(tableName);
-      console.log(`🔍 DEBUG: fallbackMetadata para ${tableName}:`, fallbackMetadata);
-      metadataCache.set(tableName, fallbackMetadata);
-      return fallbackMetadata;
+      console.log(`❌ Tabla ${tableName} no encontrada en el schema thermo`);
+      return null;
     }
     
     // Construir el objeto de metadatos desde el resultado de la función
@@ -188,11 +187,8 @@ const getTableMetadata = async (tableName) => {
     return metadata;
   } catch (error) {
     console.error(`❌ Error obteniendo metadatos dinámicos para ${tableName}:`, error);
-    console.log(`🔄 Usando metadatos hardcodeados como fallback para ${tableName}`);
-    const fallbackMetadata = getHardcodedMetadata(tableName);
-    // También guardar el fallback en cache para evitar consultas repetidas
-    metadataCache.set(tableName, fallbackMetadata);
-    return fallbackMetadata;
+    console.log(`❌ No se pueden obtener metadatos para ${tableName}`);
+    return null;
   }
 };
 
@@ -1920,37 +1916,29 @@ app.get('/api/thermo/localizaciones', async (req, res) => {
 // La tabla 'nodo' no existe en el schema 'thermo'
 // En Thermos usamos 'sensor' y 'localizacionsensor' para sensores industriales
 
-// Ruta de prueba para information_schema
-app.get('/api/thermo/test-info-schema', async (req, res) => {
+// Ruta de prueba para la función de metadatos
+app.get('/api/thermo/test-metadata-function', async (req, res) => {
   try {
-    console.log('🔍 Probando acceso a information_schema...');
+    console.log('🔍 Probando función fn_get_table_metadata...');
     
-    // Probar consulta directa a information_schema usando SQL
-    const { data: columnsData, error: columnsError } = await supabase
-      .rpc('exec_sql', {
-        query: `
-          SELECT column_name, data_type, is_nullable, column_default
-          FROM information_schema.columns 
-          WHERE table_schema = 'thermo' 
-            AND table_name = 'localizacion'
-          ORDER BY ordinal_position
-        `
-      });
+    // Probar la función directamente
+    const { data: metadataResult, error: metadataError } = await supabase
+      .rpc('fn_get_table_metadata', { tbl_name: 'localizacion' });
     
-    console.log('🔍 Resultado de information_schema.columns:', {
-      hasData: !!columnsData,
-      dataLength: columnsData?.length || 0,
-      error: columnsError,
-      firstFew: columnsData?.slice(0, 3) || []
+    console.log('🔍 Resultado de fn_get_table_metadata:', {
+      hasData: !!metadataResult,
+      error: metadataError,
+      columnsCount: metadataResult?.columns?.length || 0,
+      fullResult: metadataResult
     });
     
     res.json({
-      columns: columnsData,
-      error: columnsError,
-      message: 'Prueba de information_schema completada'
+      metadata: metadataResult,
+      error: metadataError,
+      message: 'Prueba de función fn_get_table_metadata completada'
     });
   } catch (error) {
-    console.error('❌ Error en prueba de information_schema:', error);
+    console.error('❌ Error en prueba de función:', error);
     res.status(500).json({ error: error.message });
   }
 });

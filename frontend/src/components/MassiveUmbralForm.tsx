@@ -688,7 +688,7 @@ for (const tipoOption of tiposDelNodo) {
                         }}
                       >
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-orange-500 font-mono text-xs font-bold">
+                          <span className="text-blue-600 font-mono text-xs font-bold">
                             GRUPO {groupIndex + 1} - {group.count} TIPO(S)
                           </span>
                           <span className="text-green-400 font-mono text-xs">
@@ -709,12 +709,12 @@ for (const tipoOption of tiposDelNodo) {
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {group.types.slice(0, 2).map((tipo, tipoIndex) => (
-                            <span key={tipoIndex} className="text-orange-600 dark:text-orange-300 font-mono text-xs bg-orange-100 dark:bg-orange-900 bg-opacity-50 dark:bg-opacity-30 px-2 py-1 rounded">
+                            <span key={tipoIndex} className="text-blue-600 dark:text-blue-300 font-mono text-xs bg-blue-100 dark:bg-blue-900 bg-opacity-50 dark:bg-opacity-30 px-2 py-1 rounded">
                               {tipo}
                             </span>
                           ))}
                           {group.types.length > 2 && (
-                            <span className="text-orange-600 dark:text-orange-300 font-mono text-xs px-2 py-1">
+                            <span className="text-blue-600 dark:text-blue-300 font-mono text-xs px-2 py-1">
                               +{group.types.length - 2} más
                             </span>
                           )}
@@ -739,7 +739,7 @@ for (const tipoOption of tiposDelNodo) {
                       onChange={(e) => handleSelectAllNodes(e.target.checked)}
                       className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3"
                     />
-                    <span className="text-orange-400 text-sm font-mono tracking-wider font-bold">
+                    <span className="text-blue-600 text-sm font-mono tracking-wider font-bold">
                       SELECCIONAR TODOS
                     </span>
                   </label>
@@ -853,7 +853,7 @@ for (const tipoOption of tiposDelNodo) {
                           
                           return (
                             <div key={tipo.tipoid} className="bg-gray-200 dark:bg-neutral-700 rounded-lg p-4">
-                              <h6 className="text-orange-300 font-mono tracking-wider font-bold mb-3">
+                              <h6 className="text-blue-600 font-mono tracking-wider font-bold mb-3">
                                 {tipo.tipo.toUpperCase()}
                               </h6>
                               
@@ -928,24 +928,24 @@ for (const tipoOption of tiposDelNodo) {
       {/* Resumen de selección */}
       {selectedNodesCount > 0 && (
         <div className="bg-gray-100 dark:bg-neutral-800 rounded-lg p-4">
-          <h5 className="text-orange-400 font-mono tracking-wider font-bold mb-3">
+          <h5 className="text-blue-600 font-mono tracking-wider font-bold mb-3">
             {t('umbral.selection_summary')}
           </h5>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
-              <span className="text-orange-400">{t('umbral.selected_nodes')}</span>
+              <span className="text-blue-600">{t('umbral.selected_nodes')}</span>
               <span className="text-gray-900 dark:text-white ml-2">{selectedNodesCount}</span>
             </div>
             <div>
-              <span className="text-orange-400">{t('umbral.assigned_types')}</span>
+              <span className="text-blue-600">{t('umbral.assigned_types')}</span>
               <span className="text-gray-900 dark:text-white ml-2">{assignedTiposCount}</span>
             </div>
             <div>
-              <span className="text-orange-400">{t('umbral.configured_metrics')}</span>
+              <span className="text-blue-600">{t('umbral.configured_metrics')}</span>
               <span className="text-gray-900 dark:text-white ml-2">{validMetricasCount}</span>
             </div>
           </div>
-          <div className="mt-3 text-orange-300 font-mono text-sm">
+          <div className="mt-3 text-blue-600 font-mono text-sm">
             {t('umbral.total_thresholds_to_create')} <span className="font-bold">{totalCombinations}</span>
           </div>
         </div>
