@@ -135,7 +135,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = ({
       onFundoChange(fundo);
     }
 
-    // NO actualizar entidad y ubicación aquí porque ya se actualizan desde NodeSelector
+    // NO actualizar entidad y ubicación aquí porque ya se actualizan desde SensorSelector
     // Esto evita que se sobrescriban los objetos completos con solo los IDs
 
     // Actualizar fechas solo si son diferentes

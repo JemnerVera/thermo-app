@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { JoySenseService } from "../../services/backend-api"
-import { NodeSelector } from "./NodeSelector"
+import { SensorSelector } from "./SensorSelector"
 import { useLanguage } from "../../contexts/LanguageContext"
 
 interface ModernDashboardProps {
@@ -516,11 +516,11 @@ export function ModernDashboard({ filters, onFiltersChange, onEntidadChange, onU
         )}
 
         {/* Node Selector Console */}
-        <NodeSelector
+        <SensorSelector
           selectedEntidadId={filters.entidadId}
           selectedUbicacionId={filters.ubicacionId}
-          onNodeSelect={(nodeData) => {
-            setSelectedNode(nodeData)
+          onSensorSelect={(sensorData) => {
+            setSelectedNode(sensorData)
           }}
           onFiltersUpdate={(newFilters) => {
             onFiltersChange({

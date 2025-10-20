@@ -204,7 +204,7 @@ export const SensorSelector: React.FC<SensorSelectorProps> = ({
                 setIsSearchDropdownOpen(true)
               }}
               onFocus={() => setIsSearchDropdownOpen(true)}
-              placeholder={t('dashboard.search_node_placeholder')}
+              placeholder={t('dashboard.search_sensor_placeholder')}
               className="w-full px-4 py-2 bg-gray-200 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-800 dark:text-white placeholder-gray-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-sm"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -233,7 +233,7 @@ export const SensorSelector: React.FC<SensorSelectorProps> = ({
                     key={node.nodoid}
                     onClick={() => handleSensorSelect(node)}
                     className="w-full px-4 py-3 text-left hover:bg-gray-200 dark:hover:bg-neutral-600 transition-colors border-b border-gray-300 dark:border-neutral-600 last:border-b-0 group relative"
-                    title={`${t('dashboard.tooltip.deveui')} ${node.deveui} | ${t('dashboard.tooltip.location')} ${node.ubicacion.ubicacion} | ${t('dashboard.tooltip.fund')} ${node.ubicacion.fundo.fundo} | ${t('dashboard.tooltip.company')} ${node.ubicacion.fundo.empresa.empresa} | ${t('dashboard.tooltip.country')} ${node.ubicacion.fundo.empresa.pais.pais}${node.latitud && node.longitud ? ` | ${t('dashboard.tooltip.coordinates')} ${node.latitud}, ${node.longitud}` : ''}`}
+                    title={`${t('dashboard.tooltip.sensor_id')} ${node.nodoid} | ${t('dashboard.tooltip.location')} ${node.ubicacion.ubicacion} | ${t('dashboard.tooltip.fund')} ${node.ubicacion.fundo.fundo} | ${t('dashboard.tooltip.company')} ${node.ubicacion.fundo.empresa.empresa} | ${t('dashboard.tooltip.country')} ${node.ubicacion.fundo.empresa.pais.pais}${node.latitud && node.longitud ? ` | ${t('dashboard.tooltip.coordinates')} ${node.latitud}, ${node.longitud}` : ''}`}
                   >
                     <div className="font-medium text-gray-800 dark:text-white">{node.nodo}</div>
                     <div className="text-sm text-gray-600 dark:text-neutral-400">
