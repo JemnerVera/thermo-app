@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { AuthUser, AuthError } from '../types';
 
-// Declaración para TypeScript
-declare const process: any;
+// Debug: Verificar variables de entorno ANTES de usarlas
+console.log('🔍 Debug completo de variables de entorno:');
+console.log('process.env existe:', typeof process !== 'undefined');
+console.log('process.env keys:', process.env ? Object.keys(process.env).filter(key => key.startsWith('REACT_APP')) : 'process.env no existe');
+console.log('REACT_APP_SUPABASE_URL:', process.env?.REACT_APP_SUPABASE_URL);
+console.log('REACT_APP_SUPABASE_PUBLISHABLE_KEY:', process.env?.REACT_APP_SUPABASE_PUBLISHABLE_KEY ? 'Presente' : 'Ausente');
 
 // Configuración de Supabase Auth - SEGURO: Usando publishable key (THERMOS)
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -10,6 +14,9 @@ const supabasePublishableKey = process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY;
 
 // Validar que las variables de entorno estén configuradas
 if (!supabaseUrl || !supabasePublishableKey) {
+  console.error('❌ Variables de entorno no encontradas:');
+  console.error('  - REACT_APP_SUPABASE_URL:', supabaseUrl);
+  console.error('  - REACT_APP_SUPABASE_PUBLISHABLE_KEY:', supabasePublishableKey ? 'Presente' : 'Ausente');
   throw new Error('❌ Variables de entorno de Supabase no configuradas. Verifica REACT_APP_SUPABASE_URL y REACT_APP_SUPABASE_PUBLISHABLE_KEY en tu archivo .env');
 }
 

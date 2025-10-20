@@ -145,15 +145,15 @@ export const SensorSelector: React.FC<SensorSelectorProps> = ({
     setSearchTerm('')
     
     // Sincronizar todos los filtros globales
-    syncAllFilters(node)
+    syncAllFilters(sensor)
     
     // Actualizar filtros del dashboard
     onFiltersUpdate({
-      entidadId: node.entidad.entidadid,
-      ubicacionId: node.ubicacionid,
-      fundoId: node.ubicacion.fundoid,
-      empresaId: node.ubicacion.fundo.empresa.empresaid,
-      paisId: node.ubicacion.fundo.empresa.pais.paisid
+      entidadId: sensor.entidad.entidadid,
+      ubicacionId: sensor.ubicacionid,
+      fundoId: sensor.ubicacion.fundoid,
+      empresaId: sensor.ubicacion.fundo.empresa.empresaid,
+      paisId: sensor.ubicacion.fundo.empresa.pais.paisid
     })
   }
 
@@ -162,15 +162,15 @@ export const SensorSelector: React.FC<SensorSelectorProps> = ({
     onSensorSelect(sensor)
     
     // Sincronizar todos los filtros globales
-    syncAllFilters(node)
+    syncAllFilters(sensor)
     
     // Actualizar filtros del dashboard
     onFiltersUpdate({
-      entidadId: node.entidad.entidadid,
-      ubicacionId: node.ubicacionid,
-      fundoId: node.ubicacion.fundoid,
-      empresaId: node.ubicacion.fundo.empresa.empresaid,
-      paisId: node.ubicacion.fundo.empresa.pais.paisid
+      entidadId: sensor.entidad.entidadid,
+      ubicacionId: sensor.ubicacionid,
+      fundoId: sensor.ubicacion.fundoid,
+      empresaId: sensor.ubicacion.fundo.empresa.empresaid,
+      paisId: sensor.ubicacion.fundo.empresa.pais.paisid
     })
   }
 

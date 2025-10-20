@@ -512,7 +512,7 @@ export class JoySenseService {
           fundo: fundos.length,
           ubicacion: ubicaciones.length,
           metrica: metricas.length,
-          sensor: sensores.length,
+          nodo: sensores.length, // Mapear sensores a nodo para compatibilidad
           tipo: tipos.length
         };
       } else {
@@ -804,7 +804,7 @@ export class JoySenseService {
           fundoCount: fundos.length,
           ubicacionCount: ubicaciones.length,
           metricaCount: metricas.length,
-          nodoCount: nodos.length,
+          nodoCount: sensores.length, // Usar sensores en lugar de nodos
           tipoCount: tipos.length
         };
       } else {

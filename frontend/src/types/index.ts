@@ -26,6 +26,29 @@ export interface Ubicacion {
   fundoid: number;
 }
 
+export interface Localizacion {
+  localizacionid: number;
+  localizacion: string;
+  ubicacionid: number;
+  statusid: number;
+  usercreatedid: number;
+  datecreated: string;
+  usermodifiedid: number;
+  datemodified: string;
+}
+
+export interface Criticidad {
+  criticidadid: number;
+  criticidad: string;
+  descripcion?: string;
+  color?: string;
+  statusid: number;
+  usercreatedid: number;
+  datecreated: string;
+  usermodifiedid: number;
+  datemodified: string;
+}
+
 export interface Metrica {
   metricaid: number;
   metrica: string;
