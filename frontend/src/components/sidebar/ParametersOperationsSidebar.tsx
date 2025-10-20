@@ -165,7 +165,7 @@ const ParametersOperationsSidebar: React.FC<ParametersOperationsSidebarProps> = 
                   isExpanded ? 'gap-3' : 'justify-center'
                 } ${
                   isActive
-                    ? "bg-orange-500 text-white"
+                    ? "bg-blue-600 text-white"
                     : "text-gray-600 dark:text-neutral-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-neutral-800"
                 }`}
               >

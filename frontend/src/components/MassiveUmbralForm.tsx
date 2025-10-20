@@ -512,7 +512,7 @@ for (const tipoOption of tiposDelNodo) {
       if (field === 'pais' && paisSeleccionado && getPaisName) {
         return (
           <div key="pais-contextual">
-            <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
               PAÍS
             </label>
             <div className="w-full px-3 py-2 bg-gray-200 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-600 dark:text-white font-mono cursor-not-allowed opacity-75">
@@ -523,7 +523,7 @@ for (const tipoOption of tiposDelNodo) {
       } else if (field === 'empresa' && empresaSeleccionada && getEmpresaName) {
         return (
           <div key="empresa-contextual">
-            <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
               EMPRESA
             </label>
             <div className="w-full px-3 py-2 bg-gray-200 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-600 dark:text-white font-mono cursor-not-allowed opacity-75">
@@ -534,7 +534,7 @@ for (const tipoOption of tiposDelNodo) {
       } else if (field === 'fundo') {
         return (
           <div key="fundo-contextual">
-            <label className="block text-lg font-bold text-orange-500 font-mono tracking-wider mb-2">
+            <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider mb-2">
               {t('table_headers.fund')}
             </label>
             {fundosOptions.length === 1 ? (
@@ -561,7 +561,7 @@ for (const tipoOption of tiposDelNodo) {
       } else if (field === 'entidad') {
         return (
           <div key="entidad-contextual">
-            <label className="block text-lg font-bold text-orange-500 font-mono tracking-wider mb-2">
+            <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider mb-2">
               {t('table_headers.entity')}
             </label>
             {entidadesOptions.length === 1 ? (
@@ -630,7 +630,7 @@ for (const tipoOption of tiposDelNodo) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Nodos */}
         <div>
-          <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider mb-4">
+          <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider mb-4">
             NODO
           </h4>
           
@@ -737,7 +737,7 @@ for (const tipoOption of tiposDelNodo) {
                       type="checkbox"
                       checked={allNodesSelected}
                       onChange={(e) => handleSelectAllNodes(e.target.checked)}
-                      className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2 mr-3"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3"
                     />
                     <span className="text-orange-400 text-sm font-mono tracking-wider font-bold">
                       SELECCIONAR TODOS
@@ -751,7 +751,7 @@ for (const tipoOption of tiposDelNodo) {
                       type="checkbox"
                       checked={node.selected}
                       onChange={(e) => handleNodeSelection(node.nodoid, e.target.checked)}
-                      className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2 mr-3"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3"
                     />
                     <div className="flex-1">
                       <div className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">
@@ -779,7 +779,7 @@ for (const tipoOption of tiposDelNodo) {
         {/* Tipos de sensores asignados */}
         {assignedSensorTypes.length > 0 && (
           <div>
-            <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider mb-4">
+            <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider mb-4">
               {t('umbral.assigned_sensor_types')}
             </h4>
             
@@ -804,7 +804,7 @@ for (const tipoOption of tiposDelNodo) {
       {/* Métricas */}
       {assignedSensorTypes.length > 0 && (
         <div>
-          <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider mb-4">
+          <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider mb-4">
             MÉTRICAS
           </h4>
           
@@ -818,7 +818,7 @@ for (const tipoOption of tiposDelNodo) {
                         type="checkbox"
                         checked={metrica.selected}
                         onChange={(e) => handleMetricaSelection(metrica.metricaid, e.target.checked)}
-                        className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2 mr-3"
+                        className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3"
                       />
                       <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">
                         {metrica.metrica.toUpperCase()}

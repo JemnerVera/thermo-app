@@ -424,7 +424,7 @@ const AlertasDashboard: React.FC = () => {
                     </button>
                     <button
                       onClick={() => window.open(`/umbrales?edit=${alerta.alertaid}`, '_blank')}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="text-sky-500 hover:text-sky-700"
                     >
                       Ver Umbral
                     </button>

@@ -239,12 +239,12 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
         <div className="h-20 flex items-center justify-center border-b border-gray-300 dark:border-gray-700">
           {isExpanded ? (
             <div className="flex items-center space-x-3">
-              <img src="/Logo - icono.png" alt="JoySense" className="w-8 h-8" />
-              <img src="/Logo - texto.png" alt="JoySense" className="h-6" />
+              <img src="/thermo_logo.png" alt="Thermos" className="w-8 h-8" />
+              <span className="text-lg font-bold text-blue-600 font-mono tracking-wider">THERMOS APP</span>
             </div>
           ) : (
             <div className="flex justify-center">
-              <img src="/Logo - icono.png" alt="JoySense" className="w-8 h-8" />
+              <img src="/thermo_logo.png" alt="Thermos" className="w-8 h-8" />
             </div>
           )}
         </div>

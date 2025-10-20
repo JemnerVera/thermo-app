@@ -35,7 +35,7 @@ const BaseAuxiliarySidebar: React.FC<BaseAuxiliarySidebarProps> = ({
           <h3 className={`font-bold text-sm tracking-wider ${
             color === 'green' ? 'text-green-500' :
             color === 'blue' ? 'text-blue-500' :
-            'text-orange-500'
+            'text-blue-600'
           }`}>{title.toUpperCase()}</h3>
         ) : (
           <div className="flex items-center justify-center text-gray-800 dark:text-white">
@@ -43,8 +43,8 @@ const BaseAuxiliarySidebar: React.FC<BaseAuxiliarySidebarProps> = ({
               <div className="text-lg font-bold">{collapsedText}</div>
             ) : (
               <div className="flex flex-col items-center justify-center">
-                <div className="text-xs font-bold tracking-wider">Joy</div>
-                <div className="text-xs font-bold tracking-wider">Sense</div>
+                <div className="text-xs font-bold tracking-wider">Thermos</div>
+                <div className="text-xs font-bold tracking-wider">App</div>
               </div>
             )}
           </div>

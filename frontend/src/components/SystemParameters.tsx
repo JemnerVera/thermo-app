@@ -3371,7 +3371,7 @@ const getFundoName = (fundoId: string) => {
     if (paisSeleccionado && (selectedTable === 'empresa' || selectedTable === 'fundo' || selectedTable === 'ubicacion' || selectedTable === 'localizacion' || selectedTable === 'entidad')) {
       contextualFields.push(
         <div key="pais-contextual">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             {t('fields.country')} 🔒
           </label>
           <div className="w-full px-3 py-2 bg-gray-200 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-900 dark:text-white text-base font-mono cursor-not-allowed opacity-75">
@@ -3385,7 +3385,7 @@ const getFundoName = (fundoId: string) => {
     if (empresaSeleccionada && (selectedTable === 'fundo' || selectedTable === 'ubicacion' || selectedTable === 'localizacion' || selectedTable === 'entidad')) {
       contextualFields.push(
         <div key="empresa-contextual">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
 {t('fields.company')} 🔒
           </label>
           <div className="w-full px-3 py-2 bg-gray-200 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-900 dark:text-white text-base font-mono cursor-not-allowed opacity-75">
@@ -3399,7 +3399,7 @@ const getFundoName = (fundoId: string) => {
     if (fundoSeleccionado && (selectedTable === 'ubicacion' || selectedTable === 'localizacion' || selectedTable === 'entidad')) {
       contextualFields.push(
         <div key="fundo-contextual">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
 {t('fields.fund')} 🔒
           </label>
           <div className="w-full px-3 py-2 bg-gray-200 dark:bg-neutral-700 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-900 dark:text-white text-base font-mono cursor-not-allowed opacity-75">
@@ -8506,7 +8506,7 @@ const handleCancelModal = () => {
                         {/* Para contacto, mostrar selector de tipo si no se ha seleccionado */}
                         {selectedTable === 'contacto' && !selectedContactType ? (
                           <div className="text-center py-8">
-                            <label className="block text-lg font-bold text-orange-500 font-mono tracking-wider mb-6">
+                            <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider mb-6">
                               {t('contact.title')}
                             </label>
                             <div className="flex flex-col space-y-4 max-w-md mx-auto">
@@ -8667,7 +8667,7 @@ const handleCancelModal = () => {
 
                         <div className="mb-6 p-4 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg">
 
-                          <h3 className="text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                          <h3 className="text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
 
                             📋 ACTUALIZACIÓN MÚLTIPLE AUTOMÁTICA
 
@@ -8675,7 +8675,7 @@ const handleCancelModal = () => {
 
                           <p className="text-neutral-300 mb-3 font-mono">
 
-                            Se han seleccionado <span className="font-bold text-orange-500">{selectedRowsForUpdate.length}</span> entradas del nodo <span className="font-bold text-orange-500">{selectedRowsForUpdate[0]?.nodoid}</span> para actualizar.
+                            Se han seleccionado <span className="font-bold text-blue-600">{selectedRowsForUpdate.length}</span> entradas del nodo <span className="font-bold text-blue-600">{selectedRowsForUpdate[0]?.nodoid}</span> para actualizar.
 
                             {(selectedTable === 'sensor' || selectedTable === 'metricasensor') && (
 
@@ -8787,7 +8787,7 @@ return (
 
                                <div key={col.columnName} className="mb-4">
 
-                                 <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                                 <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
 
                                    {displayName.toUpperCase()} 🔒
 
@@ -8821,7 +8821,7 @@ return (
 
                                <div key={col.columnName} className="mb-4">
 
-                                 <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                                 <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
 
                                    {displayName.toUpperCase()}
 
@@ -8845,7 +8845,7 @@ return (
 
                                      }))}
 
-                                     className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2"
+                                     className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
 
                                    />
 
@@ -8868,7 +8868,7 @@ return (
                              const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
                              return (
                                <div key={col.columnName} className="mb-4">
-                                 <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                                 <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                                    {displayName.toUpperCase()}
                                  </label>
                                  <SelectWithPlaceholder
@@ -8890,7 +8890,7 @@ return (
 
                              <div key={col.columnName} className="mb-4">
 
-                               <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                               <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
 
                                  {displayName.toUpperCase()}
 
@@ -9005,7 +9005,7 @@ return (
 
                           <div className="flex justify-between items-center mb-4">
 
-                            <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider">ACTUALIZAR STATUS</h4>
+                            <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider">ACTUALIZAR STATUS</h4>
 
                             <div className="flex gap-2">
 
@@ -9125,7 +9125,7 @@ setIndividualRowStatus(newIndividualStatus);
 
                                           }}
 
-                                          className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2"
+                                          className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
 
                                         />
 
@@ -9370,7 +9370,7 @@ return (
 
                                          }}
 
-                                         className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2"
+                                         className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
 
                                        />
 
@@ -9752,13 +9752,13 @@ return getDisplayValueLocal(row, col.columnName);
 
                 <div className="flex items-center justify-center mb-4">
 
-                  <svg className="w-8 h-8 text-orange-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
 
                   </svg>
 
-                  <h2 className="text-2xl font-bold text-orange-500 font-mono tracking-wider">PARÁMETROS</h2>
+                  <h2 className="text-2xl font-bold text-blue-600 font-mono tracking-wider">PARÁMETROS</h2>
 
                 </div>
 

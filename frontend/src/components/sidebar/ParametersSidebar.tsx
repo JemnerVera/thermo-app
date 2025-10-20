@@ -185,7 +185,7 @@ const ParametersSidebar: React.FC<ParametersSidebarProps> = ({
               
               {/* Título del grupo (solo cuando está expandido) */}
               {isExpanded && (
-                <div className="px-4 py-2 text-xs font-medium text-orange-400 uppercase tracking-wider">
+                <div className="px-4 py-2 text-xs font-medium text-blue-400 uppercase tracking-wider">
                   {groupName}
                 </div>
               )}
@@ -208,7 +208,7 @@ const ParametersSidebar: React.FC<ParametersSidebarProps> = ({
                         isExpanded ? 'gap-3' : 'justify-center'
                       } ${
                   isActive
-                    ? "bg-orange-500 text-white"
+                    ? "bg-blue-600 text-white"
                     : "text-neutral-400 hover:text-white hover:bg-neutral-800"
                 }`}
               >

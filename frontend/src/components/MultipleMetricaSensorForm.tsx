@@ -353,7 +353,7 @@ return {
       {/* Selección de Entidad y Nodos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
          <div>
-           <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">{t('table_headers.entity')}*</label>
+           <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">{t('table_headers.entity')}*</label>
          <div className="relative dropdown-container">
              <div
                onClick={() => setEntidadDropdownOpen(!entidadDropdownOpen)}
@@ -415,7 +415,7 @@ return {
        </div>
 
          <div>
-           <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+           <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
              {t('metricsensor.type_locked')}
            </label>
            <div className={`w-full px-3 py-2 border rounded-lg font-mono ${
@@ -505,7 +505,7 @@ return {
           
           {/* Container 1: Nodos disponibles con checkboxes */}
           <div className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
-            <h4 className="text-lg font-bold text-orange-500 mb-4 font-mono tracking-wider">
+            <h4 className="text-lg font-bold text-blue-600 mb-4 font-mono tracking-wider">
               {t('metricsensor.node')}
             </h4>
             <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-2">
@@ -522,7 +522,7 @@ return {
                           setSelectedNodos(selectedNodos.filter(id => id !== option.value.toString()));
                         }
                       }}
-                      className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2 mr-3"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3"
                     />
                     <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">{option.label.toUpperCase()}</span>
                   </label>
@@ -577,7 +577,7 @@ return {
                           setSelectedMetricasCheckboxes(selectedMetricasCheckboxes.filter(id => id !== option.value.toString()));
                         }
                       }}
-                      className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2 mr-3"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3"
                     />
                     <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">{option.label.toUpperCase()}</span>
                   </label>

@@ -138,34 +138,50 @@ const getTableMetadata = async (tableName) => {
   }
   
   try {
-    console.log(`🔍 Obteniendo metadatos dinámicos para tabla: ${tableName} usando stored procedure`);
+    console.log(`🔍 Obteniendo metadatos dinámicos para tabla: ${tableName} usando función Supabase`);
     
-    // Usar la función stored procedure que creamos en Supabase
-    const { data, error } = await supabase.rpc('fn_get_table_metadata', {
-      tbl_name: tableName
+    // Usar la función de Supabase para obtener metadatos
+    const { data: metadataResult, error: metadataError } = await supabase
+      .rpc('fn_get_table_metadata', { tbl_name: tableName });
+    
+    console.log(`🔍 DEBUG: Resultado de get_table_metadata para ${tableName}:`, {
+      hasData: !!metadataResult,
+      error: metadataError,
+      columnsCount: metadataResult?.columns?.length || 0
     });
     
-    if (error) {
-      console.log(`⚠️ Error en stored procedure para ${tableName}:`, error);
+    if (metadataError) {
+      console.log(`⚠️ Error obteniendo metadatos via función para ${tableName}:`, metadataError);
       console.log(`🔄 Usando metadatos hardcodeados como fallback para ${tableName}`);
       const fallbackMetadata = getHardcodedMetadata(tableName);
       metadataCache.set(tableName, fallbackMetadata);
       return fallbackMetadata;
     }
     
-    if (!data || !data.columns || data.columns.length === 0) {
-      console.log(`⚠️ Stored procedure no retornó columnas para ${tableName}, usando fallback`);
+    if (!metadataResult || !metadataResult.columns || metadataResult.columns.length === 0) {
+      console.log(`⚠️ No se encontraron columnas para ${tableName}, usando fallback`);
+      console.log(`🔍 DEBUG: metadataResult es:`, metadataResult);
       const fallbackMetadata = getHardcodedMetadata(tableName);
+      console.log(`🔍 DEBUG: fallbackMetadata para ${tableName}:`, fallbackMetadata);
       metadataCache.set(tableName, fallbackMetadata);
       return fallbackMetadata;
     }
     
-    // La función stored procedure ya retorna el formato correcto
-    const metadata = data;
+    // Construir el objeto de metadatos desde el resultado de la función
+    const metadata = {
+      columns: metadataResult.columns.map(col => ({
+        column_name: col.column_name,
+        data_type: col.data_type,
+        is_nullable: col.is_nullable,
+        column_default: col.column_default
+      })),
+      info: metadataResult.info || { table_name: tableName, table_type: 'BASE TABLE' },
+      constraints: metadataResult.constraints || []
+    };
     
     // Guardar en cache
     metadataCache.set(tableName, metadata);
-    console.log(`✅ Metadatos dinámicos obtenidos via stored procedure para: ${tableName}`);
+    console.log(`✅ Metadatos dinámicos obtenidos via función Supabase para: ${tableName}`);
     console.log(`📊 Columnas encontradas: ${metadata.columns.length}`);
     console.log(`🔗 Constraints encontrados: ${metadata.constraints.length}`);
     
@@ -183,6 +199,7 @@ const getTableMetadata = async (tableName) => {
 // Función fallback con metadatos hardcodeados
 const getHardcodedMetadata = (tableName) => {
   console.log(`⚠️ Usando metadatos hardcodeados para tabla: ${tableName}`);
+  console.log(`🔍 DEBUG: Buscando metadatos hardcodeados para: ${tableName}`);
   
   // Metadatos hardcodeados para las tablas principales
   const hardcodedMetadata = {
@@ -282,20 +299,7 @@ const getHardcodedMetadata = (tableName) => {
       info: { table_name: 'tipo', table_type: 'BASE TABLE' },
       constraints: [{ constraint_name: 'pk_tipo', constraint_type: 'PRIMARY KEY' }]
     },
-    nodo: {
-      columns: [
-        { column_name: 'nodoid', data_type: 'bigint', is_nullable: 'NO', column_default: null },
-        { column_name: 'nodo', data_type: 'character varying', is_nullable: 'NO', column_default: null },
-        { column_name: 'entidadid', data_type: 'integer', is_nullable: 'NO', column_default: null },
-        { column_name: 'statusid', data_type: 'integer', is_nullable: 'NO', column_default: '1' },
-        { column_name: 'usercreatedid', data_type: 'integer', is_nullable: 'NO', column_default: null },
-        { column_name: 'datecreated', data_type: 'timestamp with time zone', is_nullable: 'NO', column_default: 'now()' },
-        { column_name: 'usermodifiedid', data_type: 'integer', is_nullable: 'NO', column_default: null },
-        { column_name: 'datemodified', data_type: 'timestamp with time zone', is_nullable: 'NO', column_default: 'now()' }
-      ],
-      info: { table_name: 'nodo', table_type: 'BASE TABLE' },
-      constraints: [{ constraint_name: 'pk_nodo', constraint_type: 'PRIMARY KEY' }]
-    },
+    // nodo eliminado - no existe en schema Thermos
     usuario: {
       columns: [
         { column_name: 'usuarioid', data_type: 'integer', is_nullable: 'NO', column_default: null },
@@ -320,6 +324,8 @@ const getHardcodedMetadata = (tableName) => {
   };
   
   console.log(`🔍 DEBUG: getHardcodedMetadata devolviendo ${metadata.columns.length} columnas para ${tableName}`);
+  console.log(`🔍 DEBUG: Tablas disponibles en hardcodedMetadata:`, Object.keys(hardcodedMetadata));
+  console.log(`🔍 DEBUG: ¿Existe ${tableName} en hardcodedMetadata?`, hardcodedMetadata.hasOwnProperty(tableName));
   return metadata;
 };
 
@@ -569,7 +575,7 @@ app.get('/api/thermo/metricasensor', async (req, res) => {
     const { data, error } = await supabase
       .from('metricasensor')
       .select('*')
-      .order('nodoid')
+      .order('sensorid, metricaid') // Ordenar por clave primaria compuesta
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Metricasensor obtenidos:', data?.length || 0);
@@ -690,7 +696,7 @@ app.get('/api/thermo/localizacion', async (req, res) => {
     const { data, error } = await supabase
       .from('localizacion')
       .select('*')
-      .order('ubicacionid, nodoid') // Ordenar por clave primaria compuesta
+      .order('localizacionid') // Ordenar por clave primaria
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Backend: Localizacion obtenida:', data?.length || 0);
@@ -1382,18 +1388,17 @@ app.put('/api/thermo/usuario/:id', async (req, res) => {
 });
 
 // Rutas PUT para tablas con claves compuestas
-app.put('/api/thermo/localizacion/:ubicacionid/:nodoid', async (req, res) => {
+app.put('/api/thermo/localizacion/:localizacionid', async (req, res) => {
   try {
-    const { ubicacionid, nodoid } = req.params;
+    const { localizacionid } = req.params;
     const updateData = req.body;
     
-    console.log(`🔍 Backend: Actualizando localizacion con ubicacionid ${ubicacionid} y nodoid ${nodoid}...`);
+    console.log(`🔍 Backend: Actualizando localizacion con localizacionid ${localizacionid}...`);
     
     const { data, error } = await supabase
       .from('localizacion')
       .update(updateData)
-      .eq('ubicacionid', ubicacionid)
-      .eq('nodoid', nodoid)
+      .eq('localizacionid', localizacionid)
       .select();
       
       if (error) {
@@ -1412,18 +1417,17 @@ app.put('/api/thermo/localizacion/:ubicacionid/:nodoid', async (req, res) => {
 // Ruta PUT para localizacion con query parameters (para compatibilidad con frontend)
 app.put('/api/thermo/localizacion/composite', async (req, res) => {
   try {
-    const { ubicacionid, nodoid, entidadid } = req.query;
+    const { ubicacionid, localizacionid, entidadid } = req.query;
     const updateData = req.body;
     
-    console.log(`🔍 Backend: Actualizando localizacion con query params - ubicacionid: ${ubicacionid}, nodoid: ${nodoid}, entidadid: ${entidadid}...`);
-    console.log(`🔍 Backend: Actualizando ubicacion con ID ${id}`);
-    console.log(`🔍 Backend: Tipos de datos - ubicacionid: ${typeof ubicacionid}, nodoid: ${typeof nodoid}, entidadid: ${typeof entidadid}`);
+    console.log(`🔍 Backend: Actualizando localizacion con query params - ubicacionid: ${ubicacionid}, localizacionid: ${localizacionid}, entidadid: ${entidadid}...`);
+    console.log(`🔍 Backend: Tipos de datos - ubicacionid: ${typeof ubicacionid}, localizacionid: ${typeof localizacionid}, entidadid: ${typeof entidadid}`);
     
     const { data, error } = await supabase
         .from('localizacion')
       .update(updateData)
       .eq('ubicacionid', ubicacionid)
-      .eq('nodoid', nodoid)
+      .eq('localizacionid', localizacionid)
       .eq('entidadid', entidadid)
       .select();
     
@@ -1916,6 +1920,41 @@ app.get('/api/thermo/localizaciones', async (req, res) => {
 // La tabla 'nodo' no existe en el schema 'thermo'
 // En Thermos usamos 'sensor' y 'localizacionsensor' para sensores industriales
 
+// Ruta de prueba para information_schema
+app.get('/api/thermo/test-info-schema', async (req, res) => {
+  try {
+    console.log('🔍 Probando acceso a information_schema...');
+    
+    // Probar consulta directa a information_schema usando SQL
+    const { data: columnsData, error: columnsError } = await supabase
+      .rpc('exec_sql', {
+        query: `
+          SELECT column_name, data_type, is_nullable, column_default
+          FROM information_schema.columns 
+          WHERE table_schema = 'thermo' 
+            AND table_name = 'localizacion'
+          ORDER BY ordinal_position
+        `
+      });
+    
+    console.log('🔍 Resultado de information_schema.columns:', {
+      hasData: !!columnsData,
+      dataLength: columnsData?.length || 0,
+      error: columnsError,
+      firstFew: columnsData?.slice(0, 3) || []
+    });
+    
+    res.json({
+      columns: columnsData,
+      error: columnsError,
+      message: 'Prueba de information_schema completada'
+    });
+  } catch (error) {
+    console.error('❌ Error en prueba de information_schema:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Ruta para detectar schema disponible (THERMOS)
 app.get('/api/thermo/detect', async (req, res) => {
   try {
@@ -2052,7 +2091,7 @@ app.get('/api/thermo/tables', async (req, res) => {
           tables: availableTables,
           method: 'known_tables_fallback'
         });
-      } else {
+    } else {
         console.log('✅ Tablas encontradas via consulta directa:', directData);
         res.json({ 
           available: true, 

@@ -26,11 +26,11 @@
 /* Para Firefox */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #f97316 #d1d5db; /* orange-500 gray-300 */
+  scrollbar-color: #2563eb #d1d5db; /* blue-600 gray-300 */
 }
 
 .dark .custom-scrollbar {
-  scrollbar-color: #f97316 #404040; /* orange-500 neutral-700 */
+  scrollbar-color: #2563eb #404040; /* blue-600 neutral-700 */
 }
 
 /* Ocultar scrollbar cuando está colapsado */

@@ -264,7 +264,7 @@ const MultipleUsuarioPerfilForm: React.FC<MultipleUsuarioPerfilFormProps> = ({
         {/* Contenedor 1: Usuarios sin perfil */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider">
+            <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider">
               {t('userprofile.users_without_profile')}
             </h4>
           </div>
@@ -288,7 +288,7 @@ const MultipleUsuarioPerfilForm: React.FC<MultipleUsuarioPerfilFormProps> = ({
                     type="checkbox"
                     checked={selectedUsuariosCheckboxes.includes(usuario.usuarioid.toString())}
                     onChange={() => handleUsuarioToggle(usuario.usuarioid.toString())}
-                    className="mr-3 text-orange-500 focus:ring-orange-500"
+                    className="mr-3 text-blue-600 focus:ring-blue-600"
                   />
                   <div className="flex-1">
                     <div className="text-white font-medium font-mono">
@@ -312,7 +312,7 @@ const MultipleUsuarioPerfilForm: React.FC<MultipleUsuarioPerfilFormProps> = ({
         {/* Contenedor 2: Perfiles disponibles */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider">
+            <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider">
               {t('userprofile.profiles_available')}
             </h4>
           </div>
@@ -336,7 +336,7 @@ const MultipleUsuarioPerfilForm: React.FC<MultipleUsuarioPerfilFormProps> = ({
                     type="checkbox"
                     checked={selectedPerfilesCheckboxes.includes(perfil.perfilid.toString())}
                     onChange={() => handlePerfilToggle(perfil.perfilid.toString())}
-                    className="mr-3 text-orange-500 focus:ring-orange-500"
+                    className="mr-3 text-blue-600 focus:ring-blue-600"
                   />
                   <div className="flex-1">
                     <div className="text-white font-medium font-mono">{perfil.perfil}</div>

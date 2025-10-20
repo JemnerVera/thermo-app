@@ -186,7 +186,7 @@ export function MassiveSensorForm({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Nodos */}
         <div>
-          <h4 className="text-lg font-bold text-orange-500 font-mono tracking-wider mb-4">
+          <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider mb-4">
             NODO
           </h4>
           
@@ -200,7 +200,7 @@ export function MassiveSensorForm({
                       type="checkbox"
                       checked={allNodesSelected}
                       onChange={(e) => handleSelectAllNodes(e.target.checked)}
-                      className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
                     />
                   </div>
                   <div className="col-span-6">
@@ -223,7 +223,7 @@ export function MassiveSensorForm({
                         type="checkbox"
                         checked={node.selected}
                         onChange={(e) => handleNodeSelection(node.nodoid, e.target.checked)}
-                        className="w-4 h-4 text-orange-500 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-orange-500 focus:ring-2"
+                        className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
                       />
                     </div>
                     <div className="col-span-6 flex items-center">

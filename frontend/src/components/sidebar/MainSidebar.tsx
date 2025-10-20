@@ -51,7 +51,7 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
-      color: 'blue'
+      color: 'sky'
     }
   ];
 
@@ -59,8 +59,9 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
     switch (color) {
       case 'green': return 'text-green-400';
       case 'blue': return 'text-blue-400';
-      case 'orange': return 'text-orange-400';
+      case 'orange': return 'text-blue-400';
       case 'gray': return 'text-gray-400';
+      case 'sky': return 'text-sky-400';
       default: return 'text-gray-400';
     }
   };
@@ -69,8 +70,9 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
     switch (color) {
       case 'green': return 'bg-green-600';
       case 'blue': return 'bg-blue-600';
-      case 'orange': return 'bg-orange-500';
+      case 'orange': return 'bg-blue-600';
       case 'gray': return 'bg-gray-600';
+      case 'sky': return 'bg-sky-500';
       default: return 'bg-gray-600';
     }
   };
@@ -85,12 +87,12 @@ const MainSidebar: React.FC<MainSidebarProps> = ({
       <div className="h-16 flex items-center justify-center border-b border-gray-300 dark:border-neutral-700 p-4">
         {isExpanded ? (
           <div className="flex items-center space-x-3">
-            <img src="/Logo - icono.png" alt="JoySense" className="w-8 h-8" />
-            <img src="/Logo - texto.png" alt="JoySense" className="h-6 w-auto" />
+            <img src="/thermo_logo.png" alt="Thermos" className="w-8 h-8" />
+            <span className="text-lg font-bold text-blue-600 font-mono tracking-wider">THERMOS APP</span>
           </div>
         ) : (
           <div className="flex justify-center">
-            <img src="/Logo - icono.png" alt="JoySense" className="w-8 h-8" />
+            <img src="/thermo_logo.png" alt="Thermos" className="w-8 h-8" />
           </div>
         )}
       </div>

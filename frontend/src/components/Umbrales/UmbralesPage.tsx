@@ -161,7 +161,7 @@ const UmbralesPage: React.FC = () => {
       {/* Mensajes de estado de datos de referencia */}
       {referenceDataLoading && (
         <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-blue-700 text-sm">
+          <p className="text-sky-600 text-sm">
             🔄 Cargando datos de referencia... Por favor espera mientras se cargan los nodos, métricas y ubicaciones.
           </p>
         </div>
@@ -517,7 +517,7 @@ const UmbralesPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(umbral)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      className="text-sky-500 hover:text-sky-700 mr-3"
                     >
                       Editar
                     </button>

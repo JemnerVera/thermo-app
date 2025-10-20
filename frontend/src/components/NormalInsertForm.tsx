@@ -236,7 +236,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       if (field === 'pais' && paisSeleccionado) {
         return (
           <div key="pais-contextual">
-            <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
               {t('create.country')}
             </label>
             <div className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-base font-mono cursor-not-allowed opacity-75">
@@ -249,7 +249,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       else if (field === 'empresa' && empresaSeleccionada) {
         return (
           <div key="empresa-contextual">
-            <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
               {t('create.company')}
             </label>
             <div className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-base font-mono cursor-not-allowed opacity-75">
@@ -262,7 +262,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       else if (field === 'fundo' && fundoSeleccionado) {
         return (
           <div key="fundo-contextual">
-            <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
               {t('table_headers.fund')}
             </label>
             <div className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-base font-mono cursor-not-allowed opacity-75">
@@ -411,7 +411,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       return (
         <div key={col.columnName} className="mb-4">
           <label className={`block text-lg font-bold mb-2 font-mono tracking-wider ${
-            isEnabled ? 'text-orange-500' : 'text-gray-500'
+            isEnabled ? 'text-blue-600' : 'text-gray-500'
           }`}>
             {displayName.toUpperCase()}{isRequired ? '*' : ''}
           </label>
@@ -428,7 +428,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
                   });
                 }
               }}
-              className={`w-5 h-5 text-orange-500 bg-neutral-800 border-neutral-600 rounded focus:ring-orange-500 focus:ring-2 ${
+              className={`w-5 h-5 text-blue-600 bg-neutral-800 border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 ${
                 !isEnabled ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             />
@@ -447,7 +447,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       return (
         <div key={col.columnName} className="mb-4">
           <label className={`block text-lg font-bold mb-2 font-mono tracking-wider ${
-            isEnabled ? 'text-orange-500' : 'text-gray-500'
+            isEnabled ? 'text-blue-600' : 'text-gray-500'
           }`}>
             {displayName.toUpperCase()}{isRequired ? '*' : ''}
           </label>
@@ -481,7 +481,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
     return (
       <div key={col.columnName} className="mb-4">
         <label className={`block text-lg font-bold mb-2 font-mono tracking-wider ${
-          isEnabled ? 'text-orange-500' : 'text-gray-500'
+          isEnabled ? 'text-blue-600' : 'text-gray-500'
         }`}>
           {displayName.toUpperCase()}
         </label>
@@ -564,7 +564,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
         result.push(
           <div key="pais-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
-              <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+              <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                 {t('create.country')}
               </label>
               <div className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white text-base font-mono cursor-not-allowed opacity-75">
@@ -949,7 +949,7 @@ return filteredNodos;
       const options = getUniqueOptionsForField(col.columnName);
       return (
         <div key={col.columnName} className="mb-4">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             {displayName.toUpperCase()}{isRequired ? '*' : ''}
           </label>
           <SelectWithPlaceholder
@@ -982,7 +982,7 @@ return filteredNodos;
       const options = getUniqueOptionsForField(col.columnName);
       return (
         <div key={col.columnName} className="mb-4">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             {displayName.toUpperCase()}{isRequired ? '*' : ''}
           </label>
           <SelectWithPlaceholder
@@ -1015,7 +1015,7 @@ return filteredNodos;
       const options = getFilteredNodoOptions();
       return (
         <div key={col.columnName} className="mb-4">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             {displayName.toUpperCase()}{isRequired ? '*' : ''}
           </label>
           <SelectWithPlaceholder
@@ -1045,7 +1045,7 @@ return filteredNodos;
     if (fieldType === 'coordenadas') {
       return (
         <div key={col.columnName} className="mb-4">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             {displayName.toUpperCase()}{isRequired ? '*' : ''}
           </label>
           <input
@@ -1089,7 +1089,7 @@ return filteredNodos;
           if (col.columnName === 'statusid') {
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <div className="flex items-center space-x-3">
@@ -1100,7 +1100,7 @@ return filteredNodos;
                       ...formData,
                       [col.columnName]: e.target.checked ? 1 : 0
                     })}
-                    className="w-5 h-5 text-orange-500 bg-neutral-800 border-neutral-600 rounded focus:ring-orange-500 focus:ring-2"
+                    className="w-5 h-5 text-blue-600 bg-neutral-800 border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
                   />
                   <span className="text-white font-mono tracking-wider">
                     {value === 1 ? t('create.active') : t('create.inactive')}
@@ -1115,7 +1115,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1136,7 +1136,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1157,7 +1157,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1178,7 +1178,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1198,7 +1198,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1219,7 +1219,7 @@ return filteredNodos;
             const displayName = getColumnDisplayNameTranslated(col.columnName, t);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1240,7 +1240,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1260,7 +1260,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1281,7 +1281,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1301,7 +1301,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1321,7 +1321,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1342,7 +1342,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1362,7 +1362,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1382,7 +1382,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1402,7 +1402,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1422,7 +1422,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1443,7 +1443,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1463,7 +1463,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1484,7 +1484,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1504,7 +1504,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1525,7 +1525,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1545,7 +1545,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1566,7 +1566,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1587,7 +1587,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1607,7 +1607,7 @@ return filteredNodos;
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
                   {displayName.toUpperCase()}{isRequired ? '*' : ''}
                 </label>
                 <SelectWithPlaceholder
@@ -1628,7 +1628,7 @@ return filteredNodos;
           return (
             <div key={col.columnName} className="mb-4">
               <label className={`block text-lg font-bold mb-2 font-mono tracking-wider ${
-                isEnabled ? 'text-orange-500' : 'text-gray-500'
+                isEnabled ? 'text-blue-600' : 'text-gray-500'
               }`}>
                 {displayName.toUpperCase()}{isRequired ? '*' : ''}
               </label>
@@ -1664,7 +1664,7 @@ return filteredNodos;
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Campo Usuario */}
         <div className="space-y-3">
-          <label className="block text-lg font-bold text-orange-500 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider">
             {getColumnDisplayNameTranslated('usuarioid', t)?.toUpperCase()} *
           </label>
           <SelectWithPlaceholder
@@ -1681,7 +1681,7 @@ return filteredNodos;
           <>
             {/* Campo País */}
             <div className="space-y-3">
-              <label className="block text-lg font-bold text-orange-500 font-mono tracking-wider">
+              <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider">
                 {t('create.country')} *
               </label>
               <SelectWithPlaceholder
@@ -1722,13 +1722,13 @@ return filteredNodos;
 
             {/* Campo Número de Teléfono */}
             <div className="space-y-3">
-              <label className="block text-lg font-bold text-orange-500 font-mono tracking-wider">
+              <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider">
                 {t('contact.phone_number')} *
               </label>
               <div className="flex">
                 <span className={`px-4 py-3 border rounded-l-lg text-white text-sm font-medium min-w-[80px] text-center ${
                   formData.codigotelefonoid 
-                    ? 'bg-orange-600 border-orange-500' 
+                    ? 'bg-blue-600 border-blue-500' 
                     : 'bg-neutral-800 border-neutral-700'
                 }`}>
                   {(() => {
@@ -1773,7 +1773,7 @@ return filteredNodos;
 
         {selectedContactType === 'email' && (
           <div className="space-y-3">
-            <label className="block text-lg font-bold text-orange-500 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider">
               {t('contact.email_address')} *
             </label>
             <input
@@ -1802,7 +1802,7 @@ return filteredNodos;
 
         {/* Campo Status (siempre visible en contacto) */}
         <div className="mb-4">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             {t('create.status')}*
           </label>
           <div className="flex items-center space-x-3">
@@ -1813,7 +1813,7 @@ return filteredNodos;
                 ...formData,
                 statusid: e.target.checked ? 1 : 0
               })}
-              className="w-5 h-5 text-orange-500 bg-neutral-800 border-neutral-600 rounded focus:ring-orange-500 focus:ring-2"
+              className="w-5 h-5 text-blue-600 bg-neutral-800 border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
             />
             <span className="text-white font-mono tracking-wider">
               {formData.statusid === 1 ? t('create.active') : t('create.inactive')}
@@ -1853,7 +1853,7 @@ return filteredNodos;
         <button
           onClick={onInsert}
           disabled={loading}
-          className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-mono tracking-wider"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-mono tracking-wider"
         >
           <span>➕</span>
           <span>{loading ? 'GUARDANDO...' : t('create.save')}</span>

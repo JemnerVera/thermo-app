@@ -21,7 +21,7 @@ export const useTableDataManagement = () => {
   const [ubicacionesData, setUbicacionesData] = useState<any[]>([]);
   const [localizacionesData, setLocalizacionesData] = useState<any[]>([]);
   const [entidadesData, setEntidadesData] = useState<any[]>([]);
-  const [nodosData, setNodosData] = useState<any[]>([]);
+  // nodosData eliminado - obsoleto para Thermos (era para nodos LoRaWAN agrícolas)
   const [tiposData, setTiposData] = useState<any[]>([]);
   const [metricasData, setMetricasData] = useState<any[]>([]);
   const [criticidadesData, setCriticidadesData] = useState<any[]>([]);
@@ -67,7 +67,6 @@ export const useTableDataManagement = () => {
         ubicacionesResponse,
         localizacionesResponse,
         entidadesResponse,
-        nodosResponse,
         tiposResponse,
         metricasResponse,
         criticidadesResponse,
@@ -86,7 +85,7 @@ export const useTableDataManagement = () => {
         JoySenseService.getTableData('ubicacion', 500),
         JoySenseService.getTableData('localizacion', 500),
         JoySenseService.getTableData('entidad', 500),
-        JoySenseService.getTableData('nodo', 500),
+        // JoySenseService.getTableData('nodo', 500), // Eliminado - tabla no existe en Thermos
         JoySenseService.getTableData('tipo', 500),
         JoySenseService.getTableData('metrica', 500),
         JoySenseService.getTableData('criticidad', 500),
@@ -114,7 +113,7 @@ export const useTableDataManagement = () => {
       const ubicaciones = Array.isArray(ubicacionesResponse) ? ubicacionesResponse : ((ubicacionesResponse as any)?.data || []);
       const localizaciones = Array.isArray(localizacionesResponse) ? localizacionesResponse : ((localizacionesResponse as any)?.data || []);
       const entidades = Array.isArray(entidadesResponse) ? entidadesResponse : ((entidadesResponse as any)?.data || []);
-      const nodos = Array.isArray(nodosResponse) ? nodosResponse : ((nodosResponse as any)?.data || []);
+      // const nodos = Array.isArray(nodosResponse) ? nodosResponse : ((nodosResponse as any)?.data || []); // Eliminado - obsoleto para Thermos
       const tipos = Array.isArray(tiposResponse) ? tiposResponse : ((tiposResponse as any)?.data || []);
       const metricas = Array.isArray(metricasResponse) ? metricasResponse : ((metricasResponse as any)?.data || []);
       const criticidades = Array.isArray(criticidadesResponse) ? criticidadesResponse : ((criticidadesResponse as any)?.data || []);
@@ -134,7 +133,7 @@ export const useTableDataManagement = () => {
       setUbicacionesData(ubicaciones);
       setLocalizacionesData(localizaciones);
       setEntidadesData(entidades);
-      setNodosData(nodos);
+      // setNodosData(nodos); // Eliminado - obsoleto para Thermos
       setTiposData(tipos);
       setMetricasData(metricas);
       setCriticidadesData(criticidades);
@@ -339,7 +338,7 @@ export const useTableDataManagement = () => {
     ubicacionesData,
     localizacionesData,
     entidadesData,
-    nodosData,
+    // nodosData eliminado - obsoleto para Thermos
     tiposData,
     metricasData,
     criticidadesData,
@@ -368,7 +367,7 @@ export const useTableDataManagement = () => {
     setUbicacionesData,
     setLocalizacionesData,
     setEntidadesData,
-    setNodosData,
+    // setNodosData eliminado - obsoleto para Thermos
     setTiposData,
     setMetricasData,
     setCriticidadesData,

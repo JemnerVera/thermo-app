@@ -100,7 +100,7 @@ const MultipleSensorForm: React.FC<MultipleSensorFormProps> = ({
     if (paisSeleccionado) {
       contextualFields.push(
         <div key="pais-contextual">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             PAÍS
           </label>
           <div className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white font-mono cursor-not-allowed opacity-75">
@@ -113,7 +113,7 @@ const MultipleSensorForm: React.FC<MultipleSensorFormProps> = ({
     if (empresaSeleccionada) {
       contextualFields.push(
         <div key="empresa-contextual">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             EMPRESA
           </label>
           <div className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white font-mono cursor-not-allowed opacity-75">
@@ -126,7 +126,7 @@ const MultipleSensorForm: React.FC<MultipleSensorFormProps> = ({
     if (fundoSeleccionado) {
       contextualFields.push(
         <div key="fundo-contextual">
-          <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
             FUNDO
           </label>
           <div className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 rounded-lg text-white font-mono cursor-not-allowed opacity-75">
@@ -155,7 +155,7 @@ const MultipleSensorForm: React.FC<MultipleSensorFormProps> = ({
         <div className="space-y-6">
           {/* Fila 2: Nodo */}
           <div>
-            <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
               {t('table_headers.node')}*
             </label>
             <SelectWithPlaceholder
@@ -172,7 +172,7 @@ const MultipleSensorForm: React.FC<MultipleSensorFormProps> = ({
 
           {/* Fila 3: Entidad */}
           <div>
-            <label className="block text-lg font-bold text-orange-500 mb-2 font-mono tracking-wider">
+            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
               {t('table_headers.entity')}*
             </label>
             <SelectWithPlaceholder
@@ -224,7 +224,7 @@ const MultipleSensorForm: React.FC<MultipleSensorFormProps> = ({
 
         {/* Segunda columna: Container de sensores */}
         <div>
-          <h4 className="text-lg font-bold text-orange-500 mb-4 font-mono tracking-wider">{t('sensor.sensors_to_create')}</h4>
+          <h4 className="text-lg font-bold text-blue-600 mb-4 font-mono tracking-wider">{t('sensor.sensors_to_create')}</h4>
           <div className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
             <div className="space-y-3 max-h-96 overflow-y-auto">
             {multipleSensors.length > 0 ? (

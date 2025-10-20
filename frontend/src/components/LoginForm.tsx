@@ -32,17 +32,17 @@ const LoginForm: React.FC = () => {
         <div className="flex justify-center">
           <div className="w-24 h-24 flex items-center justify-center">
             <img 
-              src="/Logo - icono.png" 
-              alt="JoySense Logo" 
+              src="/thermo_logo.png" 
+              alt="Thermos Logo" 
               className="w-full h-full object-contain"
             />
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-orange-500 font-mono tracking-wider">
-          JOYSENSE APP
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-blue-600 font-mono tracking-wider">
+          THERMOS APP
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-neutral-300 font-mono tracking-wider">
-          SISTEMA DE MONITOREO AGRÍCOLA INTELIGENTE
+          SISTEMA DE MONITOREO DE SENSORES
         </p>
       </div>
 
@@ -65,7 +65,7 @@ const LoginForm: React.FC = () => {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-orange-500 font-mono tracking-wider">
+              <label htmlFor="email" className="block text-sm font-medium text-blue-600 font-mono tracking-wider">
                 CORREO ELECTRÓNICO
               </label>
               <div className="mt-1">
@@ -84,7 +84,7 @@ const LoginForm: React.FC = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-orange-500 font-mono tracking-wider">
+              <label htmlFor="password" className="block text-sm font-medium text-blue-600 font-mono tracking-wider">
                 CONTRASEÑA
               </label>
               <div className="mt-1">
@@ -106,7 +106,7 @@ const LoginForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200 font-mono tracking-wider"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors duration-200 font-mono tracking-wider"
               >
                 {isLoading ? (
                   <div className="flex items-center">
@@ -126,7 +126,7 @@ const LoginForm: React.FC = () => {
                 <div className="w-full border-t border-gray-300 dark:border-neutral-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-neutral-900 text-gray-500 dark:text-neutral-400 font-mono tracking-wider">SISTEMA DE MONITOREO AGRÍCOLA</span>
+                <span className="px-2 bg-white dark:bg-neutral-900 text-gray-500 dark:text-neutral-400 font-mono tracking-wider">SISTEMA DE MONITOREO DE SENSORES</span>
               </div>
             </div>
           </div>

@@ -508,7 +508,7 @@ return hasFormDataChanges || hasMultipleDataChanges;
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Thermos Dashboard</h2>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">Dashboard en desarrollo para sensores térmicos industriales</p>
                 <div className="bg-orange-100 dark:bg-orange-900 border border-orange-300 dark:border-orange-700 rounded-lg p-4 max-w-md">
-                  <p className="text-orange-800 dark:text-orange-200 text-sm">
+                  <p className="text-blue-800 dark:text-blue-200 text-sm">
                     El dashboard de nodos LoRaWAN ha sido eliminado. 
                     Se está desarrollando un nuevo dashboard específico para sensores térmicos industriales.
                   </p>
@@ -557,10 +557,10 @@ return hasFormDataChanges || hasMultipleDataChanges;
           <div className="text-center">
             <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 max-w-md mx-auto">
               <div className="flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-orange-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                <h2 className="text-2xl font-bold text-orange-500 font-mono tracking-wider">{t('tabs.parameters')}</h2>
+                <h2 className="text-2xl font-bold text-blue-600 font-mono tracking-wider">{t('tabs.parameters')}</h2>
               </div>
               <p className="text-neutral-300 font-mono tracking-wider">{t('forms.select_option')}</p>
             </div>
@@ -585,7 +585,7 @@ return hasFormDataChanges || hasMultipleDataChanges;
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Thermos Dashboard</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">Dashboard en desarrollo para sensores térmicos industriales</p>
             <div className="bg-orange-100 dark:bg-orange-900 border border-orange-300 dark:border-orange-700 rounded-lg p-4 max-w-md">
-              <p className="text-orange-800 dark:text-orange-200 text-sm">
+              <p className="text-blue-800 dark:text-blue-200 text-sm">
                 El dashboard de nodos LoRaWAN ha sido eliminado. 
                 Se está desarrollando un nuevo dashboard específico para sensores térmicos industriales.
               </p>
@@ -643,14 +643,14 @@ return hasFormDataChanges || hasMultipleDataChanges;
             <div className="h-16 bg-white dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 flex items-center justify-between px-6">
               <div className="flex items-center gap-4">
                 <div className="text-sm text-gray-600 dark:text-neutral-400 font-mono">
-                  JOYSENSE APP / <span className={
+                  THERMOS APP / <span className={
                     activeTab === 'parameters' || activeTab?.startsWith('parameters-')
-                      ? 'text-orange-500' // Naranja para Parámetros
+                      ? 'text-blue-600' // Azul para Parámetros
                       : activeTab === 'reportes' || activeTab?.startsWith('reportes-')
                       ? 'text-green-500' // Verde para Reportes
                       : activeTab === 'umbrales' || activeTab?.startsWith('umbrales-')
-                      ? 'text-blue-500' // Azul para Configuración
-                      : 'text-orange-500' // Naranja por defecto
+                      ? 'text-sky-500' // Celeste para Configuración
+                      : 'text-blue-600' // Azul por defecto
                   }>
                     {activeTab === 'parameters' || activeTab?.startsWith('parameters-')
                       ? (() => {
@@ -750,11 +750,11 @@ return hasFormDataChanges || hasMultipleDataChanges;
                   <div className="text-center max-w-2xl mx-auto px-6">
                     {/* Logo táctico */}
                     <div className="mb-12">
-                      <div className="w-32 h-32 bg-gray-200 dark:bg-neutral-900 border-2 border-orange-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
-                        <img src="/Logo - icono.png" alt="JoySense" className="w-16 h-16" />
+                      <div className="w-32 h-32 flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                        <img src="/thermo_logo.png" alt="Thermos Logo" className="w-24 h-24 object-contain" />
                       </div>
                       
-                      <h1 className="text-5xl font-bold text-orange-500 mb-4 leading-tight font-mono tracking-wider">
+                      <h1 className="text-5xl font-bold text-blue-600 mb-4 leading-tight font-mono tracking-wider">
                         {t('welcome.title')}
                       </h1>
                       
@@ -765,7 +765,7 @@ return hasFormDataChanges || hasMultipleDataChanges;
                       {/* Instrucción con diseño táctico */}
                       <div className="bg-gray-100 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-2xl p-8">
                         <div className="flex items-center justify-center mb-4">
-                          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mr-3">
+                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
