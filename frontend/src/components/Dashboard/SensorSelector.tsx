@@ -5,10 +5,10 @@ import { NodeData } from '../../types/NodeData'
 import { useFilters } from '../../contexts/FilterContext'
 import { useLanguage } from '../../contexts/LanguageContext'
 
-interface NodeSelectorProps {
+interface SensorSelectorProps {
   selectedEntidadId: number | null
   selectedUbicacionId: number | null
-  onNodeSelect: (nodeData: NodeData) => void
+  onSensorSelect: (sensorData: NodeData) => void
   onFiltersUpdate: (filters: { 
     entidadId: number; 
     ubicacionId: number;
@@ -21,10 +21,10 @@ interface NodeSelectorProps {
   onUbicacionChange?: (ubicacion: any) => void
 }
 
-export const NodeSelector: React.FC<NodeSelectorProps> = ({
+export const SensorSelector: React.FC<SensorSelectorProps> = ({
   selectedEntidadId,
   selectedUbicacionId,
-  onNodeSelect,
+  onSensorSelect,
   onFiltersUpdate,
   onEntidadChange,
   onUbicacionChange
@@ -138,9 +138,9 @@ export const NodeSelector: React.FC<NodeSelectorProps> = ({
     }
   }
 
-  const handleNodeSelect = (node: NodeData) => {
-    setSelectedNode(node)
-    onNodeSelect(node)
+  const handleSensorSelect = (sensor: NodeData) => {
+    setSelectedNode(sensor)
+    onSensorSelect(sensor)
     setIsSearchDropdownOpen(false)
     setSearchTerm('')
     
@@ -157,9 +157,9 @@ export const NodeSelector: React.FC<NodeSelectorProps> = ({
     })
   }
 
-  const handleMapNodeClick = (node: NodeData) => {
-    setSelectedNode(node)
-    onNodeSelect(node)
+  const handleMapSensorClick = (sensor: NodeData) => {
+    setSelectedNode(sensor)
+    onSensorSelect(sensor)
     
     // Sincronizar todos los filtros globales
     syncAllFilters(node)
@@ -231,7 +231,7 @@ export const NodeSelector: React.FC<NodeSelectorProps> = ({
                 filteredNodes.map((node) => (
                   <button
                     key={node.nodoid}
-                    onClick={() => handleNodeSelect(node)}
+                    onClick={() => handleSensorSelect(node)}
                     className="w-full px-4 py-3 text-left hover:bg-gray-200 dark:hover:bg-neutral-600 transition-colors border-b border-gray-300 dark:border-neutral-600 last:border-b-0 group relative"
                     title={`${t('dashboard.tooltip.deveui')} ${node.deveui} | ${t('dashboard.tooltip.location')} ${node.ubicacion.ubicacion} | ${t('dashboard.tooltip.fund')} ${node.ubicacion.fundo.fundo} | ${t('dashboard.tooltip.company')} ${node.ubicacion.fundo.empresa.empresa} | ${t('dashboard.tooltip.country')} ${node.ubicacion.fundo.empresa.pais.pais}${node.latitud && node.longitud ? ` | ${t('dashboard.tooltip.coordinates')} ${node.latitud}, ${node.longitud}` : ''}`}
                   >
@@ -254,7 +254,7 @@ export const NodeSelector: React.FC<NodeSelectorProps> = ({
       <InteractiveMap
         nodes={nodes}
         selectedNode={selectedNode}
-        onNodeSelect={handleMapNodeClick}
+        onNodeSelect={handleMapSensorClick}
         loading={loading}
         nodeMediciones={nodeMediciones}
       />

@@ -31,9 +31,21 @@ export interface Metrica {
   metrica: string;
 }
 
+// DEPRECATED: Usar Sensor en su lugar
 export interface Nodo {
   nodoid: number;
   nodo: string;
+}
+
+export interface Sensor {
+  sensorid: number;
+  sensor: string;
+  tipoid: number;
+  statusid: number;
+  usercreatedid: number;
+  datecreated: string;
+  usermodifiedid: number;
+  datemodified: string;
 }
 
 export interface Tipo {
@@ -43,17 +55,15 @@ export interface Tipo {
 
 export interface Medicion {
   medicionid: number;
-  medicion: number;
+  localizacionsensorid: number;
+  valor: number;
   fecha: string;
-  ubicacionid: number;
-  metricaid: number;
-  nodoid: number;
-  tipoid: number;
+  usercreatedid: number;
+  datecreated: string;
+  // Relaciones opcionales
+  localizacionsensor?: LocalizacionSensor;
   metrica?: Metrica;
-  nodo?: {
-    nodoid: number;
-    nodo: string;
-  };
+  sensor?: Sensor;
   tipo?: {
     tipoid: number;
     tipo: string;
@@ -65,16 +75,16 @@ export interface Medicion {
 }
 
 export interface MetricaSensor {
-  nodoid: number;
+  sensorid: number;
   metricaid: number;
-  primarykey: number;
-  statustid: number;
+  statusid: number;
+  usercreatedid: number;
+  usermodifiedid: number;
+  datecreated: string;
+  datemodified: string;
 }
 
-export interface Sensor {
-  nodoid: number;
-  tipoid: number;
-}
+// DEPRECATED: Interfaz antigua de Sensor
 
 export interface Entidad {
   entidadid: number;
@@ -128,4 +138,67 @@ export interface AuthUser {
 
 export interface AuthError {
   message: string;
+}
+
+// ===== NUEVAS INTERFACES PARA THERMOS =====
+
+// LocalizacionSensor: Nueva tabla en Thermos que conecta sensores con ubicaciones
+export interface LocalizacionSensor {
+  localizacionsensorid: number;
+  localizacionid: number;
+  sensorid: number;
+  metricaid: number;
+  localizacionsensor: string;
+  statusid: number;
+  usercreatedid: number;
+  datecreated: string;
+  usermodifiedid: number;
+  datemodified: string;
+  // Relaciones opcionales
+  localizacion?: Localizacion;
+  sensor?: Sensor;
+  metrica?: Metrica;
+}
+
+// MensajeError: Nueva tabla para errores de mensajes en Thermos
+export interface MensajeError {
+  mensaje_errorid: number;
+  uuid_origen?: string;
+  tipo_origen?: string;
+  detalle?: string;
+  usercreatedid: number;
+  datecreated: string;
+}
+
+// Umbral: Actualizada para Thermos
+export interface Umbral {
+  umbralid: number;
+  localizacionsensorid: number;
+  criticidadid: number;
+  umbral: string;
+  maximo: number;
+  minimo: number;
+  estandar?: number;
+  statusid: number;
+  usercreatedid: number;
+  datecreated: string;
+  usermodifiedid: number;
+  datemodified: string;
+  // Relaciones opcionales
+  localizacionsensor?: LocalizacionSensor;
+  criticidad?: Criticidad;
+}
+
+// Alerta: Actualizada para Thermos
+export interface Alerta {
+  uuid_alerta: string;
+  usercreatedid: number;
+  medicionid: number;
+  umbralid: number;
+  fecha: string;
+  statusid: number;
+  datecreated: string;
+  // Relaciones opcionales
+  medicion?: Medicion;
+  umbral?: Umbral;
 }
