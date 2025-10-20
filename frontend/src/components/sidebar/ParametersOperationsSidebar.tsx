@@ -115,7 +115,7 @@ const ParametersOperationsSidebar: React.FC<ParametersOperationsSidebarProps> = 
       'localizacion': t('parameters.tables.localization'),
       'entidad': t('parameters.tables.entity'),
       'tipo': t('parameters.tables.type'),
-      'nodo': t('parameters.tables.node'),
+      // 'nodo' eliminado - obsoleto para Thermos
       'sensor': t('parameters.tables.sensor'),
       'metricasensor': t('parameters.tables.metric_sensor'),
       'metrica': t('parameters.tables.metric'),
