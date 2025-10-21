@@ -4,7 +4,9 @@ import { useLanguage } from '../../contexts/LanguageContext';
 interface TemperatureData {
   id: number;
   fundo_id: number;
+  fundo_nombre?: string;
   zona_id: number;
+  zona_nombre?: string;
   valor: number;
   fecha: string;
 }
@@ -33,6 +35,30 @@ const RealtimeTemperatureDashboard: React.FC = () => {
     zona_id: '',
     limit: '100'
   });
+  const [fundos, setFundos] = useState<any[]>([]);
+  const [zonas, setZonas] = useState<any[]>([]);
+
+  const fetchFilterOptions = async () => {
+    try {
+      const [fundosResponse, zonasResponse] = await Promise.all([
+        fetch('http://localhost:3001/api/public/fundo'),
+        fetch('http://localhost:3001/api/public/zona')
+      ]);
+
+      if (fundosResponse.ok && zonasResponse.ok) {
+        const [fundosData, zonasData] = await Promise.all([
+          fundosResponse.json(),
+          zonasResponse.json()
+        ]);
+        console.log('Fundos cargados:', fundosData);
+        console.log('Zonas cargadas:', zonasData);
+        setFundos(fundosData);
+        setZonas(zonasData);
+      }
+    } catch (err) {
+      console.error('Error cargando opciones de filtro:', err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -59,7 +85,28 @@ const RealtimeTemperatureDashboard: React.FC = () => {
         statsResponse.json()
       ]);
 
-      setData(dataResult);
+      // Mapear nombres de fundo y zona
+      const dataWithNames = dataResult.map((record: any) => {
+        const fundoNombre = fundos.find(f => f.id === record.fundo_id)?.nombre || record.fundo_id;
+        const zonaNombre = zonas.find(z => z.id === record.zona_id)?.nombre || record.zona_id;
+        
+        console.log('Mapeando registro:', {
+          id: record.id,
+          fundo_id: record.fundo_id,
+          fundo_nombre: fundoNombre,
+          zona_id: record.zona_id,
+          zona_nombre: zonaNombre
+        });
+        
+        return {
+          ...record,
+          fundo_nombre: fundoNombre,
+          zona_nombre: zonaNombre
+        };
+      });
+      
+      console.log('Datos con nombres:', dataWithNames.slice(0, 2)); // Solo los primeros 2 para debug
+      setData(dataWithNames);
       setStats(statsResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
@@ -67,6 +114,10 @@ const RealtimeTemperatureDashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -122,27 +173,37 @@ const RealtimeTemperatureDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
-                Fundo ID
+                Fundo
               </label>
-              <input
-                type="number"
+              <select
                 value={filters.fundo_id}
                 onChange={(e) => setFilters({...filters, fundo_id: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
-                placeholder="Filtro por fundo"
-              />
+              >
+                <option value="">Todos los fundos</option>
+                {fundos.map((fundo) => (
+                  <option key={fundo.id} value={fundo.id}>
+                    {fundo.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
-                Zona ID
+                Zona
               </label>
-              <input
-                type="number"
+              <select
                 value={filters.zona_id}
                 onChange={(e) => setFilters({...filters, zona_id: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
-                placeholder="Filtro por zona"
-              />
+              >
+                <option value="">Todas las zonas</option>
+                {zonas.map((zona) => (
+                  <option key={zona.id} value={zona.id}>
+                    {zona.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
@@ -250,8 +311,8 @@ const RealtimeTemperatureDashboard: React.FC = () => {
               <thead className="bg-gray-50 dark:bg-neutral-700">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Fundo ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Zona ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Fundo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Zona</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Temperatura</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Fecha</th>
                 </tr>
@@ -260,8 +321,12 @@ const RealtimeTemperatureDashboard: React.FC = () => {
                 {data.map((record) => (
                   <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-neutral-700">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{record.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-300">{record.fundo_id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-300">{record.zona_id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-300">
+                      {record.fundo_nombre || record.fundo_id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-300">
+                      {record.zona_nombre || record.zona_id}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">{record.valor}°C</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-300">
                       {new Date(record.fecha).toLocaleString()}

@@ -2881,7 +2881,7 @@ app.get('/api/public/temperatura-zona', async (req, res) => {
     const { limit = 100, fundo_id, zona_id, start_date, end_date } = req.query;
     console.log('🔍 Backend: Obteniendo datos de temperatura_zona...');
     
-    // Usar consulta directa a la tabla public.temperatura - zona
+    // Usar consulta directa a la tabla public.temperatura - zona (como funcionaba antes)
     let query = supabasePublic
       .from('temperatura-zona')
       .select('*');
@@ -2914,7 +2914,7 @@ app.get('/api/public/temperatura-zona', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    console.log('✅ Backend: Datos de temperatura_zona obtenidos:', data?.length || 0);
+    console.log('✅ Backend: Datos de temperatura obtenidos:', data?.length || 0);
     res.json(data || []);
   } catch (error) {
     console.error('❌ Error in /api/thermo/temperatura-zona:', error);
@@ -3031,6 +3031,56 @@ app.get('/api/public/temperatura-zona/by-zone', async (req, res) => {
     res.json(groupedData);
   } catch (error) {
     console.error('❌ Error in /api/thermo/temperatura-zona/by-zone:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// RUTAS PARA FUNDO Y ZONA (PUBLIC SCHEMA)
+// ============================================================================
+
+// Obtener todos los fundos
+app.get('/api/public/fundo', async (req, res) => {
+  try {
+    console.log('🔍 Backend: Obteniendo fundos...');
+    
+    const { data, error } = await supabasePublic
+      .from('fundo')
+      .select('*')
+      .order('nombre', { ascending: true });
+    
+    if (error) {
+      console.error('❌ Error backend:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    console.log('✅ Backend: Fundos obtenidos:', data?.length || 0);
+    res.json(data || []);
+  } catch (error) {
+    console.error('❌ Error in /api/public/fundo:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Obtener todas las zonas
+app.get('/api/public/zona', async (req, res) => {
+  try {
+    console.log('🔍 Backend: Obteniendo zonas...');
+    
+    const { data, error } = await supabasePublic
+      .from('zona')
+      .select('*')
+      .order('nombre', { ascending: true });
+    
+    if (error) {
+      console.error('❌ Error backend:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    console.log('✅ Backend: Zonas obtenidas:', data?.length || 0);
+    res.json(data || []);
+  } catch (error) {
+    console.error('❌ Error in /api/public/zona:', error);
     res.status(500).json({ error: error.message });
   }
 });

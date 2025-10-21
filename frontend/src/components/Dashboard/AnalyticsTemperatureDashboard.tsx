@@ -11,6 +11,7 @@ interface ZoneData {
 
 interface ZoneStats {
   zona_id: number;
+  zona_nombre?: string;
   count: number;
   avg: number;
   min: number;
@@ -31,6 +32,28 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
     fundo_id: '',
     limit: '100'
   });
+  const [fundos, setFundos] = useState<any[]>([]);
+  const [zonas, setZonas] = useState<any[]>([]);
+
+  const fetchFilterOptions = async () => {
+    try {
+      const [fundosResponse, zonasResponse] = await Promise.all([
+        fetch('http://localhost:3001/api/public/fundo'),
+        fetch('http://localhost:3001/api/public/zona')
+      ]);
+      
+      if (fundosResponse.ok && zonasResponse.ok) {
+        const [fundosData, zonasData] = await Promise.all([
+          fundosResponse.json(),
+          zonasResponse.json()
+        ]);
+        setFundos(fundosData);
+        setZonas(zonasData);
+      }
+    } catch (err) {
+      console.error('Error cargando opciones de filtro:', err);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -49,7 +72,19 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
       }
 
       const data = await response.json();
-      setZoneData(data);
+      
+      // Mapear nombres de zona en los datos agrupados
+      const dataWithNames: { [key: string]: any[] } = {};
+      Object.entries(data).forEach(([zoneId, records]) => {
+        const zonaNombre = zonas.find(z => z.id === parseInt(zoneId))?.nombre || zoneId;
+        const recordsArray = records as any[];
+        dataWithNames[zoneId] = recordsArray.map((record: any) => ({
+          ...record,
+          zona_nombre: zonaNombre
+        }));
+      });
+      
+      setZoneData(dataWithNames);
 
       // Calcular estadísticas por zona
       const stats: ZoneStats[] = Object.entries(data).map(([zoneId, records]) => {
@@ -60,9 +95,13 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
         const min = Math.min(...values);
         const max = Math.max(...values);
         const latest = recordsArray[0]; // El más reciente
+        
+        // Buscar el nombre de la zona
+        const zonaNombre = zonas.find(z => z.id === parseInt(zoneId))?.nombre || zoneId;
 
         return {
           zona_id: parseInt(zoneId),
+          zona_nombre: zonaNombre,
           count,
           avg: Number(avg.toFixed(2)),
           min,
@@ -80,6 +119,10 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchFilterOptions();
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -129,15 +172,20 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
-                Fundo ID
+                Fundo
               </label>
-              <input
-                type="number"
+              <select
                 value={filters.fundo_id}
                 onChange={(e) => setFilters({...filters, fundo_id: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
-                placeholder="Filtro por fundo"
-              />
+              >
+                <option value="">Todos los fundos</option>
+                {fundos.map((fundo) => (
+                  <option key={fundo.id} value={fundo.id}>
+                    {fundo.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
@@ -228,7 +276,7 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
               <thead className="bg-gray-50 dark:bg-neutral-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Zona ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Zona</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Registros</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Promedio</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-neutral-300 uppercase tracking-wider">Mínima</th>
@@ -240,7 +288,9 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
               <tbody className="bg-white dark:bg-neutral-800 divide-y divide-gray-200 dark:divide-neutral-700">
                 {zoneStats.map((stat) => (
                   <tr key={stat.zona_id} className="hover:bg-gray-50 dark:hover:bg-neutral-700">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{stat.zona_id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      {stat.zona_nombre || stat.zona_id}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-neutral-300">{stat.count}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">{stat.avg}°C</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">{stat.min}°C</td>
