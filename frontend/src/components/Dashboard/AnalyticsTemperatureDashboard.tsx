@@ -306,14 +306,27 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
                   Mostrando {startIndex + 1} a {Math.min(endIndex, zoneStats.length)} de {zoneStats.length} registros
                 </div>
                 <div className="flex items-center space-x-2">
+                  {/* Primera página */}
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-neutral-700"
+                    title="Primera página"
+                  >
+                    ««
+                  </button>
+                  
+                  {/* Página anterior */}
                   <button
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className="px-3 py-1 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-neutral-700"
+                    title="Página anterior"
                   >
-                    Anterior
+                    «
                   </button>
                   
+                  {/* Números de página */}
                   <div className="flex items-center space-x-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
@@ -326,6 +339,7 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
                               ? 'bg-green-500 text-white border-green-500'
                               : 'border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-700'
                           }`}
+                          title={`Página ${pageNum}`}
                         >
                           {pageNum}
                         </button>
@@ -333,12 +347,24 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
                     })}
                   </div>
                   
+                  {/* Página siguiente */}
                   <button
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
                     className="px-3 py-1 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-neutral-700"
+                    title="Página siguiente"
                   >
-                    Siguiente
+                    »
+                  </button>
+                  
+                  {/* Última página */}
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-neutral-700"
+                    title="Última página"
+                  >
+                    »»
                   </button>
                 </div>
               </div>

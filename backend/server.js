@@ -2881,10 +2881,11 @@ app.get('/api/public/temperatura-zona', async (req, res) => {
     const { limit = 100, fundo_id, zona_id, start_date, end_date } = req.query;
     console.log('🔍 Backend: Obteniendo datos de temperatura_zona...');
     
-    // Usar consulta directa a la tabla public.temperatura - zona (como funcionaba antes)
-    let query = supabasePublic
-      .from('temperatura-zona')
-      .select('*');
+      // Usar consulta directa a la tabla public.temperatura - zona (como funcionaba antes)
+      let query = supabasePublic
+        .from('temperatura-zona')
+        .select('*')
+        .order('fecha', { ascending: false }); // Ordenar por fecha descendente (más reciente primero)
     
     // Aplicar filtros
     if (fundo_id) {
@@ -2930,7 +2931,8 @@ app.get('/api/public/temperatura-zona/stats', async (req, res) => {
     
     let query = supabasePublic
       .from('temperatura-zona')
-      .select('valor, fecha, zona_id, fundo_id');
+      .select('valor, fecha, zona_id, fundo_id')
+      .order('fecha', { ascending: false }); // Ordenar por fecha descendente (más reciente primero)
     
     // Aplicar filtros
     if (fundo_id) {
@@ -2992,7 +2994,8 @@ app.get('/api/public/temperatura-zona/by-zone', async (req, res) => {
     
     let query = supabasePublic
       .from('temperatura-zona')
-      .select('zona_id, valor, fecha');
+      .select('zona_id, valor, fecha')
+      .order('fecha', { ascending: false }); // Ordenar por fecha descendente (más reciente primero)
     
     // Aplicar filtros
     if (fundo_id) {
