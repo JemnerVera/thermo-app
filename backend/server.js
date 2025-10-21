@@ -723,29 +723,8 @@ app.get('/api/thermo/alerta', async (req, res) => {
     console.log('🔍 Obteniendo alertas de thermo.alerta...');
     const { data, error } = await supabase
       .from('alerta')
-      .select(`
-        *,
-        umbral:umbralid(
-          umbralid,
-          umbral,
-          minimo,
-          maximo,
-          nodoid,
-          tipoid,
-          metricaid,
-          ubicacionid,
-          criticidadid
-        ),
-        medicion:medicionid(
-          medicionid,
-          valor,
-          fecha,
-          nodoid,
-          tipoid,
-          metricaid
-        )
-      `)
-      .order('alertaid', { ascending: false })
+      .select('*')
+      .order('medicionid', { ascending: false })
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
     console.log('✅ Alertas encontradas:', data?.length || 0);

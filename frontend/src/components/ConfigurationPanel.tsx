@@ -23,11 +23,11 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-8 h-8 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-          <h2 className="text-2xl font-bold text-blue-500 font-mono tracking-wider">
+          <h2 className="text-2xl font-bold text-sky-500 font-mono tracking-wider">
             {t('configuration.title')}
           </h2>
         </div>
@@ -42,7 +42,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
       <div className="space-y-6">
         {/* Configuración de Idioma */}
         <div className="bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-blue-500 mb-3 font-mono tracking-wider">
+          <h3 className="text-lg font-bold text-sky-500 mb-3 font-mono tracking-wider">
             🌐 {t('configuration.language')}
           </h3>
           <div className="space-y-3">
@@ -56,8 +56,8 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                   onClick={() => setLanguage(lang.code)}
                   className={`p-3 rounded-lg border-2 transition-all duration-200 font-mono tracking-wider ${
                     language === lang.code
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                      : 'border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-gray-700 dark:text-neutral-300 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10'
+                      ? 'border-sky-500 bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300'
+                      : 'border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-gray-700 dark:text-neutral-300 hover:border-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/10'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -80,7 +80,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
 
         {/* Configuración de Tema */}
         <div className="bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-blue-500 mb-3 font-mono tracking-wider">
+          <h3 className="text-lg font-bold text-sky-500 mb-3 font-mono tracking-wider">
             🎨 {t('configuration.theme')}
           </h3>
           <div className="space-y-3">
@@ -90,7 +90,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
             <div className="flex space-x-3">
               <button
                 onClick={toggleTheme}
-                className="flex-1 p-4 rounded-lg border-2 border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 hover:border-blue-400 transition-all duration-200"
+                className="flex-1 p-4 rounded-lg border-2 border-gray-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 hover:border-sky-400 transition-all duration-200"
               >
                 <div className="flex items-center justify-center space-x-3">
                   {theme === 'dark' ? (
@@ -109,7 +109,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                     </>
                   ) : (
                     <>
-                      <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-6 h-6 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                       </svg>
                       <div className="text-left">
@@ -136,7 +136,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
         {/* Configuración Avanzada */}
         {showAdvanced && (
           <div className="bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
-            <h3 className="text-lg font-bold text-blue-500 mb-3 font-mono tracking-wider">
+            <h3 className="text-lg font-bold text-sky-500 mb-3 font-mono tracking-wider">
               ⚙️ {t('configuration.advanced')}
             </h3>
             <div className="space-y-4">
@@ -150,7 +150,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="w-4 h-4 text-blue-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-sky-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-sky-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-700 dark:text-neutral-300 font-mono">
                       {t('configuration.email_alerts')}
@@ -160,7 +160,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="w-4 h-4 text-blue-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-sky-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-sky-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-700 dark:text-neutral-300 font-mono">
                       {t('configuration.push_notifications')}
@@ -169,7 +169,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                   <label className="flex items-center space-x-3">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 text-blue-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-sky-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-sky-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-700 dark:text-neutral-300 font-mono">
                       {t('configuration.alert_sounds')}
@@ -188,7 +188,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="w-4 h-4 text-blue-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-sky-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-sky-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-700 dark:text-neutral-300 font-mono">
                       {t('configuration.auto_refresh')}
@@ -197,7 +197,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                   <label className="flex items-center space-x-3">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 text-blue-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-sky-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-sky-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-700 dark:text-neutral-300 font-mono">
                       {t('configuration.offline_mode')}
@@ -216,7 +216,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                     <input
                       type="checkbox"
                       defaultChecked
-                      className="w-4 h-4 text-blue-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-sky-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-sky-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-700 dark:text-neutral-300 font-mono">
                       {t('configuration.smooth_animations')}
@@ -225,7 +225,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
                   <label className="flex items-center space-x-3">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 text-blue-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-sky-500 bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 rounded focus:ring-sky-500 focus:ring-2"
                     />
                     <span className="text-sm text-gray-700 dark:text-neutral-300 font-mono">
                       {t('configuration.compact_mode')}
@@ -239,7 +239,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
 
         {/* Información del Sistema */}
         <div className="bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-blue-500 mb-3 font-mono tracking-wider">
+          <h3 className="text-lg font-bold text-sky-500 mb-3 font-mono tracking-wider">
             ℹ️ {t('configuration.system_info')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-mono">
@@ -281,7 +281,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ className = '' 
           <button className="px-4 py-2 bg-gray-300 dark:bg-neutral-700 text-gray-700 dark:text-neutral-300 rounded-lg hover:bg-gray-400 dark:hover:bg-neutral-600 transition-colors font-mono tracking-wider">
             {t('configuration.reset')}
           </button>
-          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-mono tracking-wider">
+          <button className="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors font-mono tracking-wider">
             {t('configuration.save_changes')}
           </button>
         </div>
