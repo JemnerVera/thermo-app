@@ -29,11 +29,18 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
-    fundo_id: '',
-    limit: '100'
+    fundo_id: ''
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 25;
   const [fundos, setFundos] = useState<any[]>([]);
   const [zonas, setZonas] = useState<any[]>([]);
+
+  // Calcular datos paginados
+  const totalPages = Math.ceil(zoneStats.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedStats = zoneStats.slice(startIndex, endIndex);
 
   const fetchFilterOptions = async () => {
     try {
@@ -63,7 +70,7 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
       // Construir query parameters
       const params = new URLSearchParams();
       if (filters.fundo_id) params.append('fundo_id', filters.fundo_id);
-      params.append('limit', filters.limit);
+      params.append('limit', '1000'); // Obtener más datos para paginación
 
       const response = await fetch(`http://localhost:3001/api/public/temperatura-zona/by-zone?${params}`);
       
@@ -126,6 +133,7 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    setCurrentPage(1); // Resetear a la primera página cuando cambien los filtros
   }, [filters]);
 
   if (loading) {
@@ -169,7 +177,7 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
 
         {/* Filtros */}
         <div className="bg-white dark:bg-neutral-800 rounded-lg p-6 mb-8 border border-gray-300 dark:border-neutral-700">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
                 Fundo
@@ -185,21 +193,6 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
                     {fundo.nombre}
                   </option>
                 ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
-                Límite de registros
-              </label>
-              <select
-                value={filters.limit}
-                onChange={(e) => setFilters({...filters, limit: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-neutral-700 dark:text-white"
-              >
-                <option value="50">50 registros</option>
-                <option value="100">100 registros</option>
-                <option value="200">200 registros</option>
-                <option value="500">500 registros</option>
               </select>
             </div>
           </div>
@@ -286,7 +279,7 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-neutral-800 divide-y divide-gray-200 dark:divide-neutral-700">
-                {zoneStats.map((stat) => (
+                {paginatedStats.map((stat) => (
                   <tr key={stat.zona_id} className="hover:bg-gray-50 dark:hover:bg-neutral-700">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {stat.zona_nombre || stat.zona_id}
@@ -304,6 +297,53 @@ const AnalyticsTemperatureDashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+          
+          {/* Barra de navegación */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-neutral-700">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500 dark:text-neutral-400">
+                  Mostrando {startIndex + 1} a {Math.min(endIndex, zoneStats.length)} de {zoneStats.length} registros
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-neutral-700"
+                  >
+                    Anterior
+                  </button>
+                  
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`px-3 py-1 text-sm border rounded-lg ${
+                            currentPage === pageNum
+                              ? 'bg-green-500 text-white border-green-500'
+                              : 'border-gray-300 dark:border-neutral-600 hover:bg-gray-50 dark:hover:bg-neutral-700'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 text-sm border border-gray-300 dark:border-neutral-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-neutral-700"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
