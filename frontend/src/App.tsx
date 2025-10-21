@@ -16,6 +16,7 @@ import { useMainContentLayout } from './hooks/useMainContentLayout';
 import { SystemParametersLazyWithBoundary, usePreloadCriticalComponents } from './components/LazyComponents';
 import AlertasMain from './components/Reportes/AlertasMain';
 import MensajesMain from './components/Reportes/MensajesMain';
+import TemperatureDashboardMain from './components/Dashboard/TemperatureDashboardMain';
 import { JoySenseService } from './services/backend-api';
 import { Pais, Empresa } from './types';
 // import { SkipLink } from './components/Accessibility';
@@ -164,6 +165,7 @@ const AppContentInternal: React.FC = () => {
 
   // Estados para la aplicación
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeDashboard, setActiveDashboard] = useState<'realtime' | 'analytics'>('realtime');
   const [showWelcomeIntegrated, setShowWelcomeIntegrated] = useState<boolean>(true);
 
   // Hook para el layout del sidebar
@@ -502,19 +504,10 @@ return hasFormDataChanges || hasMultipleDataChanges;
       switch (reporteTab) {
         case 'dashboard':
           return (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🌡️</div>
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Thermos Dashboard</h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">Dashboard en desarrollo para sensores térmicos industriales</p>
-                <div className="bg-orange-100 dark:bg-orange-900 border border-orange-300 dark:border-orange-700 rounded-lg p-4 max-w-md">
-                  <p className="text-blue-800 dark:text-blue-200 text-sm">
-                    El dashboard de nodos LoRaWAN ha sido eliminado. 
-                    Se está desarrollando un nuevo dashboard específico para sensores térmicos industriales.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <TemperatureDashboardMain
+              activeDashboard={activeDashboard}
+              onDashboardChange={(dashboard: string) => setActiveDashboard(dashboard as 'realtime' | 'analytics')}
+            />
           );
         case 'alertas':
           return <AlertasMain />;
@@ -628,6 +621,8 @@ return hasFormDataChanges || hasMultipleDataChanges;
           formData={currentFormData}
           multipleData={currentMultipleData}
           massiveFormData={currentMassiveFormData}
+          activeDashboard={activeDashboard}
+          onDashboardChange={(dashboard: string) => setActiveDashboard(dashboard as 'realtime' | 'analytics')}
         />
 
         {/* Área principal con header fijo y contenido scrolleable */}

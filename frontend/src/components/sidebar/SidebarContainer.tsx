@@ -15,6 +15,8 @@ interface SidebarContainerProps {
   formData?: Record<string, any>;
   multipleData?: any[];
   massiveFormData?: Record<string, any>;
+  activeDashboard?: string;
+  onDashboardChange?: (dashboard: string) => void;
 }
 
 const SidebarContainer: React.FC<SidebarContainerProps> = ({
@@ -28,7 +30,9 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({
   onSubTabChange,
   formData = {},
   multipleData = [],
-  massiveFormData = {}
+  massiveFormData = {},
+  activeDashboard,
+  onDashboardChange
 }) => {
   const {
     mainSidebarExpanded,
@@ -96,6 +100,22 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({
             multipleData={multipleData}
             massiveFormData={massiveFormData}
             showThirdLevel={true}
+          />
+        </div>
+      )}
+
+      {/* Tercer sidebar para dashboards (solo cuando está en reportes-dashboard) */}
+      {hasAuxiliarySidebar && activeTab === 'reportes-dashboard' && (
+        <div className="flex-shrink-0 z-30">
+          <AuxiliarySidebar
+            isExpanded={auxiliarySidebarExpanded}
+            onMouseEnter={handleAuxiliarySidebarMouseEnter}
+            onMouseLeave={handleAuxiliarySidebarMouseLeave}
+            activeTab={activeTab}
+            onTabChange={onTabChange}
+            activeDashboard={activeDashboard}
+            onDashboardChange={onDashboardChange}
+            showDashboardThirdLevel={true}
           />
         </div>
       )}
