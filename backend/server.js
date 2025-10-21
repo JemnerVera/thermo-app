@@ -56,6 +56,10 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   db: { schema: dbSchema }
 });
 
+// Cliente de Supabase para schema public (para tablas como temperatura_zona)
+// Sin configuración de schema para acceder a public por defecto
+const supabasePublic = createClient(supabaseUrl, supabaseKey);
+
 // Log de configuración inicial
 console.log('🔧 Configuración de Supabase:');
 console.log(`   URL: ${supabaseUrl}`);
@@ -2828,6 +2832,205 @@ app.get('/api/thermo/mediciones-con-entidad', async (req, res) => {
     }
   } catch (error) {
     console.error('❌ Error in /api/thermo/mediciones-con-entidad:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ===== RUTAS PARA TABLAS PUBLIC (DASHBOARDS) =====
+
+// Ruta de prueba para verificar tablas en schema public
+app.get('/api/public/test-public-tables', async (req, res) => {
+  try {
+    console.log('🔍 Probando acceso a tablas del schema public...');
+    console.log('🔍 Cliente supabasePublic configurado para schema:', 'public (por defecto)');
+    
+    // Probar acceso directo a la tabla temperatura - zona
+    console.log('🔍 Probando acceso directo a tabla temperatura - zona...');
+    const { data: tempData, error: tempError } = await supabasePublic
+      .from('temperatura-zona')
+      .select('*')
+      .limit(1);
+    
+    console.log('🔍 Datos de temperatura - zona:', tempData);
+    console.log('🔍 Error temperatura - zona:', tempError);
+    
+    // Probar con información del schema
+    console.log('🔍 Probando información del schema...');
+    const { data: schemaData, error: schemaError } = await supabasePublic
+      .rpc('exec_sql', { query: "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'" });
+    
+    console.log('🔍 Tablas en schema public (via RPC):', schemaData);
+    console.log('🔍 Error RPC:', schemaError);
+    
+    res.json({
+      temperatura_zona_data: tempData,
+      temperatura_zona_error: tempError,
+      schema_tables: schemaData,
+      schema_error: schemaError,
+      message: 'Prueba de acceso a schema public completada'
+    });
+  } catch (error) {
+    console.error('❌ Error en prueba de schema public:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ruta para temperatura_zona - datos de sensores de temperatura
+app.get('/api/public/temperatura-zona', async (req, res) => {
+  try {
+    const { limit = 100, fundo_id, zona_id, start_date, end_date } = req.query;
+    console.log('🔍 Backend: Obteniendo datos de temperatura_zona...');
+    
+    // Usar consulta directa a la tabla public.temperatura - zona
+    let query = supabasePublic
+      .from('temperatura-zona')
+      .select('*');
+    
+    // Aplicar filtros
+    if (fundo_id) {
+      query = query.eq('fundo_id', fundo_id);
+    }
+    
+    if (zona_id) {
+      query = query.eq('zona_id', zona_id);
+    }
+    
+    if (start_date) {
+      query = query.gte('fecha', start_date);
+    }
+    
+    if (end_date) {
+      query = query.lte('fecha', end_date);
+    }
+    
+    query = query
+      .order('fecha', { ascending: false })
+      .limit(parseInt(limit));
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('❌ Error backend:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    console.log('✅ Backend: Datos de temperatura_zona obtenidos:', data?.length || 0);
+    res.json(data || []);
+  } catch (error) {
+    console.error('❌ Error in /api/thermo/temperatura-zona:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ruta para estadísticas de temperatura por zona
+app.get('/api/public/temperatura-zona/stats', async (req, res) => {
+  try {
+    const { fundo_id, zona_id, start_date, end_date } = req.query;
+    console.log('🔍 Backend: Obteniendo estadísticas de temperatura_zona...');
+    
+    let query = supabasePublic
+      .from('temperatura-zona')
+      .select('valor, fecha, zona_id, fundo_id');
+    
+    // Aplicar filtros
+    if (fundo_id) {
+      query = query.eq('fundo_id', fundo_id);
+    }
+    
+    if (zona_id) {
+      query = query.eq('zona_id', zona_id);
+    }
+    
+    if (start_date) {
+      query = query.gte('fecha', start_date);
+    }
+    
+    if (end_date) {
+      query = query.lte('fecha', end_date);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('❌ Error backend:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    if (!data || data.length === 0) {
+      return res.json({
+        count: 0,
+        avg: 0,
+        min: 0,
+        max: 0,
+        latest: null
+      });
+    }
+    
+    // Calcular estadísticas
+    const valores = data.map(d => parseFloat(d.valor)).filter(v => !isNaN(v));
+    const stats = {
+      count: valores.length,
+      avg: valores.length > 0 ? valores.reduce((a, b) => a + b, 0) / valores.length : 0,
+      min: valores.length > 0 ? Math.min(...valores) : 0,
+      max: valores.length > 0 ? Math.max(...valores) : 0,
+      latest: data[0] // El más reciente por orden de fecha
+    };
+    
+    console.log('✅ Backend: Estadísticas de temperatura calculadas:', stats);
+    res.json(stats);
+  } catch (error) {
+    console.error('❌ Error in /api/thermo/temperatura-zona/stats:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ruta para datos de temperatura por zona (agrupados)
+app.get('/api/public/temperatura-zona/by-zone', async (req, res) => {
+  try {
+    const { fundo_id, start_date, end_date } = req.query;
+    console.log('🔍 Backend: Obteniendo datos de temperatura agrupados por zona...');
+    
+    let query = supabasePublic
+      .from('temperatura-zona')
+      .select('zona_id, valor, fecha');
+    
+    // Aplicar filtros
+    if (fundo_id) {
+      query = query.eq('fundo_id', fundo_id);
+    }
+    
+    if (start_date) {
+      query = query.gte('fecha', start_date);
+    }
+    
+    if (end_date) {
+      query = query.lte('fecha', end_date);
+    }
+    
+    query = query.order('fecha', { ascending: false });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('❌ Error backend:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    // Agrupar por zona_id
+    const groupedData = {};
+    if (data) {
+      data.forEach(item => {
+        if (!groupedData[item.zona_id]) {
+          groupedData[item.zona_id] = [];
+        }
+        groupedData[item.zona_id].push(item);
+      });
+    }
+    
+    console.log('✅ Backend: Datos agrupados por zona obtenidos:', Object.keys(groupedData).length, 'zonas');
+    res.json(groupedData);
+  } catch (error) {
+    console.error('❌ Error in /api/thermo/temperatura-zona/by-zone:', error);
     res.status(500).json({ error: error.message });
   }
 });
