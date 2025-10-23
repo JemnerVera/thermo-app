@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 import { useGlobalFilterEffect } from './useGlobalFilterEffect';
 
 export interface TableDataState {
@@ -62,35 +62,35 @@ export const useTableData = (
       // Usar el método específico si existe, sino usar getTableData genérico
       switch (tableName) {
         case 'pais':
-          tableData = await JoySenseService.getPaises();
+          tableData = await ThermosService.getPaises();
           break;
         case 'empresa':
-          tableData = await JoySenseService.getEmpresas();
+          tableData = await ThermosService.getEmpresas();
           break;
         case 'fundo':
-          tableData = await JoySenseService.getFundos();
+          tableData = await ThermosService.getFundos();
           break;
         case 'ubicacion':
-          tableData = await JoySenseService.getUbicaciones();
+          tableData = await ThermosService.getUbicaciones();
           break;
         case 'localizacion':
-          tableData = await JoySenseService.getLocalizaciones();
+          tableData = await ThermosService.getLocalizaciones();
           break;
         case 'entidad':
-          tableData = await JoySenseService.getEntidades();
+          tableData = await ThermosService.getEntidades();
           break;
         case 'tipo':
-          tableData = await JoySenseService.getTipos();
+          tableData = await ThermosService.getTipos();
           break;
         case 'nodo':
-          tableData = await JoySenseService.getNodos();
+          tableData = await ThermosService.getNodos();
           break;
         case 'metrica':
-          tableData = await JoySenseService.getMetricas();
+          tableData = await ThermosService.getMetricas();
           break;
         default:
           // Para tablas que no tienen método específico, usar getTableData genérico
-          tableData = await JoySenseService.getTableData(tableName);
+          tableData = await ThermosService.getTableData(tableName);
           break;
       }
 

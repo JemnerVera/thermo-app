@@ -3,7 +3,7 @@
 // ============================================================================
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 import { Pais, Empresa, Fundo, Ubicacion } from '../types';
 import SeparateCharts from './DashboardCharts';
 
@@ -161,7 +161,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
   const loadPaises = async () => {
     try {
       setLoading(true);
-      const data = await JoySenseService.getPaises();
+      const data = await ThermosService.getPaises();
       setPaises(data);
     } catch (error) {
       console.error('Error loading paises:', error);
@@ -172,7 +172,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
   const loadMetricas = async () => {
     try {
-      const data = await JoySenseService.getMetricas();
+      const data = await ThermosService.getMetricas();
       setMetricas(data);
     } catch (error) {
       console.error('Error loading metricas:', error);
@@ -181,7 +181,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
   const loadNodos = async () => {
     try {
-      const data = await JoySenseService.getNodos();
+      const data = await ThermosService.getNodos();
       setNodos(data);
     } catch (error) {
       console.error('Error loading nodos:', error);
@@ -190,7 +190,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
   const loadTipos = async () => {
     try {
-      const data = await JoySenseService.getTipos();
+      const data = await ThermosService.getTipos();
       setTipos(data);
     } catch (error) {
       console.error('Error loading tipos:', error);
@@ -199,7 +199,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
   const loadEntidades = async (ubicacionId?: number) => {
     try {
-      const data = await JoySenseService.getEntidades(ubicacionId);
+      const data = await ThermosService.getEntidades(ubicacionId);
       setEntidades(data);
     } catch (error) {
       console.error('Error loading entidades:', error);
@@ -223,7 +223,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
     try {
       setLoading(true);
-      const data = await JoySenseService.getEmpresasByPais(pais.paisid);
+      const data = await ThermosService.getEmpresasByPais(pais.paisid);
       setEmpresas(data);
     } catch (error) {
       console.error('Error loading empresas:', error);
@@ -243,7 +243,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
     try {
       setLoading(true);
-      const data = await JoySenseService.getFundosByEmpresa(empresa.empresaid);
+      const data = await ThermosService.getFundosByEmpresa(empresa.empresaid);
       setFundos(data);
     } catch (error) {
       console.error('Error loading fundos:', error);
@@ -261,7 +261,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
     try {
       setLoading(true);
-      const data = await JoySenseService.getUbicacionesByFundo(fundo.fundoid);
+      const data = await ThermosService.getUbicacionesByFundo(fundo.fundoid);
       setUbicaciones(data);
     } catch (error) {
       console.error('Error loading ubicaciones:', error);
@@ -282,7 +282,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
     try {
       setLoading(true);
       // Carga inicial rápida: solo 100 mediciones
-      const data = await JoySenseService.getMediciones({
+      const data = await ThermosService.getMediciones({
         ubicacionId,
         entidadId: selectedEntidad?.entidadid,
         limit: 100 // Carga rápida inicial
@@ -296,7 +296,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
 
       // Obtener el conteo total para mostrar cuántas hay disponibles
       try {
-        const countData = await JoySenseService.getMediciones({
+        const countData = await ThermosService.getMediciones({
           ubicacionId,
           entidadId: selectedEntidad?.entidadid,
           countOnly: true
@@ -321,7 +321,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
     
     try {
       setLoadingMore(true);
-      const data = await JoySenseService.getMediciones({
+      const data = await ThermosService.getMediciones({
         ubicacionId: selectedUbicacion.ubicacionid,
         startDate,
         endDate,
@@ -346,7 +346,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
       setLoading(true);
       
       // Obtener datos filtrados
-      const data = await JoySenseService.getMediciones({
+      const data = await ThermosService.getMediciones({
         ubicacionId: selectedUbicacion.ubicacionid,
         startDate,
         endDate,
@@ -363,7 +363,7 @@ const DynamicHierarchy: React.FC<DynamicHierarchyProps> = memo(() => {
       
       // Obtener el conteo actualizado con los filtros
       try {
-        const countData = await JoySenseService.getMediciones({
+        const countData = await ThermosService.getMediciones({
           ubicacionId: selectedUbicacion.ubicacionid,
           startDate,
           endDate,

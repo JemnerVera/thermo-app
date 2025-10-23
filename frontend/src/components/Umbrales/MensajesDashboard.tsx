@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 
 interface Mensaje {
   alertaid: number;
@@ -92,14 +92,14 @@ const MensajesDashboard: React.FC = () => {
         criticidadesData,
         medicionesData
       ] = await Promise.all([
-        JoySenseService.getTableData('mensaje', 1000),
-        JoySenseService.getTableData('contacto', 1000),
-        JoySenseService.getTableData('medio', 1000),
-        JoySenseService.getTableData('usuario', 1000),
-        JoySenseService.getTableData('alerta', 1000),
-        JoySenseService.getTableData('umbral', 1000),
-        JoySenseService.getTableData('criticidad', 1000),
-        JoySenseService.getTableData('medicion', 1000)
+        ThermosService.getTableData('mensaje', 1000),
+        ThermosService.getTableData('contacto', 1000),
+        ThermosService.getTableData('medio', 1000),
+        ThermosService.getTableData('usuario', 1000),
+        ThermosService.getTableData('alerta', 1000),
+        ThermosService.getTableData('umbral', 1000),
+        ThermosService.getTableData('criticidad', 1000),
+        ThermosService.getTableData('medicion', 1000)
       ]);
 
       console.log('📊 Datos cargados:', {

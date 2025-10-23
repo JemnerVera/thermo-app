@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 interface Nodo {
   nodoid: number;
@@ -86,13 +86,13 @@ export const useReferenceData = () => {
         fundosResponse,
         empresasResponse
       ] = await Promise.all([
-        JoySenseService.getTableData('nodo', 1000),
-        JoySenseService.getTableData('metrica', 1000),
-        JoySenseService.getTableData('tipo', 1000),
-        JoySenseService.getTableData('criticidad', 1000),
-        JoySenseService.getTableData('ubicacion', 1000),
-        JoySenseService.getTableData('fundo', 1000),
-        JoySenseService.getTableData('empresa', 1000)
+        ThermosService.getTableData('nodo', 1000),
+        ThermosService.getTableData('metrica', 1000),
+        ThermosService.getTableData('tipo', 1000),
+        ThermosService.getTableData('criticidad', 1000),
+        ThermosService.getTableData('ubicacion', 1000),
+        ThermosService.getTableData('fundo', 1000),
+        ThermosService.getTableData('empresa', 1000)
       ]);
 
       // Extraer datos de cada respuesta

@@ -1,12 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
 import { useInsertOperations } from '../useInsertOperations';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 import { backendAPI } from '../../services/backend-api';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Mock de JoySenseService
+// Mock de ThermosService
 jest.mock('../../services/backend-api');
-const mockJoySenseService = JoySenseService as jest.Mocked<typeof JoySenseService>;
+const mockThermosService = ThermosService as jest.Mocked<typeof ThermosService>;
 const mockBackendAPI = backendAPI as jest.Mocked<typeof backendAPI>;
 
 // Mock de useAuth

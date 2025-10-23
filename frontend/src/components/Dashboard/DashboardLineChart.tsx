@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 
 interface DashboardLineChartProps {
   entidadId: number | null;
@@ -53,7 +53,7 @@ export const DashboardLineChart: React.FC<DashboardLineChartProps> = ({
       setError(null);
 
       // Obtener datos reales de mediciones del backend
-      const medicionesResponse = await JoySenseService.getMediciones({
+      const medicionesResponse = await ThermosService.getMediciones({
         entidadId,
         ubicacionId,
         startDate,
@@ -68,8 +68,8 @@ export const DashboardLineChart: React.FC<DashboardLineChartProps> = ({
       }
 
       // Obtener métricas y nodos para procesar los datos
-      const metricasData = await JoySenseService.getTableData('metricasensor');
-      const nodosData = await JoySenseService.getTableData('nodo');
+      const metricasData = await ThermosService.getTableData('metricasensor');
+      const nodosData = await ThermosService.getTableData('nodo');
 
 
       // Guardar métricas y nodos en el estado

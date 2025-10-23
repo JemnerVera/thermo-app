@@ -1,15 +1,15 @@
 import { renderHook, act } from '@testing-library/react';
 import { useSystemParametersCRUD } from '../useSystemParametersCRUD';
 import { useAuth } from '../../contexts/AuthContext';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 
 // Mock de useAuth
 jest.mock('../../contexts/AuthContext');
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
-// Mock de JoySenseService
+// Mock de ThermosService
 jest.mock('../../services/backend-api');
-const mockJoySenseService = JoySenseService as jest.Mocked<typeof JoySenseService>;
+const mockThermosService = ThermosService as jest.Mocked<typeof ThermosService>;
 
 // Mock de hooks
 jest.mock('../useInsertOperations');
@@ -61,7 +61,7 @@ describe('useSystemParametersCRUD', () => {
   });
 
   it('debe manejar eliminación correctamente', async () => {
-    mockJoySenseService.deleteRecord.mockResolvedValue(undefined);
+    mockThermosService.deleteRecord.mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useSystemParametersCRUD());
 
@@ -71,7 +71,7 @@ describe('useSystemParametersCRUD', () => {
       expect(response.message).toContain('eliminado exitosamente');
     });
 
-    expect(mockJoySenseService.deleteRecord).toHaveBeenCalledWith('pais', 1);
+    expect(mockThermosService.deleteRecord).toHaveBeenCalledWith('pais', 1);
   });
 
   it('debe manejar errores de inserción', async () => {
@@ -102,7 +102,7 @@ describe('useSystemParametersCRUD', () => {
   });
 
   it('debe manejar errores de eliminación', async () => {
-    mockJoySenseService.deleteRecord.mockRejectedValue(new Error('Error de eliminación'));
+    mockThermosService.deleteRecord.mockRejectedValue(new Error('Error de eliminación'));
 
     const { result } = renderHook(() => useSystemParametersCRUD());
 

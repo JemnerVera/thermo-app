@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { JoySenseService } from '../services/backend-api'
+import { ThermosService } from '../services/backend-api'
 
 interface ContactFormProps {
   userId: number
@@ -33,7 +33,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
 
   const loadCodigosTelefonicos = async () => {
     try {
-      const data = await JoySenseService.getCodigosTelefonicos()
+      const data = await ThermosService.getCodigosTelefonicos()
       setCodigosTelefonicos(data)
     } catch (err) {
       console.error('Error cargando códigos telefónicos:', err)
@@ -73,7 +73,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           datemodified: new Date().toISOString()
         }
 
-        const correoResult = await JoySenseService.insertCorreo(correoData)
+        const correoResult = await ThermosService.insertCorreo(correoData)
         
         // Insertar contacto
         const contactoData = {
@@ -86,7 +86,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           datemodified: new Date().toISOString()
         }
 
-        await JoySenseService.insertContacto(contactoData)
+        await ThermosService.insertContacto(contactoData)
 
       } else if (contactType === 'telefono') {
         if (!selectedCodigo) {
@@ -113,7 +113,7 @@ export const ContactForm: React.FC<ContactFormProps> = ({
           datemodified: new Date().toISOString()
         }
 
-        await JoySenseService.insertContacto(contactoData)
+        await ThermosService.insertContacto(contactoData)
       }
 
       onSuccess?.()

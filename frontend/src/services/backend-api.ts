@@ -125,8 +125,8 @@ let currentSchema = 'public';
 let schemaCache: string | null = null;
 let schemaDetectionPromise: Promise<string> | null = null;
 
-// Servicios para JoySense Dashboard usando Backend API
-export class JoySenseService {
+// Servicios para Thermos Dashboard usando Backend API
+export class ThermosService {
   
   // Detectar schema disponible (via Backend API)
   static async detectSchema(): Promise<string> {

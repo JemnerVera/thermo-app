@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 interface Umbral {
   umbralid: number;
@@ -42,7 +42,7 @@ export const useUmbrales = () => {
       setError(null);
       setMessage(null);
       
-      const response = await JoySenseService.getTableData('umbral');
+      const response = await ThermosService.getTableData('umbral');
       
       // Extraer el array de datos de la respuesta
       let data: Umbral[] = [];
@@ -93,7 +93,7 @@ export const useUmbrales = () => {
         datecreated: new Date().toISOString()
       };
 
-      const response = await JoySenseService.insertTableRow('umbral', umbralData);
+      const response = await ThermosService.insertTableRow('umbral', umbralData);
       
       if (response.error) throw new Error(response.error);
       
@@ -128,7 +128,7 @@ export const useUmbrales = () => {
         datemodified: new Date().toISOString()
       };
 
-      const response = await JoySenseService.updateTableRow('umbral', umbralid.toString(), umbralData);
+      const response = await ThermosService.updateTableRow('umbral', umbralid.toString(), umbralData);
       
       if (response.error) throw new Error(response.error);
       
@@ -150,7 +150,7 @@ export const useUmbrales = () => {
       setError(null);
       setMessage(null);
       
-      const response = await JoySenseService.deleteTableRow('umbral', umbralid.toString());
+      const response = await ThermosService.deleteTableRow('umbral', umbralid.toString());
       
       if (response.error) throw new Error(response.error);
       

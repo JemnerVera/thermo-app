@@ -2,7 +2,7 @@
 // IMPORTS
 // ============================================================================
 
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 // ============================================================================
 // INTERFACES & TYPES
@@ -1556,7 +1556,7 @@ const validatePaisUpdate = async (
 const checkPaisDependencies = async (paisid: number): Promise<boolean> => {
   try {
     // Verificar en tabla empresa
-    const empresas = await JoySenseService.getEmpresas();
+    const empresas = await ThermosService.getEmpresas();
     return empresas.some(empresa => empresa.paisid === paisid);
   } catch (error) {
     console.error('Error checking pais dependencies:', error);
@@ -1658,7 +1658,7 @@ const validateEmpresaUpdate = async (
 const checkEmpresaDependencies = async (empresaid: number): Promise<boolean> => {
   try {
     // Verificar en tabla fundo
-    const fundos = await JoySenseService.getFundos();
+    const fundos = await ThermosService.getFundos();
     return fundos.some(fundo => fundo.empresaid === empresaid);
   } catch (error) {
     console.error('Error checking empresa dependencies:', error);
@@ -1761,7 +1761,7 @@ return {
 const checkFundoDependencies = async (fundoid: number): Promise<boolean> => {
   try {
     // Verificar en tabla ubicacion
-    const ubicaciones = await JoySenseService.getUbicaciones();
+    const ubicaciones = await ThermosService.getUbicaciones();
     return ubicaciones.some(ubicacion => ubicacion.fundoid === fundoid);
   } catch (error) {
     console.error('Error checking fundo dependencies:', error);
@@ -1839,7 +1839,7 @@ const validateUbicacionUpdate = async (
 const checkUbicacionDependencies = async (ubicacionid: number): Promise<boolean> => {
   try {
     // Verificar en tabla localizacion
-    const localizaciones = await JoySenseService.getLocalizaciones();
+    const localizaciones = await ThermosService.getLocalizaciones();
     return localizaciones.some(localizacion => localizacion.ubicacionid === ubicacionid);
   } catch (error) {
     console.error('Error checking ubicacion dependencies:', error);
@@ -2004,13 +2004,13 @@ const validateEntidadUpdate = async (
 const checkEntidadDependencies = async (entidadid: number): Promise<boolean> => {
   try {
     // Verificar en tabla tipo
-    const tipos = await JoySenseService.getTipos();
+    const tipos = await ThermosService.getTipos();
     const hasTipos = tipos.some(tipo => tipo.entidadid === entidadid);
     
     if (hasTipos) return true;
     
     // Verificar en tabla localizacion
-    const localizaciones = await JoySenseService.getLocalizaciones();
+    const localizaciones = await ThermosService.getLocalizaciones();
     const hasLocalizaciones = localizaciones.some(localizacion => localizacion.entidadid === entidadid);
     
     return hasLocalizaciones;
@@ -2090,19 +2090,19 @@ const validateTipoUpdate = async (
 const checkTipoDependencies = async (tipoid: number): Promise<boolean> => {
   try {
     // Verificar en tabla sensor
-    const sensores = await JoySenseService.getTableData('sensor');
+    const sensores = await ThermosService.getTableData('sensor');
     const hasSensores = sensores.some(sensor => sensor.tipoid === tipoid);
     
     if (hasSensores) return true;
     
     // Verificar en tabla metricasensor
-    const metricasensores = await JoySenseService.getTableData('metricasensor');
+    const metricasensores = await ThermosService.getTableData('metricasensor');
     const hasMetricasensores = metricasensores.some(metricasensor => metricasensor.tipoid === tipoid);
     
     if (hasMetricasensores) return true;
     
     // Verificar en tabla umbral
-    const umbrales = await JoySenseService.getTableData('umbral');
+    const umbrales = await ThermosService.getTableData('umbral');
     const hasUmbrales = umbrales.some(umbral => umbral.tipoid === tipoid);
     
     return hasUmbrales;
@@ -2191,19 +2191,19 @@ const validateNodoUpdate = async (
 const checkNodoDependencies = async (nodoid: number): Promise<boolean> => {
   try {
     // Verificar en tabla sensor
-    const sensores = await JoySenseService.getTableData('sensor');
+    const sensores = await ThermosService.getTableData('sensor');
     const hasSensores = sensores.some(sensor => sensor.nodoid === nodoid);
     
     if (hasSensores) return true;
     
     // Verificar en tabla metricasensor
-    const metricasensores = await JoySenseService.getTableData('metricasensor');
+    const metricasensores = await ThermosService.getTableData('metricasensor');
     const hasMetricasensores = metricasensores.some(metricasensor => metricasensor.nodoid === nodoid);
     
     if (hasMetricasensores) return true;
     
     // Verificar en tabla localizacion
-    const localizaciones = await JoySenseService.getLocalizaciones();
+    const localizaciones = await ThermosService.getLocalizaciones();
     const hasLocalizaciones = localizaciones.some(localizacion => localizacion.nodoid === nodoid);
     
     return hasLocalizaciones;
@@ -2284,13 +2284,13 @@ const validateMetricaUpdate = async (
 const checkMetricaDependencies = async (metricaid: number): Promise<boolean> => {
   try {
     // Verificar en tabla metricasensor
-    const metricasensores = await JoySenseService.getTableData('metricasensor');
+    const metricasensores = await ThermosService.getTableData('metricasensor');
     const hasMetricasensores = metricasensores.some(metricasensor => metricasensor.metricaid === metricaid);
     
     if (hasMetricasensores) return true;
     
     // Verificar en tabla umbral
-    const umbrales = await JoySenseService.getTableData('umbral');
+    const umbrales = await ThermosService.getTableData('umbral');
     const hasUmbrales = umbrales.some(umbral => umbral.metricaid === metricaid);
     
     return hasUmbrales;
@@ -2629,13 +2629,13 @@ const validateUmbralUpdate = async (
 const checkUmbralDependencies = async (umbralid: number): Promise<boolean> => {
   try {
     // Verificar en tabla perfilumbral
-    const perfilumbrales = await JoySenseService.getTableData('perfilumbral');
+    const perfilumbrales = await ThermosService.getTableData('perfilumbral');
     const hasPerfilumbrales = perfilumbrales.some(perfilumbral => perfilumbral.umbralid === umbralid);
     
     if (hasPerfilumbrales) return true;
     
     // Verificar en tabla alerta
-    const alertas = await JoySenseService.getTableData('alerta');
+    const alertas = await ThermosService.getTableData('alerta');
     const hasAlertas = alertas.some(alerta => alerta.umbralid === umbralid);
     
     return hasAlertas;
@@ -2787,13 +2787,13 @@ const validateCriticidadUpdate = async (
 const checkCriticidadDependencies = async (criticidadid: number): Promise<boolean> => {
   try {
     // Verificar en tabla umbral
-    const umbrales = await JoySenseService.getTableData('umbral');
+    const umbrales = await ThermosService.getTableData('umbral');
     const hasUmbrales = umbrales.some(umbral => umbral.criticidadid === criticidadid);
     
     if (hasUmbrales) return true;
     
     // Verificar en tabla alerta
-    const alertas = await JoySenseService.getTableData('alerta');
+    const alertas = await ThermosService.getTableData('alerta');
     const hasAlertas = alertas.some(alerta => alerta.criticidadid === criticidadid);
     
     return hasAlertas;
@@ -2864,7 +2864,7 @@ const validateMedioUpdate = async (
 const checkMedioDependencies = async (medioid: number): Promise<boolean> => {
   try {
     // Verificar en tabla contacto
-    const contactos = await JoySenseService.getTableData('contacto');
+    const contactos = await ThermosService.getTableData('contacto');
     const hasContactos = contactos.some(contacto => contacto.medioid === medioid);
     
     return hasContactos;
@@ -3169,25 +3169,25 @@ const validateUsuarioUpdate = async (
 const checkUsuarioDependencies = async (usuarioid: number): Promise<boolean> => {
   try {
     // Verificar en tabla usuarioperfil
-    const usuarioperfiles = await JoySenseService.getTableData('usuarioperfil');
+    const usuarioperfiles = await ThermosService.getTableData('usuarioperfil');
     const hasUsuarioperfiles = usuarioperfiles.some(usuarioperfil => usuarioperfil.usuarioid === usuarioid);
     
     if (hasUsuarioperfiles) return true;
     
     // Verificar en tabla contacto
-    const contactos = await JoySenseService.getTableData('contacto');
+    const contactos = await ThermosService.getTableData('contacto');
     const hasContactos = contactos.some(contacto => contacto.usuarioid === usuarioid);
     
     if (hasContactos) return true;
     
     // Verificar en tabla audit_log_umbral
-    const auditLogs = await JoySenseService.getTableData('audit_log_umbral');
+    const auditLogs = await ThermosService.getTableData('audit_log_umbral');
     const hasAuditLogs = auditLogs.some(auditLog => auditLog.modified_by === usuarioid);
     
     if (hasAuditLogs) return true;
     
     // Verificar en tabla alerta
-    const alertas = await JoySenseService.getTableData('alerta');
+    const alertas = await ThermosService.getTableData('alerta');
     const hasAlertas = alertas.some(alerta => alerta.usuarioid === usuarioid);
     
     return hasAlertas;
@@ -3306,13 +3306,13 @@ const validatePerfilUpdate = async (
 const checkPerfilDependencies = async (perfilid: number): Promise<boolean> => {
   try {
     // Verificar en tabla usuarioperfil
-    const usuarioperfiles = await JoySenseService.getTableData('usuarioperfil');
+    const usuarioperfiles = await ThermosService.getTableData('usuarioperfil');
     const hasUsuarioperfiles = usuarioperfiles.some(usuarioperfil => usuarioperfil.perfilid === perfilid);
     
     if (hasUsuarioperfiles) return true;
     
     // Verificar en tabla perfilumbral
-    const perfilumbrales = await JoySenseService.getTableData('perfilumbral');
+    const perfilumbrales = await ThermosService.getTableData('perfilumbral');
     const hasPerfilumbrales = perfilumbrales.some(perfilumbral => perfilumbral.perfilid === perfilid);
     
     return hasPerfilumbrales;

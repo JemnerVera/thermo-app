@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 import { ColumnInfo } from '../types/systemParameters';
 
 /**
@@ -42,7 +42,7 @@ export const useTableDataManagement = () => {
    */
   const loadUserData = useCallback(async () => {
     try {
-      const response = await JoySenseService.getTableData('usuario', 1000);
+      const response = await ThermosService.getTableData('usuario', 1000);
       const data = Array.isArray(response) ? response : ((response as any)?.data || []);
       
       
@@ -79,24 +79,24 @@ export const useTableDataManagement = () => {
         contactosResponse,
         correosResponse
       ] = await Promise.all([
-        JoySenseService.getTableData('pais', 500),
-        JoySenseService.getTableData('empresa', 500),
-        JoySenseService.getTableData('fundo', 500),
-        JoySenseService.getTableData('ubicacion', 500),
-        JoySenseService.getTableData('localizacion', 500),
-        JoySenseService.getTableData('entidad', 500),
-        // JoySenseService.getTableData('nodo', 500), // Eliminado - tabla no existe en Thermos
-        JoySenseService.getTableData('tipo', 500),
-        JoySenseService.getTableData('metrica', 500),
-        JoySenseService.getTableData('criticidad', 500),
-        JoySenseService.getTableData('perfil', 500),
-        JoySenseService.getTableData('umbral', 500),
-        JoySenseService.getTableData('usuario', 500),
-        JoySenseService.getTableData('sensor', 500),
-        JoySenseService.getTableData('metricasensor', 500),
-        JoySenseService.getTableData('perfilumbral', 500),
-        JoySenseService.getTableData('contacto', 500),
-        JoySenseService.getTableData('correo', 500)
+        ThermosService.getTableData('pais', 500),
+        ThermosService.getTableData('empresa', 500),
+        ThermosService.getTableData('fundo', 500),
+        ThermosService.getTableData('ubicacion', 500),
+        ThermosService.getTableData('localizacion', 500),
+        ThermosService.getTableData('entidad', 500),
+        // ThermosService.getTableData('nodo', 500), // Eliminado - tabla no existe en Thermos
+        ThermosService.getTableData('tipo', 500),
+        ThermosService.getTableData('metrica', 500),
+        ThermosService.getTableData('criticidad', 500),
+        ThermosService.getTableData('perfil', 500),
+        ThermosService.getTableData('umbral', 500),
+        ThermosService.getTableData('usuario', 500),
+        ThermosService.getTableData('sensor', 500),
+        ThermosService.getTableData('metricasensor', 500),
+        ThermosService.getTableData('perfilumbral', 500),
+        ThermosService.getTableData('contacto', 500),
+        ThermosService.getTableData('correo', 500)
       ]);
 
       // Procesar respuestas
@@ -190,7 +190,7 @@ export const useTableDataManagement = () => {
         return;
       }
       
-      const cols = await JoySenseService.getTableColumns(selectedTable);
+      const cols = await ThermosService.getTableColumns(selectedTable);
       
       // Verificar si la llamada fue cancelada después de recibir las columnas
       if (abortController.signal.aborted) {
@@ -264,7 +264,7 @@ export const useTableDataManagement = () => {
         return;
       }
       
-      const dataResponse = await JoySenseService.getTableData(selectedTable, 1000);
+      const dataResponse = await ThermosService.getTableData(selectedTable, 1000);
       
       // Verificar si la llamada fue cancelada después de recibir los datos
       if (abortController.signal.aborted) {
@@ -296,7 +296,7 @@ export const useTableDataManagement = () => {
       // Cargar datos de sensores si estamos en el contexto de metricasensor o umbral
       if (selectedTable === 'metricasensor' || selectedTable === 'umbral') {
         try {
-          const sensorResponse = await JoySenseService.getTableData('sensor', 1000);
+          const sensorResponse = await ThermosService.getTableData('sensor', 1000);
           const sensorData = Array.isArray(sensorResponse) ? sensorResponse : ((sensorResponse as any)?.data || []);
           setSensorsData(sensorData);
         } catch (error) {

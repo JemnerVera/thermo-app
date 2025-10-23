@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 
 // Tipos para el estado de los sensores
 interface SensorEstado {
@@ -70,31 +70,31 @@ const useSensorData = () => {
         ubicaciones,
         criticidades
       ] = await Promise.all([
-        JoySenseService.getTableData('metricasensor', 1000).then(data => {
+        ThermosService.getTableData('metricasensor', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('umbral', 1000).then(data => {
+        ThermosService.getTableData('umbral', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('alerta', 1000).then(data => {
+        ThermosService.getTableData('alerta', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('medicion', 1000).then(data => {
+        ThermosService.getTableData('medicion', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('nodo', 1000).then(data => {
+        ThermosService.getTableData('nodo', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('metrica', 1000).then(data => {
+        ThermosService.getTableData('metrica', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('tipo', 1000).then(data => {
+        ThermosService.getTableData('tipo', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('ubicacion', 1000).then(data => {
+        ThermosService.getTableData('ubicacion', 1000).then(data => {
           return data;
         }),
-        JoySenseService.getTableData('criticidad', 1000).then(data => {
+        ThermosService.getTableData('criticidad', 1000).then(data => {
           return data;
         })
       ]);

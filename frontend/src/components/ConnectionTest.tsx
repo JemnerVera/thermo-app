@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 const ConnectionTest: React.FC = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -22,17 +22,17 @@ const ConnectionTest: React.FC = () => {
       
       // 2. Listar tablas para schema sense
       const tables: {[key: string]: string[]} = {};
-      const schemaTables = await JoySenseService.listTables('sense');
+      const schemaTables = await ThermosService.listTables('sense');
       tables['sense'] = schemaTables;
       setAvailableTables(tables);
       
       // 3. Probar conexión
-      const connected = await JoySenseService.testConnection();
+      const connected = await ThermosService.testConnection();
       setIsConnected(connected);
       
       if (connected) {
         // 4. Obtener información de tablas
-        const info = await JoySenseService.getTableInfo();
+        const info = await ThermosService.getTableInfo();
         setTableInfo(info);
       }
       

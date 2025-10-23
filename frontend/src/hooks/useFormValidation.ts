@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { validateTableData, validateTableUpdate, ValidationResult, EnhancedValidationResult } from '../utils/formValidation';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 export interface UseFormValidationReturn {
   validateInsert: (formData: Record<string, any>) => Promise<EnhancedValidationResult>;
@@ -51,7 +51,7 @@ export const useFormValidation = (selectedTable: string): UseFormValidationRetur
     
     try {
       // Obtener datos existentes para validación de duplicados
-      const existingData = await JoySenseService.getTableData(selectedTable);
+      const existingData = await ThermosService.getTableData(selectedTable);
       
       const result = await validateTableUpdate(selectedTable, formData, originalData, existingData);
       
@@ -83,64 +83,64 @@ export const useFormValidation = (selectedTable: string): UseFormValidationRetur
         switch (tableName) {
           case 'pais':
             // Verificar si hay empresas que referencian este país
-            const empresas = await JoySenseService.getTableData('empresa');
+            const empresas = await ThermosService.getTableData('empresa');
             return empresas.some(empresa => empresa.paisid === id);
             
           case 'empresa':
             // Verificar si hay fundos que referencian esta empresa
-            const fundos = await JoySenseService.getTableData('fundo');
+            const fundos = await ThermosService.getTableData('fundo');
             return fundos.some(fundo => fundo.empresaid === id);
             
           case 'fundo':
             // Verificar si hay ubicaciones que referencian este fundo
-            const ubicaciones = await JoySenseService.getTableData('ubicacion');
+            const ubicaciones = await ThermosService.getTableData('ubicacion');
             return ubicaciones.some(ubicacion => ubicacion.fundoid === id);
             
           case 'ubicacion':
             // Verificar si hay localizaciones que referencian esta ubicación
-            const localizaciones = await JoySenseService.getTableData('localizacion');
+            const localizaciones = await ThermosService.getTableData('localizacion');
             return localizaciones.some(localizacion => localizacion.ubicacionid === id);
             
           case 'entidad':
             // Verificar si hay tipos que referencian esta entidad
-            const tipos = await JoySenseService.getTableData('tipo');
+            const tipos = await ThermosService.getTableData('tipo');
             return tipos.some(tipo => tipo.entidadid === id);
             
           case 'tipo':
             // Verificar si hay sensores que referencian este tipo
-            const sensores = await JoySenseService.getTableData('sensor');
+            const sensores = await ThermosService.getTableData('sensor');
             return sensores.some(sensor => sensor.tipoid === id);
             
           case 'nodo':
             // Verificar si hay sensores que referencian este nodo
-            const sensoresNodo = await JoySenseService.getTableData('sensor');
+            const sensoresNodo = await ThermosService.getTableData('sensor');
             return sensoresNodo.some(sensor => sensor.nodoid === id);
             
           case 'metrica':
             // Verificar si hay umbrales que referencian esta métrica
-            const umbrales = await JoySenseService.getTableData('umbral');
+            const umbrales = await ThermosService.getTableData('umbral');
             return umbrales.some(umbral => umbral.metricaid === id);
             
           case 'umbral':
             // Verificar si hay perfilumbrales que referencian este umbral
-            const perfilumbrales = await JoySenseService.getTableData('perfilumbral');
+            const perfilumbrales = await ThermosService.getTableData('perfilumbral');
             return perfilumbrales.some(perfilumbral => perfilumbral.umbralid === id);
             
           case 'criticidad':
             // Verificar si hay umbrales que referencian esta criticidad
-            const umbralesCriticidad = await JoySenseService.getTableData('umbral');
+            const umbralesCriticidad = await ThermosService.getTableData('umbral');
             return umbralesCriticidad.some(umbral => umbral.criticidadid === id);
             
           case 'medio':
             // Verificar si hay contactos que referencian este medio
-            const contactos = await JoySenseService.getTableData('contacto');
+            const contactos = await ThermosService.getTableData('contacto');
             return contactos.some(contacto => contacto.medioid === id);
             
           case 'usuario':
             // Optimización: Hacer llamadas paralelas para usuario
             const [contactosUsuario, usuarioperfiles] = await Promise.all([
-              JoySenseService.getTableData('contacto'),
-              JoySenseService.getTableData('usuarioperfil')
+              ThermosService.getTableData('contacto'),
+              ThermosService.getTableData('usuarioperfil')
             ]);
             return contactosUsuario.some(contacto => contacto.usuarioid === id) ||
                    usuarioperfiles.some(usuarioperfil => usuarioperfil.usuarioid === id);
@@ -148,8 +148,8 @@ export const useFormValidation = (selectedTable: string): UseFormValidationRetur
           case 'perfil':
             // Optimización: Hacer llamadas paralelas para perfil
             const [usuarioperfilesPerfil, perfilumbralesPerfil] = await Promise.all([
-              JoySenseService.getTableData('usuarioperfil'),
-              JoySenseService.getTableData('perfilumbral')
+              ThermosService.getTableData('usuarioperfil'),
+              ThermosService.getTableData('perfilumbral')
             ]);
             return usuarioperfilesPerfil.some(usuarioperfil => usuarioperfil.perfilid === id) ||
                    perfilumbralesPerfil.some(perfilumbral => perfilumbral.perfilid === id);

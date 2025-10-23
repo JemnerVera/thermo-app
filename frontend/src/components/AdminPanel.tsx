@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -51,25 +51,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
       
       switch (activeTab) {
         case 'pais':
-          data = await JoySenseService.getPaises();
+          data = await ThermosService.getPaises();
           break;
         case 'empresa':
-          data = await JoySenseService.getEmpresas();
+          data = await ThermosService.getEmpresas();
           break;
         case 'fundo':
-          data = await JoySenseService.getFundos();
+          data = await ThermosService.getFundos();
           break;
         case 'nodo':
-          data = await JoySenseService.getNodos();
+          data = await ThermosService.getNodos();
           break;
         case 'tipo':
-          data = await JoySenseService.getTipos();
+          data = await ThermosService.getTipos();
           break;
         case 'entidad':
-          data = await JoySenseService.getEntidades();
+          data = await ThermosService.getEntidades();
           break;
         case 'metrica':
-          data = await JoySenseService.getMetricas();
+          data = await ThermosService.getMetricas();
           break;
       }
       

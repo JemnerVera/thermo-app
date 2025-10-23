@@ -1,5 +1,5 @@
 // Servicio modular para el Dashboard
-import { JoySenseService } from './backend-api';
+import { ThermosService } from './backend-api';
 
 export interface DashboardFilters {
   ubicacionId?: number;
@@ -69,7 +69,7 @@ export class DashboardService {
       if (filters.startDate) params.startDate = filters.startDate;
       if (filters.endDate) params.endDate = filters.endDate;
 
-      const mediciones = await JoySenseService.getMediciones(params);
+      const mediciones = await ThermosService.getMediciones(params);
       
       if (!Array.isArray(mediciones)) {
         console.warn('⚠️ DashboardService: Mediciones no es un array:', mediciones);
@@ -83,14 +83,14 @@ export class DashboardService {
   // Obtener métricas disponibles basándose en mediciones reales
   static async getMetricasDisponibles(mediciones: any[]): Promise<any[]> {
     if (mediciones.length === 0) {
-      return await JoySenseService.getMetricas();
+      return await ThermosService.getMetricas();
     }
 
     // Extraer métricas únicas de las mediciones
     const metricaIds = Array.from(new Set(mediciones.map(m => m.metricaid)));
 
     // Obtener todas las métricas y filtrar
-    const todasMetricas = await JoySenseService.getMetricas();
+    const todasMetricas = await ThermosService.getMetricas();
     const metricasDisponibles = todasMetricas.filter(metrica => 
       metricaIds.includes(metrica.metricaid)
     );
@@ -133,14 +133,14 @@ export class DashboardService {
   // Obtener tipos disponibles basándose en mediciones reales
   static async getTiposDisponibles(mediciones: any[]): Promise<any[]> {
     if (mediciones.length === 0) {
-      return await JoySenseService.getTipos();
+      return await ThermosService.getTipos();
     }
 
     // Extraer tipos únicos de las mediciones
     const tipoIds = Array.from(new Set(mediciones.map(m => m.tipoid)));
 
     // Obtener todos los tipos y filtrar
-    const todosTipos = await JoySenseService.getTipos();
+    const todosTipos = await ThermosService.getTipos();
     const tiposDisponibles = todosTipos.filter(tipo => 
       tipoIds.includes(tipo.tipoid)
     );
@@ -181,7 +181,7 @@ export class DashboardService {
       this.getMetricasDisponibles(mediciones),
       this.getNodosDisponibles(mediciones, filters.ubicacionId),
       this.getTiposDisponibles(mediciones),
-      JoySenseService.getEntidades(filters.ubicacionId)
+      ThermosService.getEntidades(filters.ubicacionId)
     ]);
 
     return {

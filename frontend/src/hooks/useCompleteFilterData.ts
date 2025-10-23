@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 interface CompleteFilterData {
   paises: any[];
@@ -28,11 +28,11 @@ export const useCompleteFilterData = (authToken: string): CompleteFilterData => 
         
         // Cargar datos en paralelo para mejor rendimiento
         const [paisesData, empresasData, fundosData, entidadesData, ubicacionesData] = await Promise.all([
-          JoySenseService.getPaises(),
-          JoySenseService.getEmpresas(),
-          JoySenseService.getFundos(),
-          JoySenseService.getTableData('entidad'),
-          JoySenseService.getTableData('ubicacion')
+          ThermosService.getPaises(),
+          ThermosService.getEmpresas(),
+          ThermosService.getFundos(),
+          ThermosService.getTableData('entidad'),
+          ThermosService.getTableData('ubicacion')
         ]);
 
         setPaises(paisesData || []);

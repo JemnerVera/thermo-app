@@ -11,7 +11,7 @@ import { useFilters } from '../contexts/FilterContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 // Services
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 // Types
 import { TableInfo, Message } from '../types/systemParameters';
@@ -237,7 +237,7 @@ const SystemParameters = forwardRef<SystemParametersRef, SystemParametersProps>(
   const loadCountryCodes = async () => {
     try {
       console.log('🔍 Cargando códigos telefónicos...');
-      const data = await JoySenseService.getCodigosTelefonicos();
+      const data = await ThermosService.getCodigosTelefonicos();
       console.log('📞 Códigos telefónicos cargados:', data);
       setCountryCodes(data || []);
     } catch (error) {
@@ -1037,7 +1037,7 @@ if (metricasDelNodo.length > 0) {
 
         // Cargar datos de nodos directamente desde la API
 
-        const sensorsResponse = await JoySenseService.getTableData('sensor', 500);
+        const sensorsResponse = await ThermosService.getTableData('sensor', 500);
 
         const sensors = Array.isArray(sensorsResponse) ? sensorsResponse : ((sensorsResponse as any)?.data || []);
 
@@ -1113,7 +1113,7 @@ modalData = sensoresConSensores;
 
       try {
 
-        const sensorsResponse = await JoySenseService.getTableData('sensor', 500);
+        const sensorsResponse = await ThermosService.getTableData('sensor', 500);
 
         const sensors = Array.isArray(sensorsResponse) ? sensorsResponse : ((sensorsResponse as any)?.data || []);
 
@@ -2014,9 +2014,9 @@ try {
 
       const [, tableInfo] = await Promise.all([
 
-        JoySenseService.getTableData(selectedTable, 1),
+        ThermosService.getTableData(selectedTable, 1),
 
-        JoySenseService.getTableInfoByName(selectedTable)
+        ThermosService.getTableInfoByName(selectedTable)
 
       ]);
 
@@ -2153,7 +2153,7 @@ const loadTableConstraints = async () => {
 
 try {
 
-      // const constraints = await JoySenseService.getTableConstraints(selectedTable);
+      // const constraints = await ThermosService.getTableConstraints(selectedTable);
 
       // setTableConstraints(constraints);
 
@@ -2173,7 +2173,7 @@ try {
 
       // Para actualizar, cargar todos los datos de la tabla (como en copiar)
 
-      const response = await JoySenseService.getTableData(selectedTable, 1000);
+      const response = await ThermosService.getTableData(selectedTable, 1000);
 
       const data = Array.isArray(response) ? response : ((response as any)?.data || []);
 
@@ -2209,7 +2209,7 @@ try {
 
       // Para copiar, cargar todos los datos de la tabla
 
-      const response = await JoySenseService.getTableData(selectedTable, 1000);
+      const response = await ThermosService.getTableData(selectedTable, 1000);
 
       const data = Array.isArray(response) ? response : ((response as any)?.data || []);
 
@@ -2592,7 +2592,7 @@ preparedData.usercreatedid = usuarioid;
 // Logging específico para debugging
 
 
-await JoySenseService.insertTableRow(targetTable, filteredData);
+await ThermosService.insertTableRow(targetTable, filteredData);
 
 // Agregar el registro insertado al sistema de mensajes
 
@@ -2726,7 +2726,7 @@ if (tiposInvalidos.length > 0) {
 
       for (const record of preparedData) {
 
-        await JoySenseService.insertTableRow(selectedTable, record);
+        await ThermosService.insertTableRow(selectedTable, record);
 
       }
 
@@ -4493,7 +4493,7 @@ for (let i = 0; i < updatedEntries.length; i++) {
 
 try {
 
-          const result = await JoySenseService.updateTableRowByCompositeKey(
+          const result = await ThermosService.updateTableRowByCompositeKey(
 
             selectedTable,
 
@@ -4644,7 +4644,7 @@ for (let i = 0; i < updatedEntries.length; i++) {
 
 try {
 
-          const result = await JoySenseService.updateTableRowByCompositeKey(
+          const result = await ThermosService.updateTableRowByCompositeKey(
 
             selectedTable,
 
@@ -4801,7 +4801,7 @@ try {
 
           if (!row.usercreatedid) {
 
-result = await JoySenseService.insertTableRow(selectedTable, {
+result = await ThermosService.insertTableRow(selectedTable, {
 
               usuarioid: row.usuarioid,
 
@@ -4823,7 +4823,7 @@ result = await JoySenseService.insertTableRow(selectedTable, {
 
             // Si es una entrada existente, usar update
 
-            result = await JoySenseService.updateTableRowByCompositeKey(
+            result = await ThermosService.updateTableRowByCompositeKey(
 
               selectedTable,
 
@@ -5085,7 +5085,7 @@ for (let i = 0; i < rowsToUpdate.length; i++) {
 
 try {
 
-            await JoySenseService.updateTableRowByCompositeKey(
+            await ThermosService.updateTableRowByCompositeKey(
 
             selectedTable,
 
@@ -5313,7 +5313,7 @@ if (!compositeKey) {
 
           }
 
-result = await JoySenseService.updateTableRowByCompositeKey(
+result = await ThermosService.updateTableRowByCompositeKey(
 
           selectedTable,
 
@@ -5371,7 +5371,7 @@ result = await JoySenseService.updateTableRowByCompositeKey(
           console.log('filteredUpdateData:', filteredUpdateData);
           console.log('cleanedData:', cleanedData);
 
-          await JoySenseService.updateTableRow(
+          await ThermosService.updateTableRow(
 
             selectedTable,
 
@@ -6445,7 +6445,7 @@ for (const nodoid of nodos) {
 
          // Necesitamos cargar los datos de la tabla sensor para este nodo
 
-         const sensorTableDataResponse = await JoySenseService.getTableData('sensor', 1000);
+         const sensorTableDataResponse = await ThermosService.getTableData('sensor', 1000);
 
          const sensorTableData: any[] = Array.isArray(sensorTableDataResponse) ? sensorTableDataResponse : ((sensorTableDataResponse as any)?.data || []);
 
@@ -6575,7 +6575,7 @@ try {
 
 const insertPromises = sensorsToInsert.map((sensor, index) => 
 
-         JoySenseService.insertTableRow(selectedTable, sensor)
+         ThermosService.insertTableRow(selectedTable, sensor)
 
            .then(result => {
 
@@ -6679,7 +6679,7 @@ const usuarioid = getCurrentUserId();
         
         try {
           // Crear nuevo umbral
-          await JoySenseService.insertTableRow('umbral', umbralData);
+          await ThermosService.insertTableRow('umbral', umbralData);
         } catch (error: any) {
           // Si falla por duplicado, intentar actualizar
           if (error.message?.includes('duplicate key') || 
@@ -6694,7 +6694,7 @@ const usuarioid = getCurrentUserId();
               );
               
               if (umbralExistente) {
-                await JoySenseService.updateTableRow('umbral', umbralExistente.umbralid, {
+                await ThermosService.updateTableRow('umbral', umbralExistente.umbralid, {
                   umbral: umbralData.umbral,
                   minimo: umbralData.minimo,
                   maximo: umbralData.maximo,
@@ -6834,7 +6834,7 @@ if (referenciasInvalidas.length > 0) {
         
         try {
           // Crear nuevo umbral
-          await JoySenseService.insertTableRow('umbral', umbralData);
+          await ThermosService.insertTableRow('umbral', umbralData);
         } catch (error: any) {
           // Si falla por duplicado, intentar actualizar
           if (error.message?.includes('duplicate key') || 
@@ -6849,7 +6849,7 @@ if (referenciasInvalidas.length > 0) {
               );
               
               if (umbralExistente) {
-                await JoySenseService.updateTableRow('umbral', umbralExistente.umbralid, {
+                await ThermosService.updateTableRow('umbral', umbralExistente.umbralid, {
                   umbral: umbralData.umbral,
                   minimo: umbralData.minimo,
                   maximo: umbralData.maximo,
@@ -6925,7 +6925,7 @@ if (sensorExistente) {
 
 // Actualizar sensor existente usando endpoint con clave compuesta
 
-            await JoySenseService.updateTableRowByCompositeKey('sensor', { nodoid, tipoid }, {
+            await ThermosService.updateTableRowByCompositeKey('sensor', { nodoid, tipoid }, {
 
               statusid: 1,
 
@@ -6945,7 +6945,7 @@ try {
 
               // Intentar crear nuevo sensor
 
-              await JoySenseService.insertTableRow('sensor', sensorData);
+              await ThermosService.insertTableRow('sensor', sensorData);
 
 } catch (error: any) {
 
@@ -6965,7 +6965,7 @@ try {
 
 try {
 
-                  await JoySenseService.updateTableRow('sensor', `${nodoid}-${tipoid}`, {
+                  await ThermosService.updateTableRow('sensor', `${nodoid}-${tipoid}`, {
 
                     statusid: 1,
 
@@ -7033,7 +7033,7 @@ try {
 
               // Actualizar metricasensor existente usando endpoint con clave compuesta
 
-              await JoySenseService.updateTableRowByCompositeKey('metricasensor', { 
+              await ThermosService.updateTableRowByCompositeKey('metricasensor', { 
                 nodoid, 
                 tipoid: dato.tipoid, 
                 metricaid: dato.metricaid 
@@ -7059,7 +7059,7 @@ try {
 
               // Crear nuevo metricasensor
 
-              await JoySenseService.insertTableRow('metricasensor', metricaSensorData);
+              await ThermosService.insertTableRow('metricasensor', metricaSensorData);
 
 } catch (error: any) {
 
@@ -7079,7 +7079,7 @@ try {
 
 try {
 
-                  await JoySenseService.updateTableRow('metricasensor', `${nodoid}-${dato.metricaid}-${dato.tipoid}`, {
+                  await ThermosService.updateTableRow('metricasensor', `${nodoid}-${dato.metricaid}-${dato.tipoid}`, {
 
                     statusid: 1,
 
@@ -7117,7 +7117,7 @@ if (!combinacionesAActivar.has(combinacion)) {
 
 // Inactivar el umbral existente
 
-            await JoySenseService.updateTableRow('umbral', umbralExistente.umbralid, {
+            await ThermosService.updateTableRow('umbral', umbralExistente.umbralid, {
 
               statusid: 0,
 
@@ -7165,7 +7165,7 @@ if (valoresCriticosIdenticos) {
 
 // Solo actualizar el nombre (umbral) y asegurar que esté activo
 
-              await JoySenseService.updateTableRow('umbral', umbralExistente.umbralid, {
+              await ThermosService.updateTableRow('umbral', umbralExistente.umbralid, {
 
                 umbral: dato.umbral, // Solo actualizar el nombre
 
@@ -7181,7 +7181,7 @@ if (valoresCriticosIdenticos) {
 
               // Actualizar umbral existente con todos los valores nuevos
 
-await JoySenseService.updateTableRow('umbral', umbralExistente.umbralid, {
+await ThermosService.updateTableRow('umbral', umbralExistente.umbralid, {
 
                 ubicacionid: dato.ubicacionid,
 
@@ -7207,7 +7207,7 @@ await JoySenseService.updateTableRow('umbral', umbralExistente.umbralid, {
 
             // Crear nuevo umbral
 
-await JoySenseService.insertTableRow('umbral', dato);
+await ThermosService.insertTableRow('umbral', dato);
 
           }
 
@@ -7328,7 +7328,7 @@ preparedData.length = 0;
 
       for (const record of preparedData) {
 
-        await JoySenseService.insertTableRow(selectedTable, record);
+        await ThermosService.insertTableRow(selectedTable, record);
 
       }
 
@@ -7456,7 +7456,7 @@ try {
 
           // Obtener datos de sensores específicamente para validación
 
-          const sensorTableDataResponse = await JoySenseService.getTableData('sensor', 1000);
+          const sensorTableDataResponse = await ThermosService.getTableData('sensor', 1000);
 
           const sensorTableData: any[] = Array.isArray(sensorTableDataResponse) ? sensorTableDataResponse : ((sensorTableDataResponse as any)?.data || []);
 
@@ -7526,7 +7526,7 @@ alert(`❌ El nodo seleccionado no tiene sensores de los siguientes tipos: ${tip
 
 const insertPromises = metricasToInsert.map((metrica, index) => 
 
-         JoySenseService.insertTableRow(selectedTable, metrica)
+         ThermosService.insertTableRow(selectedTable, metrica)
 
            .then(result => {
 
@@ -7704,7 +7704,7 @@ try {
 
 const insertPromises = usuarioPerfilesToInsert.map((usuarioPerfil, index) => 
 
-        JoySenseService.insertTableRow(selectedTable, usuarioPerfil)
+        ThermosService.insertTableRow(selectedTable, usuarioPerfil)
 
           .then(result => {
 

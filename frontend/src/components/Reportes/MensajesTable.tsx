@@ -1,5 +1,5 @@
 import React, { useState, useEffect, startTransition } from 'react';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface MensajeData {
@@ -41,7 +41,7 @@ const MensajesTable: React.FC = () => {
 
       // Usar startTransition para evitar el error de Suspense
       startTransition(() => {
-        JoySenseService.getTableData('mensaje', 1000)
+        ThermosService.getTableData('mensaje', 1000)
           .then(data => {
             console.log('🔍 Frontend - Datos recibidos de mensaje:', data);
             if (Array.isArray(data)) {

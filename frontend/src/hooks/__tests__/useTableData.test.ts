@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { useTableData } from '../useTableData';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 
-// Mock de JoySenseService
+// Mock de ThermosService
 jest.mock('../../services/backend-api');
-const mockJoySenseService = JoySenseService as jest.Mocked<typeof JoySenseService>;
+const mockThermosService = ThermosService as jest.Mocked<typeof ThermosService>;
 
 // Mock de useGlobalFilterEffect
 jest.mock('../useGlobalFilterEffect', () => ({
@@ -32,7 +32,7 @@ describe('useTableData', () => {
       { paisid: 2, pais: 'Chile', paisabrev: 'CL', statusid: 1 }
     ];
 
-    mockJoySenseService.getPaises.mockResolvedValue(mockData);
+    mockThermosService.getPaises.mockResolvedValue(mockData);
 
     const { result } = renderHook(() => useTableData('pais'));
 
@@ -51,7 +51,7 @@ describe('useTableData', () => {
       { empresaid: 1, empresa: 'Empresa Test', empresabrev: 'ET', paisid: 1, statusid: 1 }
     ];
 
-    mockJoySenseService.getEmpresas.mockResolvedValue(mockData);
+    mockThermosService.getEmpresas.mockResolvedValue(mockData);
 
     const { result } = renderHook(() => useTableData('empresa'));
 
@@ -60,12 +60,12 @@ describe('useTableData', () => {
     });
 
     expect(result.current.data).toEqual(mockData);
-    expect(mockJoySenseService.getEmpresas).toHaveBeenCalledTimes(1);
+    expect(mockThermosService.getEmpresas).toHaveBeenCalledTimes(1);
   });
 
   it('debe manejar errores de carga', async () => {
     const errorMessage = 'Error de conexión';
-    mockJoySenseService.getPaises.mockRejectedValue(new Error(errorMessage));
+    mockThermosService.getPaises.mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useTableData('pais'));
 
@@ -80,7 +80,7 @@ describe('useTableData', () => {
 
   it('debe usar getTableData para tablas no específicas', async () => {
     const mockData = [{ id: 1, name: 'Test' }];
-    mockJoySenseService.getTableData.mockResolvedValue(mockData);
+    mockThermosService.getTableData.mockResolvedValue(mockData);
 
     const { result } = renderHook(() => useTableData('tabla_inexistente'));
 
@@ -89,14 +89,14 @@ describe('useTableData', () => {
     });
 
     expect(result.current.data).toEqual(mockData);
-    expect(mockJoySenseService.getTableData).toHaveBeenCalledWith('tabla_inexistente');
+    expect(mockThermosService.getTableData).toHaveBeenCalledWith('tabla_inexistente');
   });
 
   it('debe refrescar datos correctamente', async () => {
     const initialData = [{ paisid: 1, pais: 'Perú', paisabrev: 'PE' }];
     const refreshedData = [{ paisid: 1, pais: 'Perú', paisabrev: 'PE' }, { paisid: 2, pais: 'Chile', paisabrev: 'CL' }];
 
-    mockJoySenseService.getPaises
+    mockThermosService.getPaises
       .mockResolvedValueOnce(initialData)
       .mockResolvedValueOnce(refreshedData);
 
@@ -115,7 +115,7 @@ describe('useTableData', () => {
     });
 
     expect(result.current.data).toEqual(refreshedData);
-    expect(mockJoySenseService.getPaises).toHaveBeenCalledTimes(2);
+    expect(mockThermosService.getPaises).toHaveBeenCalledTimes(2);
   });
 
   it('debe establecer datos manualmente', () => {
@@ -177,13 +177,13 @@ describe('useTableData', () => {
     const { result } = renderHook(() => useTableData('pais', false));
 
     // No debería llamar al servicio
-    expect(mockJoySenseService.getPaises).not.toHaveBeenCalled();
+    expect(mockThermosService.getPaises).not.toHaveBeenCalled();
     expect(result.current.data).toEqual([]);
   });
 
   it('debe cargar datos automáticamente cuando se habilita', async () => {
     const mockData = [{ paisid: 1, pais: 'Test' }];
-    mockJoySenseService.getPaises.mockResolvedValue(mockData);
+    mockThermosService.getPaises.mockResolvedValue(mockData);
 
     const { result, rerender } = renderHook(
       ({ enabled }) => useTableData('pais', enabled),
@@ -191,7 +191,7 @@ describe('useTableData', () => {
     );
 
     // No debería cargar inicialmente
-    expect(mockJoySenseService.getPaises).not.toHaveBeenCalled();
+    expect(mockThermosService.getPaises).not.toHaveBeenCalled();
 
     // Habilitar
     rerender({ enabled: true });
@@ -200,7 +200,7 @@ describe('useTableData', () => {
       // Esperar a que se complete la carga automática
     });
 
-    expect(mockJoySenseService.getPaises).toHaveBeenCalled();
+    expect(mockThermosService.getPaises).toHaveBeenCalled();
     expect(result.current.data).toEqual(mockData);
   });
 });

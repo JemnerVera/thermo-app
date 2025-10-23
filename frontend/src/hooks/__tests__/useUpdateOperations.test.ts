@@ -1,12 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
 import { useUpdateOperations } from '../useUpdateOperations';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 import { backendAPI } from '../../services/backend-api';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Mock de JoySenseService
+// Mock de ThermosService
 jest.mock('../../services/backend-api');
-const mockJoySenseService = JoySenseService as jest.Mocked<typeof JoySenseService>;
+const mockThermosService = ThermosService as jest.Mocked<typeof ThermosService>;
 const mockBackendAPI = backendAPI as jest.Mocked<typeof backendAPI>;
 
 // Mock de useAuth
@@ -38,7 +38,7 @@ describe('useUpdateOperations', () => {
   it('debe actualizar un registro correctamente', async () => {
     const mockResponse = { id: 1, pais: 'Perú Actualizado', paisabrev: 'PE' };
     mockBackendAPI.put.mockResolvedValue(mockResponse);
-    mockJoySenseService.getTableData.mockResolvedValue([
+    mockThermosService.getTableData.mockResolvedValue([
       { paisid: 1, pais: 'Perú', paisabrev: 'PE', statusid: 1 }
     ]);
 
@@ -66,7 +66,7 @@ describe('useUpdateOperations', () => {
   });
 
   it('debe manejar errores de validación', async () => {
-    mockJoySenseService.getTableData.mockResolvedValue([
+    mockThermosService.getTableData.mockResolvedValue([
       { paisid: 1, pais: 'Perú', paisabrev: 'PE', statusid: 1 }
     ]);
 
@@ -93,7 +93,7 @@ describe('useUpdateOperations', () => {
   });
 
   it('debe manejar errores de actualización', async () => {
-    mockJoySenseService.getTableData.mockResolvedValue([
+    mockThermosService.getTableData.mockResolvedValue([
       { paisid: 1, pais: 'Perú', paisabrev: 'PE', statusid: 1 }
     ]);
 
@@ -140,7 +140,7 @@ describe('useUpdateOperations', () => {
   it('debe actualizar múltiples registros correctamente', async () => {
     const mockResponse = { id: 1, pais: 'Perú Actualizado', paisabrev: 'PE' };
     mockBackendAPI.put.mockResolvedValue(mockResponse);
-    mockJoySenseService.getTableData.mockResolvedValue([
+    mockThermosService.getTableData.mockResolvedValue([
       { paisid: 1, pais: 'Perú', paisabrev: 'PE', statusid: 1 },
       { paisid: 2, pais: 'Chile', paisabrev: 'CL', statusid: 1 }
     ]);
@@ -170,7 +170,7 @@ describe('useUpdateOperations', () => {
   });
 
   it('debe manejar errores en actualización múltiple', async () => {
-    mockJoySenseService.getTableData.mockResolvedValue([
+    mockThermosService.getTableData.mockResolvedValue([
       { paisid: 1, pais: 'Perú', paisabrev: 'PE', statusid: 1 },
       { paisid: 2, pais: 'Chile', paisabrev: 'CL', statusid: 1 }
     ]);

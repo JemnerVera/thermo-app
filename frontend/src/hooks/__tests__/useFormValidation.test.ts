@@ -1,10 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { useFormValidation } from '../useFormValidation';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 
-// Mock de JoySenseService
+// Mock de ThermosService
 jest.mock('../../services/backend-api');
-const mockJoySenseService = JoySenseService as jest.Mocked<typeof JoySenseService>;
+const mockThermosService = ThermosService as jest.Mocked<typeof ThermosService>;
 
 describe('useFormValidation', () => {
   beforeEach(() => {
@@ -76,7 +76,7 @@ describe('useFormValidation', () => {
 
   describe('validateUpdate', () => {
     it('debe validar actualización de País correctamente', async () => {
-      mockJoySenseService.getTableData.mockResolvedValue([
+      mockThermosService.getTableData.mockResolvedValue([
         { paisid: 1, pais: 'País Existente', paisabrev: 'PE', statusid: 1 }
       ]);
 
@@ -102,7 +102,7 @@ describe('useFormValidation', () => {
     });
 
     it('debe detectar duplicados en actualización', async () => {
-      mockJoySenseService.getTableData.mockResolvedValue([
+      mockThermosService.getTableData.mockResolvedValue([
         { paisid: 1, pais: 'País Existente', paisabrev: 'PE', statusid: 1 },
         { paisid: 2, pais: 'Otro País', paisabrev: 'OP', statusid: 1 }
       ]);
@@ -131,7 +131,7 @@ describe('useFormValidation', () => {
 
   describe('checkDependencies', () => {
     it('debe detectar dependencias en País', async () => {
-      mockJoySenseService.getTableData.mockResolvedValue([
+      mockThermosService.getTableData.mockResolvedValue([
         { empresaid: 1, empresa: 'Empresa Test', paisid: 1 }
       ]);
 
@@ -144,7 +144,7 @@ describe('useFormValidation', () => {
     });
 
     it('debe detectar dependencias en Empresa', async () => {
-      mockJoySenseService.getTableData.mockResolvedValue([
+      mockThermosService.getTableData.mockResolvedValue([
         { fundoid: 1, fundo: 'Fundo Test', empresaid: 1 }
       ]);
 
@@ -157,7 +157,7 @@ describe('useFormValidation', () => {
     });
 
     it('debe detectar dependencias en Fundo', async () => {
-      mockJoySenseService.getTableData.mockResolvedValue([
+      mockThermosService.getTableData.mockResolvedValue([
         { ubicacionid: 1, ubicacion: 'Ubicación Test', fundoid: 1 }
       ]);
 
@@ -170,7 +170,7 @@ describe('useFormValidation', () => {
     });
 
     it('debe retornar false cuando no hay dependencias', async () => {
-      mockJoySenseService.getTableData.mockResolvedValue([]);
+      mockThermosService.getTableData.mockResolvedValue([]);
 
       const { result } = renderHook(() => useFormValidation('pais'));
       

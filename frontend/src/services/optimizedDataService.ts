@@ -1,4 +1,4 @@
-import { JoySenseService } from './backend-api';
+import { ThermosService } from './backend-api';
 import { queryCache, CACHE_TTL } from './queryCache';
 
 // Tipos para datos de referencia
@@ -84,7 +84,7 @@ class OptimizedDataService {
       console.log(`🔄 Cargando ${table} (limit: ${limit})`);
       const startTime = performance.now();
       
-      const response = await JoySenseService.getTableData(table, limit);
+      const response = await ThermosService.getTableData(table, limit);
       const data = Array.isArray(response) ? response : ((response as any)?.data || []);
       
       const endTime = performance.now();

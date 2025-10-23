@@ -2,7 +2,7 @@
  * Utilidades para operaciones de replicación
  */
 
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 /**
  * Replica un sensor a todos los nodos del mismo tipo
@@ -24,7 +24,7 @@ export async function replicateSensor(nodo: any, relatedData: any) {
     // Replicar el sensor a cada nodo
     const replicationPromises = nodosDelMismoTipo.map(async (nodoTarget: any) => {
       try {
-        await JoySenseService.insertTableRow('sensor', {
+        await ThermosService.insertTableRow('sensor', {
           nodo_id: nodoTarget.id,
           tipo_id: currentTipo.id,
           nombre: `Sensor ${currentTipo.nombre} - ${nodoTarget.nombre}`,
@@ -69,7 +69,7 @@ export async function replicateNodo(nodo: any, relatedData: any) {
       try {
         // Replicar cada sensor del nodo actual al nodo objetivo
         for (const sensor of sensoresDelNodo) {
-          await JoySenseService.insertTableRow('sensor', {
+          await ThermosService.insertTableRow('sensor', {
             nodo_id: nodoTarget.id,
             tipo_id: sensor.tipo_id,
             nombre: sensor.nombre.replace(currentNodo.nombre, nodoTarget.nombre),
@@ -114,7 +114,7 @@ export async function replicateNodoForMetricaSensor(nodo: any, relatedData: any)
     const replicationPromises = nodosDelMismoTipo.map(async (nodoTarget: any) => {
       try {
         for (const metricaSensor of metricasensorDelNodo) {
-          await JoySenseService.insertTableRow('metricasensor', {
+          await ThermosService.insertTableRow('metricasensor', {
             nodo_id: nodoTarget.id,
             tipo_id: metricaSensor.tipo_id,
             metrica_id: metricaSensor.metrica_id,

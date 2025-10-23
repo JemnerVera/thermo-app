@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 interface FilterData {
   paises: any[];
@@ -26,9 +26,9 @@ export const useFilterData = (authToken: string): FilterData => {
         // Cargar datos en paralelo para mejor rendimiento
         // Usar los métodos específicos que ya existen en el backend
         const [paisesData, empresasData, fundosData] = await Promise.all([
-          JoySenseService.getPaises(), // Usar método específico
-          JoySenseService.getEmpresas(), // Usar método específico
-          JoySenseService.getFundos() // Usar método específico
+          ThermosService.getPaises(), // Usar método específico
+          ThermosService.getEmpresas(), // Usar método específico
+          ThermosService.getFundos() // Usar método específico
         ]);
 
 

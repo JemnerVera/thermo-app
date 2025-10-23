@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 interface DashboardData {
   metricas: any[];
@@ -24,9 +24,9 @@ export const useDashboardData = (): DashboardData => {
         
         // Cargar datos específicos del dashboard
         const [metricasData, nodosData, tiposData] = await Promise.all([
-          JoySenseService.getTableData('metricasensor'),
-          JoySenseService.getTableData('nodo'),
-          JoySenseService.getTableData('tipo')
+          ThermosService.getTableData('metricasensor'),
+          ThermosService.getTableData('nodo'),
+          ThermosService.getTableData('tipo')
         ]);
 
         setMetricas(metricasData || []);

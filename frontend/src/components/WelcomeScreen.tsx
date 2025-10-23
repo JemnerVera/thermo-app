@@ -14,7 +14,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinue }) => {
           
           {/* Título */}
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Bienvenido a JoySense
+            Bienvenido a Thermos
           </h1>
           
           {/* Subtítulo */}

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 import { backendAPI } from '../services/backend-api';
 import { useAuth } from '../contexts/AuthContext';
 import { validateTableUpdate } from '../utils/formValidation';
@@ -48,7 +48,7 @@ export const useUpdateOperations = (): UpdateOperationState & UpdateOperationAct
 
     try {
       // Obtener datos existentes para validación de duplicados
-      const existingData = await JoySenseService.getTableData(tableName);
+      const existingData = await ThermosService.getTableData(tableName);
       
       // Validar datos antes de actualizar
       const validationResult = await validateTableUpdate(tableName, formData, originalData, existingData);
@@ -124,7 +124,7 @@ export const useUpdateOperations = (): UpdateOperationState & UpdateOperationAct
       let updatedCount = 0;
 
       // Obtener datos existentes para validación de duplicados
-      const existingData = await JoySenseService.getTableData(tableName);
+      const existingData = await ThermosService.getTableData(tableName);
 
       // Actualizar cada registro
       for (let i = 0; i < updates.length; i++) {

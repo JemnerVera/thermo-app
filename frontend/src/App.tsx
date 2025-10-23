@@ -17,7 +17,7 @@ import { SystemParametersLazyWithBoundary, usePreloadCriticalComponents } from '
 import AlertasMain from './components/Reportes/AlertasMain';
 import MensajesMain from './components/Reportes/MensajesMain';
 import TemperatureDashboardMain from './components/Dashboard/TemperatureDashboardMain';
-import { JoySenseService } from './services/backend-api';
+import { ThermosService } from './services/backend-api';
 import { Pais, Empresa } from './types';
 // import { SkipLink } from './components/Accessibility';
 import { UserHeader } from './components/UserHeader';
@@ -196,8 +196,8 @@ const AppContentInternal: React.FC = () => {
     const loadInitialData = async () => {
       try {
         const [paisesData, empresasData] = await Promise.all([
-          JoySenseService.getPaises(),
-          JoySenseService.getEmpresas()
+          ThermosService.getPaises(),
+          ThermosService.getEmpresas()
         ]);
 
         if (paisesData) setPaises(paisesData);
@@ -222,7 +222,7 @@ const AppContentInternal: React.FC = () => {
   useEffect(() => {
     const loadFundos = async () => {
       try {
-        const fundosData = await JoySenseService.getFundos();
+        const fundosData = await ThermosService.getFundos();
         setFundos(fundosData || []);
       } catch (error) {
         console.error('Error cargando fundos:', error);
@@ -235,7 +235,7 @@ const AppContentInternal: React.FC = () => {
   useEffect(() => {
     const loadUbicaciones = async () => {
       try {
-        const ubicacionesData = await JoySenseService.getUbicaciones();
+        const ubicacionesData = await ThermosService.getUbicaciones();
         setUbicaciones(ubicacionesData || []);
       } catch (error) {
         console.error('Error cargando ubicaciones:', error);
@@ -248,7 +248,7 @@ const AppContentInternal: React.FC = () => {
   useEffect(() => {
     const loadEntidades = async () => {
       try {
-        const entidadesData = await JoySenseService.getEntidades();
+        const entidadesData = await ThermosService.getEntidades();
         setEntidades(entidadesData || []);
       } catch (error) {
         console.error('Error cargando entidades:', error);

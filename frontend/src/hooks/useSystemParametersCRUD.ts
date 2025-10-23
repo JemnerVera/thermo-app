@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useInsertOperations } from './useInsertOperations';
 import { useUpdateOperations } from './useUpdateOperations';
 import { useFormValidation } from './useFormValidation';
-import { JoySenseService } from '../services/backend-api';
+import { ThermosService } from '../services/backend-api';
 
 export interface SystemParametersCRUDState {
   isProcessing: boolean;
@@ -141,7 +141,7 @@ export const useSystemParametersCRUD = (): SystemParametersCRUDState & SystemPar
 
     try {
       // Realizar eliminación usando el servicio
-      // Nota: JoySenseService.deleteRecord no existe, se debe implementar
+      // Nota: ThermosService.deleteRecord no existe, se debe implementar
       // Por ahora retornamos éxito simulado
       
       return { 

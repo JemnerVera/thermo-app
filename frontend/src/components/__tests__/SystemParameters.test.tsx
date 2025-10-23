@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import SystemParameters from '../SystemParameters';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFilters } from '../../contexts/FilterContext';
 
@@ -16,7 +16,7 @@ jest.mock('../../hooks/useInsertionMessages');
 jest.mock('../../hooks/useReplicate');
 jest.mock('../../hooks/useGlobalFilterEffect');
 
-const mockJoySenseService = JoySenseService as jest.Mocked<typeof JoySenseService>;
+const mockThermosService = ThermosService as jest.Mocked<typeof ThermosService>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockUseFilters = useFilters as jest.MockedFunction<typeof useFilters>;
 
@@ -42,11 +42,11 @@ describe('SystemParameters - Tests de Regresión Críticos', () => {
       clearFilters: jest.fn()
     });
 
-    // Mock de JoySenseService
-    mockJoySenseService.getTableData = jest.fn().mockResolvedValue([]);
-    mockJoySenseService.insert = jest.fn().mockResolvedValue({ success: true });
-    mockJoySenseService.update = jest.fn().mockResolvedValue({ success: true });
-    mockJoySenseService.delete = jest.fn().mockResolvedValue({ success: true });
+    // Mock de ThermosService
+    mockThermosService.getTableData = jest.fn().mockResolvedValue([]);
+    mockThermosService.insert = jest.fn().mockResolvedValue({ success: true });
+    mockThermosService.update = jest.fn().mockResolvedValue({ success: true });
+    mockThermosService.delete = jest.fn().mockResolvedValue({ success: true });
   });
 
   afterEach(() => {
@@ -332,7 +332,7 @@ describe('SystemParameters - Tests de Regresión Críticos', () => {
   describe('Validación de Actualización', () => {
     it('debe validar actualización de País correctamente', async () => {
       // Mock de datos existentes
-      mockJoySenseService.getTableData.mockResolvedValue([
+      mockThermosService.getTableData.mockResolvedValue([
         { paisid: 1, pais: 'País Existente', paisabrev: 'PE', statusid: 1 }
       ]);
 
@@ -362,7 +362,7 @@ describe('SystemParameters - Tests de Regresión Críticos', () => {
 
     it('debe validar dependencias antes de inactivar País', async () => {
       // Mock de datos existentes con dependencias
-      mockJoySenseService.getTableData.mockResolvedValue([
+      mockThermosService.getTableData.mockResolvedValue([
         { paisid: 1, pais: 'País con Dependencias', paisabrev: 'PD', statusid: 1 }
       ]);
 

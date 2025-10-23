@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { JoySenseService } from '../../services/backend-api';
+import { ThermosService } from '../../services/backend-api';
 
 interface DatosHistoricos {
   sensorid: number;
@@ -62,14 +62,14 @@ const DashboardUmbrales: React.FC = () => {
         ubicacionesData,
         criticidadesData
       ] = await Promise.all([
-        JoySenseService.getTableData('alerta', 1000),
-        JoySenseService.getTableData('umbral', 1000),
-        JoySenseService.getTableData('medicion', 1000),
-        JoySenseService.getTableData('nodo', 1000),
-        JoySenseService.getTableData('metrica', 1000),
-        JoySenseService.getTableData('tipo', 1000),
-        JoySenseService.getTableData('ubicacion', 1000),
-        JoySenseService.getTableData('criticidad', 1000)
+        ThermosService.getTableData('alerta', 1000),
+        ThermosService.getTableData('umbral', 1000),
+        ThermosService.getTableData('medicion', 1000),
+        ThermosService.getTableData('nodo', 1000),
+        ThermosService.getTableData('metrica', 1000),
+        ThermosService.getTableData('tipo', 1000),
+        ThermosService.getTableData('ubicacion', 1000),
+        ThermosService.getTableData('criticidad', 1000)
       ]);
 
       console.log('📊 Datos cargados para dashboard:', {
