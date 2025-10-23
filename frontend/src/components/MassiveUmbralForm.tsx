@@ -241,7 +241,7 @@ setAssignedSensorTypes(assignedTypes);
   }, [selectedNodes, formData.entidadid, getUniqueOptionsForField]);
 
   // Los tipos de sensores asignados son solo informativos (solo lectura)
-  // No se pueden editar ya que se asignan en sense.sensor, no en sense.umbral
+  // No se pueden editar ya que se asignan en thermo.sensor, no en thermo.umbral
 
   // Función para verificar si todos los nodos seleccionados tienen los mismos tipos de sensores
   const validateNodeSensorTypes = () => {

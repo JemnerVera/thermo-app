@@ -167,7 +167,7 @@ export function MassiveMetricaSensorForm({
   }, [selectedNodes, formData.entidadid, getUniqueOptionsForField]);
 
   // Los tipos de sensores asignados son solo informativos (solo lectura)
-  // No se pueden editar ya que se asignan en sense.sensor, no en sense.metricasensor
+  // No se pueden editar ya que se asignan en thermo.sensor, no en thermo.metricasensor
 
   // Manejar selección de métrica
   const handleMetricaSelection = (metricaid: number, selected: boolean) => {
