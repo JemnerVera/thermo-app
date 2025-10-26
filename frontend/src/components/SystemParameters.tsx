@@ -2432,8 +2432,6 @@ preparedData.usercreatedid = usuarioid;
 
           tipo: preparedData.tipo,
 
-          entidadid: preparedData.entidadid,
-
           statusid: preparedData.statusid,
 
           usercreatedid: preparedData.usercreatedid,
@@ -3288,7 +3286,7 @@ setMessage({
 
       case 'tipo':
 
-        return ['tipo', 'entidadid'];
+        return ['tipo'];
 
       case 'sensor':
 
@@ -4913,7 +4911,7 @@ if (errorCount > 0) {
       'ubicacion': ['ubicacion', 'fundoid', 'statusid'],
       'localizacion': ['ubicacionid', 'entidadid', 'localizacion', 'statusid'],
       'entidad': ['entidad', 'statusid'],
-      'tipo': ['tipo', 'entidadid', 'statusid'],
+      'tipo': ['tipo', 'statusid'],
       'nodo': ['nodo', 'deveui', 'appeui', 'appkey', 'atpin', 'statusid'],
       'metrica': ['metrica', 'unidad', 'statusid'],
     'umbral': ['umbral', 'ubicacionid', 'criticidadid', 'nodoid', 'metricaid', 'tipoid', 'minimo', 'maximo', 'statusid'],
@@ -5486,7 +5484,7 @@ if (selectedTable === 'metrica') {
 
 if (selectedTable === 'tipo') {
 
-        return ['tipo', 'statusid', 'entidadid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+        return ['tipo', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
 
       }
 
@@ -5814,9 +5812,7 @@ if (selectedTable === 'fundo') {
 
       } else if (selectedTable === 'tipo') {
 
-        // Entidad, Tipo
-
-        reorderedColumns.push(...otherColumns.filter(col => ['entidadid'].includes(col.columnName)));
+        // Tipo
 
         reorderedColumns.push(...otherColumns.filter(col => ['tipo'].includes(col.columnName)));
 

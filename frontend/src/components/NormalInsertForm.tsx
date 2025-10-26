@@ -129,16 +129,6 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
     }
   }
   
-  // Para Tipo: solo habilitar tipo si entidadid tiene valor
-  if (selectedTable === 'tipo') {
-    if (columnName === 'tipo') {
-      return !!(formData.entidadid);
-    }
-    if (columnName === 'entidadid') {
-      return true; // Siempre habilitado
-    }
-  }
-  
   // Para Nodo: habilitación progresiva nodo -> deveui -> resto
   if (selectedTable === 'nodo') {
     if (columnName === 'nodo') {
@@ -1228,7 +1218,7 @@ return filteredNodos;
             );
           }
 
-          if (col.columnName === 'entidadid' && (selectedTable === 'localizacion' || selectedTable === 'tipo')) {
+          if (col.columnName === 'entidadid' && selectedTable === 'localizacion') {
             const options = getUniqueOptionsForField(col.columnName);
             const displayName = getColumnDisplayNameTranslated(col.columnName, t);
             return (

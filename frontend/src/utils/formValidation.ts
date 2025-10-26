@@ -78,8 +78,7 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
   ],
   
   tipo: [
-    { field: 'tipo', required: true, type: 'string', minLength: 1, customMessage: 'El nombre del tipo es obligatorio' },
-    { field: 'entidadid', required: true, type: 'number', customMessage: 'Debe seleccionar una entidad' }
+    { field: 'tipo', required: true, type: 'string', minLength: 1, maxLength: 50, customMessage: 'El nombre del tipo es obligatorio' }
   ],
   
   nodo: [
@@ -846,31 +845,32 @@ const validateTipoData = async (
     });
   }
   
-  if (!formData.entidadid) {
+  // 2. Validar longitud máxima
+  if (formData.tipo && formData.tipo.length > 50) {
     errors.push({
-      field: 'entidadid',
-      message: 'Debe seleccionar una entidad',
-      type: 'required'
+      field: 'tipo',
+      message: 'El nombre no puede exceder 50 caracteres',
+      type: 'length'
     });
   }
   
-  // 2. Validar duplicados si hay datos existentes
+  // 3. Validar duplicados si hay datos existentes
+  // CONSTRAINT: unique (tipo) - El tipo es único globalmente
   if (existingData && existingData.length > 0) {
     const tipoExists = existingData.some(item => 
-      item.tipo && item.tipo.toLowerCase() === formData.tipo?.toLowerCase() &&
-      item.entidadid && item.entidadid.toString() === formData.entidadid?.toString()
+      item.tipo && item.tipo.toLowerCase() === formData.tipo?.toLowerCase()
     );
     
     if (tipoExists) {
       errors.push({
         field: 'tipo',
-        message: 'El tipo ya existe en esta entidad',
+        message: 'El tipo ya existe',
         type: 'duplicate'
       });
     }
   }
   
-  // 3. Generar mensaje amigable
+  // 4. Generar mensaje amigable
   const userFriendlyMessage = generateUserFriendlyMessage(errors);
   
   return {
@@ -1993,15 +1993,17 @@ const validateTipoUpdate = async (
     });
   }
   
-  if (!formData.entidadid || formData.entidadid === '') {
+  // 2. Validar longitud máxima
+  if (formData.tipo && formData.tipo.length > 50) {
     errors.push({
-      field: 'entidadid',
-      message: 'La entidad es obligatoria',
-      type: 'required'
+      field: 'tipo',
+      message: 'El nombre no puede exceder 50 caracteres',
+      type: 'length'
     });
   }
   
-  // 2. Validar duplicados (excluyendo el registro actual)
+  // 3. Validar duplicados (excluyendo el registro actual)
+  // CONSTRAINT: unique (tipo) - El tipo es único globalmente
   if (formData.tipo && formData.tipo.trim() !== '') {
     const tipoExists = existingData.some(item => 
       item.tipoid !== originalData.tipoid && 
@@ -2018,15 +2020,15 @@ const validateTipoUpdate = async (
     }
   }
   
-  // 3. Validar relaciones padre-hijo (solo si se está inactivando)
+  // 4. Validar relaciones padre-hijo (solo si se está inactivando)
   if (formData.statusid === 0 && originalData.statusid !== 0) {
-    // Verificar si hay sensores, metricasensor o umbrales que referencian este tipo
+    // Verificar si hay sensores que referencian este tipo
     const hasDependentRecords = await checkTipoDependencies(originalData.tipoid);
     
     if (hasDependentRecords) {
       errors.push({
         field: 'statusid',
-        message: 'No se puede inactivar el tipo porque tiene sensores, métricas o umbrales asociados',
+        message: 'No se puede inactivar el tipo porque tiene sensores asociados',
         type: 'constraint'
       });
     }
