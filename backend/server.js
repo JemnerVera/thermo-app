@@ -130,6 +130,150 @@ async function probarTablas() {
 probarTablas();
 
 
+// ============================================================================
+// HELPER: PAGINACIÓN, BÚSQUEDA Y FILTROS - PATRÓN ENTERPRISE
+// ============================================================================
+
+// Configurar campos donde se puede buscar por texto
+const SEARCHABLE_FIELDS = {
+  metricasensor: ['sensorid', 'metricaid'],
+  sensor: ['sensorid', 'ubicacionid'],
+  alerta: ['medicionid', 'alertaid'],
+  umbral: ['umbralid', 'sensorid', 'metricaid'],
+  medicion: ['medicionid', 'sensorid'],
+  localizacion: ['localizacionid', 'ubicacionid'],
+  localizacionsensor: ['localizacionid', 'sensorid'],
+  usuario: ['login', 'nombre', 'email'],
+  mensaje: ['mensajeid'],
+  usuarioperfil: ['usuarioid', 'perfilid'],
+  // AGREGAR MÁS TABLAS SEGÚN NECESIDAD
+};
+
+/**
+ * Función helper para paginación, búsqueda y filtros server-side
+ * Soporta 2 modos:
+ *   - MODO LEGACY (sin 'page'): Carga todos los registros automáticamente
+ *   - MODO PAGINADO (con 'page'): Carga solo una página a la vez
+ * 
+ * @param {string} tableName - Nombre de la tabla
+ * @param {object} params - Parámetros de query
+ * @returns {Promise<Array|Object>} Array directo (legacy) o { data, pagination } (paginado)
+ */
+async function paginateAndFilter(tableName, params = {}) {
+  const {
+    page,                    // Número de página (1, 2, 3...) - OPCIONAL
+    pageSize = 100,          // Registros por página - DEFAULT: 100
+    search = '',             // Texto de búsqueda - OPCIONAL
+    sortBy = 'datemodified', // Campo para ordenar - DEFAULT: datemodified
+    sortOrder = 'desc',      // asc o desc - DEFAULT: desc
+    ...filters               // Filtros adicionales (paisid, empresaid, statusid, etc.)
+  } = params;
+
+  // Determinar si usar paginación o modo legacy
+  const usePagination = page !== undefined && page !== null;
+
+  try {
+    // ========================================================================
+    // 1. CONSTRUIR QUERY BASE
+    // ========================================================================
+    let query = supabase.from(tableName).select('*', { count: 'exact' });
+
+    // ========================================================================
+    // 2. APLICAR FILTROS (paisid, empresaid, fundoid, statusid, etc.)
+    // ========================================================================
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
+        query = query.eq(key, filters[key]);
+      }
+    });
+
+    // ========================================================================
+    // 3. APLICAR BÚSQUEDA (OR entre campos definidos en SEARCHABLE_FIELDS)
+    // ========================================================================
+    if (search && search.trim() !== '') {
+      const searchFields = SEARCHABLE_FIELDS[tableName] || [];
+      if (searchFields.length > 0) {
+        const searchConditions = searchFields.map(field => 
+          `${field}.ilike.%${search}%`
+        ).join(',');
+        query = query.or(searchConditions);
+      }
+    }
+
+    // ========================================================================
+    // 4. OBTENER TOTAL DE REGISTROS (para calcular páginas)
+    // ========================================================================
+    const { count: totalRecords } = await query;
+
+    // ========================================================================
+    // 5. APLICAR ORDENAMIENTO
+    // ========================================================================
+    if (sortBy) {
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+    }
+
+    // ========================================================================
+    // 6A. MODO PAGINADO: Cargar solo 1 página
+    // ========================================================================
+    if (usePagination) {
+      const offset = (page - 1) * pageSize;
+      query = query.range(offset, offset + pageSize - 1);
+      
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Devolver objeto con data + pagination info
+      return {
+        data: data || [],
+        pagination: {
+          page: parseInt(page),
+          pageSize: parseInt(pageSize),
+          total: totalRecords || 0,
+          totalPages: Math.ceil((totalRecords || 0) / pageSize)
+        }
+      };
+    }
+
+    // ========================================================================
+    // 6B. MODO LEGACY: Cargar TODOS los registros en chunks de 1000
+    // ========================================================================
+    else {
+      console.log(`📚 Modo legacy: Cargando todos los registros de ${tableName}`);
+      
+      let allData = [];
+      let currentOffset = 0;
+      const chunkSize = 1000; // Límite de Supabase
+
+      // Loop para obtener todos los registros en chunks
+      while (true) {
+        const { data: chunk, error } = await supabase
+          .from(tableName)
+          .select('*')
+          .range(currentOffset, currentOffset + chunkSize - 1)
+          .order(sortBy, { ascending: sortOrder === 'asc' });
+
+        if (error) throw error;
+        if (!chunk || chunk.length === 0) break;
+
+        allData = allData.concat(chunk);
+        
+        // Si recibimos menos de 1000, ya no hay más registros
+        if (chunk.length < chunkSize) break;
+        
+        currentOffset += chunkSize;
+      }
+
+      // Devolver array directo (sin pagination object)
+      return allData;
+    }
+
+  } catch (error) {
+    console.error(`❌ Error en paginateAndFilter para ${tableName}:`, error);
+    throw error;
+  }
+}
+
+
 // Cache de metadatos para evitar consultas repetidas
 // Cache para metadatos de tablas (deshabilitado para usar siempre función dinámica)
 const metadataCache = new Map();
@@ -505,17 +649,22 @@ app.get('/api/thermo/perfil', async (req, res) => {
 
 app.get('/api/thermo/umbral', async (req, res) => {
   try {
-    const { limit = 100 } = req.query;
     console.log('🔍 Backend: Obteniendo umbral del schema thermo...');
-    const { data, error } = await supabase
-      .from('umbral')
-      .select('*')
-      .order('umbralid')
-      .limit(parseInt(limit));
-    if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Umbral obtenido:', data?.length || 0);
-    res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/thermo/umbral:', error); res.status(500).json({ error: error.message }); }
+    const result = await paginateAndFilter('umbral', req.query);
+    
+    if (result.pagination) {
+      // MODO PAGINADO: devolver objeto con data + pagination
+      console.log(`✅ Backend: Umbral obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      res.json(result);
+    } else {
+      // MODO LEGACY: devolver array directo
+      console.log(`✅ Backend: Umbral obtenidos (modo legacy): ${result.length}`);
+      res.json(result);
+    }
+  } catch (error) {
+    console.error('❌ Error in /api/thermo/umbral:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Tabla 'medio' no existe en schema Thermos - eliminada
@@ -554,33 +703,43 @@ app.get('/api/thermo/mensaje_error', async (req, res) => {
 
 app.get('/api/thermo/sensor', async (req, res) => {
   try {
-    const { limit = 100 } = req.query;
     console.log('🔍 Backend: Obteniendo sensor del schema thermo...');
-    const { data, error } = await supabase
-      .from('sensor')
-      .select('*')
-      .order('sensorid')
-      .limit(parseInt(limit));
-    if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Sensor obtenido:', data?.length || 0);
-    res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/thermo/sensor:', error); res.status(500).json({ error: error.message }); }
+    const result = await paginateAndFilter('sensor', req.query);
+    
+    if (result.pagination) {
+      // MODO PAGINADO: devolver objeto con data + pagination
+      console.log(`✅ Backend: Sensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      res.json(result);
+    } else {
+      // MODO LEGACY: devolver array directo
+      console.log(`✅ Backend: Sensor obtenidos (modo legacy): ${result.length}`);
+      res.json(result);
+    }
+  } catch (error) {
+    console.error('❌ Error in /api/thermo/sensor:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Ruta para metricasensor - usada por el frontend
 app.get('/api/thermo/metricasensor', async (req, res) => {
   try {
-    const { limit = 100 } = req.query;
     console.log('🔍 Backend: Obteniendo metricasensor del schema thermo...');
-    const { data, error } = await supabase
-      .from('metricasensor')
-      .select('*')
-      .order('sensorid, metricaid') // Ordenar por clave primaria compuesta
-      .limit(parseInt(limit));
-    if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Metricasensor obtenidos:', data?.length || 0);
-    res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/thermo/metricasensor:', error); res.status(500).json({ error: error.message }); }
+    const result = await paginateAndFilter('metricasensor', req.query);
+    
+    if (result.pagination) {
+      // MODO PAGINADO: devolver objeto con data + pagination
+      console.log(`✅ Backend: Metricasensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      res.json(result);
+    } else {
+      // MODO LEGACY: devolver array directo
+      console.log(`✅ Backend: Metricasensor obtenidos (modo legacy): ${result.length}`);
+      res.json(result);
+    }
+  } catch (error) {
+    console.error('❌ Error in /api/thermo/metricasensor:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Ruta para perfilumbral - usada por el frontend
@@ -723,20 +882,22 @@ app.get('/api/thermo/usuario', async (req, res) => {
 // Ruta para alerta - usada por el frontend
 app.get('/api/thermo/alerta', async (req, res) => {
   try {
-    const { limit = 100 } = req.query;
     console.log('🔍 Obteniendo alertas de thermo.alerta...');
-    const { data, error } = await supabase
-      .from('alerta')
-      .select('*')
-      .order('medicionid', { ascending: false })
-      .limit(parseInt(limit));
-    if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Alertas encontradas:', data?.length || 0);
-    if (data && data.length > 0) {
-      console.log('🔍 Primera alerta:', JSON.stringify(data[0], null, 2));
+    const result = await paginateAndFilter('alerta', req.query);
+    
+    if (result.pagination) {
+      // MODO PAGINADO: devolver objeto con data + pagination
+      console.log(`✅ Backend: Alertas obtenidas: ${result.data.length} de ${result.pagination.total}`);
+      res.json(result);
+    } else {
+      // MODO LEGACY: devolver array directo
+      console.log(`✅ Backend: Alertas obtenidas (modo legacy): ${result.length}`);
+      res.json(result);
     }
-    res.json(data || []);
-  } catch (error) { console.error('❌ Error in /api/thermo/alerta:', error); res.status(500).json({ error: error.message }); }
+  } catch (error) {
+    console.error('❌ Error in /api/thermo/alerta:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Ruta para mensaje - usada por el frontend

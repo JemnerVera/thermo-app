@@ -329,7 +329,7 @@ if (hasChanges) {
 
           setMultipleMetricas([]);
 
-          setSelectedNodos([]);
+          setSelectedSensors([]);
 
           setSelectedMetricas([]);
 
@@ -1658,7 +1658,7 @@ if (hasChanges) {
 
     setMultipleMetricas([]);
 
-    setSelectedNodos([]);
+    setSelectedSensors([]);
 
     setSelectedMetricas([]);
 
@@ -1799,7 +1799,7 @@ setFormData(initializeFormData(columns));
 
     setMultipleMetricas([]);
 
-    setSelectedNodos([]);
+    setSelectedSensors([]);
 
     setSelectedMetricas([]);
 
@@ -1821,7 +1821,7 @@ setFormData(initializeFormData(columns));
 
 // Limpiar estados específicos de metricasensor
 
-    setSelectedNodos([]);
+    setSelectedSensors([]);
 
     setSelectedEntidadMetrica('');
 
@@ -1892,7 +1892,7 @@ setFormData(initializeFormData(columns));
 
       setMultipleMetricas([]);
 
-      setSelectedNodos([]);
+      setSelectedSensors([]);
 
       // setSelectedEntidadMetrica('');
 
@@ -6190,7 +6190,7 @@ return reorderedColumns;
 
    const [multipleMetricas, setMultipleMetricas] = useState<any[]>([]);
 
-   const [selectedSensors, setSelectedNodos] = useState<string[]>([]);
+   const [selectedSensors, setSelectedSensors] = useState<string[]>([]);
 
    const [selectedEntidadMetrica, setSelectedEntidadMetrica] = useState<string>('');
 
@@ -7562,7 +7562,7 @@ await Promise.all(insertPromises);
 
       setMultipleMetricas([]);
 
-      setSelectedNodos([]);
+      setSelectedSensors([]);
 
       setSelectedMetricas([]);
 
@@ -8345,9 +8345,9 @@ const handleCancelModal = () => {
 
                                                                          <MultipleMetricaSensorFormLazyWithBoundary
 
-                          selectedSensors={selectedSensors}
+                          selectedNodos={selectedSensors}
 
-                          setSelectedNodos={setSelectedNodos}
+                          setSelectedNodos={setSelectedSensors}
 
                           selectedEntidad={selectedEntidadMetrica}
 
@@ -8387,7 +8387,7 @@ const handleCancelModal = () => {
 
                             setMultipleMetricas([]);
 
-                            setSelectedNodos([]);
+                            setSelectedSensors([]);
 
                               setSelectedEntidadMetrica('');
 

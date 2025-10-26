@@ -11,7 +11,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 // ============================================================================
 
 interface MultipleMetricaSensorFormProps {
-  selectedNodos: string[];
+  selectedNodos: string[];  // Legacy name from JoySense - represents sensors in Thermos
   setSelectedNodos: (value: string[]) => void;
   selectedEntidad: string;
   setSelectedEntidad: (value: string) => void;

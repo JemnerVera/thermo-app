@@ -957,4 +957,64 @@ export class ThermosService {
     console.warn('⚠️ getNodosConLocalizacion() está deprecated. Usa getSensoresConLocalizacion() en su lugar.');
     return this.getSensoresConLocalizacion(limit);
   }
+
+  /**
+   * Obtener datos de tabla con soporte para paginación server-side
+   * Implementa patrón enterprise con 2 modos:
+   *   - MODO LEGACY (sin page): Carga todos los registros automáticamente
+   *   - MODO PAGINADO (con page): Carga solo una página a la vez
+   * 
+   * @param tableName - Nombre de la tabla en schema thermo
+   * @param options - Opciones de paginación, búsqueda y filtros
+   * @returns Promise con { data: [], pagination?: {} }
+   */
+  static async getTableDataPaginated(
+    tableName: string, 
+    options: { 
+      page?: number;           // Número de página (1, 2, 3...)
+      pageSize?: number;       // Registros por página (default: 100)
+      search?: string;         // Texto de búsqueda
+      sortBy?: string;         // Campo para ordenar (default: datemodified)
+      sortOrder?: 'asc' | 'desc'; // Orden (default: desc)
+      [key: string]: any;      // Filtros adicionales (paisid, statusid, etc.)
+    } = {}
+  ): Promise<{ data: any[]; pagination?: any }> {
+    try {
+      // Siempre detectar el schema primero
+      const detectedSchema = await this.detectSchema();
+      
+      if (detectedSchema !== 'thermo') {
+        console.warn('⚠️ getTableDataPaginated solo funciona con schema thermo');
+        return { data: [] };
+      }
+
+      // Construir query params
+      const params = new URLSearchParams();
+      
+      Object.keys(options).forEach(key => {
+        if (options[key] !== undefined && options[key] !== null && options[key] !== '') {
+          params.append(key, String(options[key]));
+        }
+      });
+
+      const queryString = params.toString();
+      const endpoint = `/thermo/${tableName}${queryString ? '?' + queryString : ''}`;
+      
+      // Llamar al backend
+      const response = await backendAPI.get(endpoint);
+      
+      // Si tiene pagination object, es modo paginado
+      if (response && response.pagination) {
+        return response; // { data: [], pagination: {} }
+      }
+      
+      // Si no, es modo legacy (array directo)
+      const data = Array.isArray(response) ? response : (response?.data || []);
+      return { data }; // { data: [] }
+      
+    } catch (error) {
+      console.error(`Error in getTableDataPaginated for ${tableName}:`, error);
+      throw error;
+    }
+  }
 }

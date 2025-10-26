@@ -1,53 +1,107 @@
 import { createClient } from '@supabase/supabase-js';
 import { AuthUser, AuthError } from '../types';
 
-// Debug: Verificar variables de entorno ANTES de usarlas
-console.log('🔍 Debug completo de variables de entorno:');
-console.log('process.env existe:', typeof process !== 'undefined');
-console.log('process.env keys:', process.env ? Object.keys(process.env).filter(key => key.startsWith('REACT_APP')) : 'process.env no existe');
-console.log('REACT_APP_SUPABASE_URL:', process.env?.REACT_APP_SUPABASE_URL);
-console.log('REACT_APP_SUPABASE_PUBLISHABLE_KEY:', process.env?.REACT_APP_SUPABASE_PUBLISHABLE_KEY ? 'Presente' : 'Ausente');
+// Declaración para TypeScript
+declare const process: any;
 
-// Configuración de Supabase Auth - SEGURO: Usando publishable key (THERMOS)
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabasePublishableKey = process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY;
+/**
+ * Lee y valida las variables de entorno requeridas para Supabase
+ * Implementa patrón 12-Factor App con validación estricta
+ * Lanza error claro si falta alguna configuración
+ */
+function getSupabaseConfig() {
+  const url = process.env.REACT_APP_SUPABASE_URL;
+  const key = process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY;
 
-// Validar que las variables de entorno estén configuradas
-if (!supabaseUrl || !supabasePublishableKey) {
-  console.error('❌ Variables de entorno no encontradas:');
-  console.error('  - REACT_APP_SUPABASE_URL:', supabaseUrl);
-  console.error('  - REACT_APP_SUPABASE_PUBLISHABLE_KEY:', supabasePublishableKey ? 'Presente' : 'Ausente');
-  throw new Error('❌ Variables de entorno de Supabase no configuradas. Verifica REACT_APP_SUPABASE_URL y REACT_APP_SUPABASE_PUBLISHABLE_KEY en tu archivo .env');
+  // Validación: Variables requeridas
+  if (!url || !key) {
+    const missing = [];
+    if (!url) missing.push('REACT_APP_SUPABASE_URL');
+    if (!key) missing.push('REACT_APP_SUPABASE_PUBLISHABLE_KEY');
+
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error('❌ ERROR: Configuración de Supabase incompleta');
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error('Variables faltantes:', missing.join(', '));
+    console.error('');
+    console.error('📝 SOLUCIÓN:');
+    console.error('1. Crea el archivo: frontend/.env');
+    console.error('2. Agrega las siguientes variables:');
+    console.error('');
+    console.error('   REACT_APP_SUPABASE_URL=https://tu-proyecto.supabase.co');
+    console.error('   REACT_APP_SUPABASE_PUBLISHABLE_KEY=tu-anon-key');
+    console.error('');
+    console.error('📚 Ver: frontend/env.example para plantilla');
+    console.error('═══════════════════════════════════════════════════════════');
+
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+
+  // Validación: NO permitir Service Role Key en frontend
+  if (key.includes('service_role')) {
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error('❌ PELIGRO: Service Role Key detectada en el frontend');
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error('La Service Role Key tiene acceso total a la base de datos');
+    console.error('y NUNCA debe usarse en el frontend (código público).');
+    console.error('');
+    console.error('✅ Usa en su lugar: anon key o publishable key');
+    console.error('═══════════════════════════════════════════════════════════');
+
+    throw new Error('Service Role Key cannot be used in frontend');
+  }
+
+  // Debug en desarrollo
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔐 Supabase Auth - Configuración validada:');
+    console.log('  - URL:', url);
+    console.log('  - Key:', key.substring(0, 30) + '...');
+    
+    // Tipo de key (los JWT keys comienzan con 'eyJ')
+    const isPublishableKey = key.startsWith('sb_publishable_');
+    const isAnonKey = key.startsWith('eyJ'); // JWT format for anon keys
+    console.log('  - Tipo:', isPublishableKey ? 'Publishable Key ✅' : (isAnonKey ? 'Anon Key (JWT) ✅' : 'Unknown'));
+  }
+
+  return { url, key };
 }
 
-// Debug: Verificar variables de entorno
-console.log('🔍 Debug Supabase Auth:');
-console.log('REACT_APP_SUPABASE_URL:', supabaseUrl);
-console.log('REACT_APP_SUPABASE_PUBLISHABLE_KEY:', supabasePublishableKey ? 'Presente' : 'Ausente');
-console.log('process.env keys:', Object.keys(process.env).filter(key => key.startsWith('REACT_APP')));
+/**
+ * Obtiene y valida la URL del backend
+ * Usa fallback a localhost solo en desarrollo
+ */
+function getBackendUrl(): string {
+  const url = process.env.REACT_APP_BACKEND_URL;
+  
+  // En desarrollo, permitir fallback a localhost
+  if (process.env.NODE_ENV === 'development' && !url) {
+    console.warn('⚠️ REACT_APP_BACKEND_URL no configurada, usando localhost por defecto');
+    return 'http://localhost:3001/api';
+  }
+  
+  // En producción, requerir configuración explícita
+  if (process.env.NODE_ENV === 'production' && !url) {
+    console.error('❌ ERROR: REACT_APP_BACKEND_URL no configurada en producción');
+    throw new Error('REACT_APP_BACKEND_URL is required in production');
+  }
+  
+  return url || 'http://localhost:3001/api';
+}
 
-// Verificar que sea PUBLISHABLE KEY (seguro para frontend)
-const isServiceRole = supabasePublishableKey.includes('service_role');
-const isPublishableKey = supabasePublishableKey.startsWith('sb_publishable_');
-const isAnonKey = supabasePublishableKey.includes('anon');
-console.log('🔑 Tipo de key detectado:');
-console.log('  - Service Role Key:', isServiceRole ? '❌ PELIGROSO' : '✅ NO');
-console.log('  - Publishable Key:', isPublishableKey ? '✅ SÍ' : '❌ NO');
-console.log('  - Anon Key:', isAnonKey ? '✅ SÍ' : '❌ NO');
-console.log('  - Key completa (primeros 30 chars):', supabasePublishableKey.substring(0, 30) + '...');
+// Obtener y validar configuración
+const config = getSupabaseConfig();
+const BACKEND_URL = getBackendUrl();
 
-// Crear cliente de Supabase para autenticación
-export const supabaseAuth = createClient(supabaseUrl, supabasePublishableKey);
+// Crear cliente de Supabase con configuración validada
+export const supabaseAuth = createClient(config.url, config.key);
 
 // Funciones de autenticación
 export const authService = {
   // Iniciar sesión usando el backend (modo desarrollo)
   async signIn(email: string, password: string): Promise<{ user: AuthUser | null; error: AuthError | null }> {
     try {
-      
-      // Usar el backend para autenticación
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api';
-      const response = await fetch(`${backendUrl}/auth/login`, {
+      // Usar el backend URL validado
+      const response = await fetch(`${BACKEND_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
