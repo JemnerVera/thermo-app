@@ -1,0 +1,787 @@
+═══════════════════════════════════════════════════════════════════════════════
+GUÍA DE IMPLEMENTACIÓN: PAGINACIÓN SERVER-SIDE PARA TABLAS GRANDES
+═══════════════════════════════════════════════════════════════════════════════
+
+Proyecto: JoySense Dashboard
+Fecha: Octubre 2025
+Autor: Implementación basada en estándares empresariales
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 PROBLEMA QUE RESUELVE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Supabase tiene un LÍMITE de 1000 registros por query
+2. Tablas con más de 1000 registros no se mostraban completamente
+3. Tablas como metricasensor, sensor, nodo, alerta crecen exponencialmente
+4. Se necesitaba una solución escalable para producción
+
+EJEMPLO DEL PROBLEMA:
+- Tabla metricasensor tenía 1401 registros
+- Frontend solo mostraba 1000
+- Los últimos 401 registros eran invisibles
+- Usuarios reportaban datos "perdidos"
+
+═══════════════════════════════════════════════════════════════════════════════
+✅ SOLUCIÓN IMPLEMENTADA: ARQUITECTURA DE 2 MODOS
+═══════════════════════════════════════════════════════════════════════════════
+
+MODO 1: MODO LEGACY (sin parámetro 'page')
+  - Comportamiento: Carga TODOS los registros automáticamente
+  - Uso: Compatibilidad con código existente
+  - Implementación: Fetch automático en chunks de 1000
+  - Log: "📚 Modo legacy: Cargando todos los registros de [tabla]"
+
+MODO 2: MODO PAGINADO (con parámetro 'page')
+  - Comportamiento: Carga solo 1 página a la vez
+  - Uso: Para UIs con controles de paginación
+  - Implementación: range(offset, offset + pageSize - 1)
+  - Response: { data: [], pagination: { page, pageSize, total, totalPages } }
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 PASO 1: BACKEND - HELPER DE PAGINACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: backend/server.js
+Ubicación: Líneas 42-180
+Función: paginateAndFilter(tableName, params)
+
+// ============================================================================
+// HELPER: PAGINACIÓN, BÚSQUEDA Y FILTROS
+// ============================================================================
+
+// Configurar campos donde se puede buscar por texto
+const SEARCHABLE_FIELDS = {
+  metricasensor: ['nodoid', 'tipoid', 'metricaid'],
+  sensor: ['nodoid', 'tipoid'],
+  nodo: ['nodo', 'nodoid'],
+  alerta: ['nodoid', 'alerta'],
+  umbral: ['nodoid', 'tipoid', 'metricaid'],
+  medicion: ['nodoid', 'medicion'],
+  localizacion: ['nodoid', 'ubicacionid'],
+  usuario: ['login', 'nombre', 'email'],
+  // AGREGAR MÁS TABLAS SEGÚN NECESIDAD
+};
+
+async function paginateAndFilter(tableName, params = {}) {
+  const {
+    page,                    // Número de página (1, 2, 3...) - OPCIONAL
+    pageSize = 100,          // Registros por página - DEFAULT: 100
+    search = '',             // Texto de búsqueda - OPCIONAL
+    sortBy = 'datemodified', // Campo para ordenar - DEFAULT: datemodified
+    sortOrder = 'desc',      // asc o desc - DEFAULT: desc
+    ...filters               // Filtros adicionales (paisid, empresaid, statusid, etc.)
+  } = params;
+
+  // Determinar si usar paginación o modo legacy
+  const usePagination = page !== undefined && page !== null;
+
+  try {
+    // ========================================================================
+    // 1. CONSTRUIR QUERY BASE
+    // ========================================================================
+    let query = supabase.from(tableName).select('*', { count: 'exact' });
+
+    // ========================================================================
+    // 2. APLICAR FILTROS (paisid, empresaid, fundoid, statusid, etc.)
+    // ========================================================================
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
+        query = query.eq(key, filters[key]);
+      }
+    });
+
+    // ========================================================================
+    // 3. APLICAR BÚSQUEDA (OR entre campos definidos en SEARCHABLE_FIELDS)
+    // ========================================================================
+    if (search && search.trim() !== '') {
+      const searchFields = SEARCHABLE_FIELDS[tableName] || [];
+      if (searchFields.length > 0) {
+        const searchConditions = searchFields.map(field => 
+          `${field}.ilike.%${search}%`
+        ).join(',');
+        query = query.or(searchConditions);
+      }
+    }
+
+    // ========================================================================
+    // 4. OBTENER TOTAL DE REGISTROS (para calcular páginas)
+    // ========================================================================
+    const { count: totalRecords } = await query;
+
+    // ========================================================================
+    // 5. APLICAR ORDENAMIENTO
+    // ========================================================================
+    if (sortBy) {
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+    }
+
+    // ========================================================================
+    // 6A. MODO PAGINADO: Cargar solo 1 página
+    // ========================================================================
+    if (usePagination) {
+      const offset = (page - 1) * pageSize;
+      query = query.range(offset, offset + pageSize - 1);
+      
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Devolver objeto con data + pagination info
+      return {
+        data: data || [],
+        pagination: {
+          page: parseInt(page),
+          pageSize: parseInt(pageSize),
+          total: totalRecords || 0,
+          totalPages: Math.ceil((totalRecords || 0) / pageSize)
+        }
+      };
+    }
+
+    // ========================================================================
+    // 6B. MODO LEGACY: Cargar TODOS los registros en chunks de 1000
+    // ========================================================================
+    else {
+      console.log(`📚 Modo legacy: Cargando todos los registros de ${tableName}`);
+      
+      let allData = [];
+      let currentOffset = 0;
+      const chunkSize = 1000; // Límite de Supabase
+
+      // Loop para obtener todos los registros en chunks
+      while (true) {
+        const { data: chunk, error } = await supabase
+          .from(tableName)
+          .select('*')
+          .range(currentOffset, currentOffset + chunkSize - 1)
+          .order(sortBy, { ascending: sortOrder === 'asc' });
+
+        if (error) throw error;
+        if (!chunk || chunk.length === 0) break;
+
+        allData = allData.concat(chunk);
+        
+        // Si recibimos menos de 1000, ya no hay más registros
+        if (chunk.length < chunkSize) break;
+        
+        currentOffset += chunkSize;
+      }
+
+      // Devolver array directo (sin pagination object)
+      return allData;
+    }
+
+  } catch (error) {
+    console.error(`❌ Error en paginateAndFilter para ${tableName}:`, error);
+    throw error;
+  }
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 PASO 2: BACKEND - APLICAR EN ENDPOINTS GET
+═══════════════════════════════════════════════════════════════════════════════
+
+PATRÓN ESTÁNDAR para todos los endpoints GET:
+
+app.get('/api/sense/[TABLA]', async (req, res) => {
+  try {
+    console.log('🔍 Backend: Obteniendo [TABLA] del schema sense...');
+    
+    // Usar helper de paginación con query params del request
+    const result = await paginateAndFilter('[TABLA]', req.query);
+    
+    // Verificar si es modo paginado o legacy
+    if (result.pagination) {
+      // MODO PAGINADO: devolver objeto con data + pagination
+      console.log(`✅ Backend: [TABLA] obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      res.json(result);
+    } else {
+      // MODO LEGACY: devolver array directo
+      console.log(`✅ Backend: [TABLA] obtenidos (modo legacy): ${result.length}`);
+      res.json(result);
+    }
+    
+  } catch (error) {
+    console.error('❌ Error in /api/sense/[TABLA]:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+EJEMPLO REAL - METRICASENSOR:
+───────────────────────────────────────────────────────────────────────────────
+
+app.get('/api/sense/metricasensor', async (req, res) => {
+  try {
+    console.log('🔍 Backend: Obteniendo metricasensor del schema sense...');
+    const result = await paginateAndFilter('metricasensor', req.query);
+    
+    if (result.pagination) {
+      console.log(`✅ Backend: Metricasensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      res.json(result);
+    } else {
+      console.log(`✅ Backend: Metricasensor obtenidos (modo legacy): ${result.length}`);
+      res.json(result);
+    }
+  } catch (error) {
+    console.error('❌ Error in /api/sense/metricasensor:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+EJEMPLO REAL - SENSOR:
+───────────────────────────────────────────────────────────────────────────────
+
+app.get('/api/sense/sensor', async (req, res) => {
+  try {
+    console.log('🔍 Backend: Obteniendo sensor del schema sense...');
+    const result = await paginateAndFilter('sensor', req.query);
+    
+    if (result.pagination) {
+      console.log(`✅ Backend: Sensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      res.json(result);
+    } else {
+      console.log(`✅ Backend: Sensor obtenidos (modo legacy): ${result.length}`);
+      res.json(result);
+    }
+  } catch (error) {
+    console.error('❌ Error in /api/sense/sensor:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+TABLAS QUE DEBEN USAR PAGINACIÓN:
+───────────────────────────────────────────────────────────────────────────────
+
+CRÍTICAS (crecimiento exponencial):
+  ✅ metricasensor  - Métricas de sensores
+  ✅ sensor         - Sensores por nodo
+  ✅ nodo           - Nodos LoRaWAN
+  ✅ alerta         - Alertas generadas
+  ✅ umbral         - Umbrales de alertas
+  ✅ medicion       - Mediciones de sensores
+  ✅ mensaje        - Mensajes de alertas
+  ✅ localizacion   - Localizaciones físicas
+
+OPCIONALES (bajo crecimiento):
+  ⚠️ usuario        - Usuarios del sistema
+  ⚠️ usuarioperfil  - Perfiles de usuario
+
+NO NECESARIAS (catálogos pequeños):
+  ❌ pais           - Lista de países
+  ❌ empresa        - Empresas registradas
+  ❌ fundo          - Fundos/fincas
+  ❌ entidad        - Entidades de sensores
+  ❌ tipo           - Tipos de sensores
+  ❌ metrica        - Métricas disponibles
+  ❌ criticidad     - Niveles de criticidad
+  ❌ status         - Estados del sistema
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 PASO 3: FRONTEND - SERVICIO API
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: frontend/src/services/backend-api.ts
+Ubicación: Agregar como método estático de la clase JoySenseService
+
+/**
+ * Obtener datos de tabla con soporte para paginación
+ * 
+ * @param tableName - Nombre de la tabla
+ * @param options - Opciones de paginación, búsqueda y filtros
+ * @returns Promise con { data: [], pagination?: {} }
+ */
+static async getTableDataPaginated(
+  tableName: string, 
+  options: { 
+    page?: number;           // Número de página (1, 2, 3...)
+    pageSize?: number;       // Registros por página
+    search?: string;         // Texto de búsqueda
+    sortBy?: string;         // Campo para ordenar
+    sortOrder?: 'asc' | 'desc'; // Orden
+    [key: string]: any;      // Filtros adicionales (paisid, statusid, etc.)
+  } = {}
+): Promise<{ data: any[]; pagination?: any }> {
+  try {
+    // Construir query params
+    const params = new URLSearchParams();
+    
+    Object.keys(options).forEach(key => {
+      if (options[key] !== undefined && options[key] !== null && options[key] !== '') {
+        params.append(key, String(options[key]));
+      }
+    });
+
+    const queryString = params.toString();
+    const endpoint = `/sense/${tableName}${queryString ? '?' + queryString : ''}`;
+    
+    // Llamar al backend
+    const response = await backendAPI.get(endpoint);
+    
+    // Si tiene pagination object, es modo paginado
+    if (response && response.pagination) {
+      return response; // { data: [], pagination: {} }
+    }
+    
+    // Si no, es modo legacy (array directo)
+    const data = Array.isArray(response) ? response : (response?.data || []);
+    return { data }; // { data: [] }
+    
+  } catch (error) {
+    console.error(`Error in getTableDataPaginated for ${tableName}:`, error);
+    throw error;
+  }
+}
+
+
+USO EN COMPONENTES:
+───────────────────────────────────────────────────────────────────────────────
+
+// MODO LEGACY (sin page): carga TODOS los registros
+const result = await JoySenseService.getTableDataPaginated('metricasensor');
+console.log(result.data); // Array con TODOS los registros
+
+
+// MODO PAGINADO (con page): carga solo 1 página
+const result = await JoySenseService.getTableDataPaginated('metricasensor', {
+  page: 1,
+  pageSize: 100,
+  search: 'temperatura',
+  statusid: 1
+});
+console.log(result.data);       // Array con 100 registros
+console.log(result.pagination); // { page: 1, pageSize: 100, total: 1401, totalPages: 15 }
+
+
+// MODO PAGINADO con filtros adicionales
+const result = await JoySenseService.getTableDataPaginated('sensor', {
+  page: 2,
+  pageSize: 50,
+  nodoid: 256,
+  statusid: 1,
+  sortBy: 'datecreated',
+  sortOrder: 'asc'
+});
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 PASO 4: FRONTEND - HOOK DE PAGINACIÓN (OPCIONAL)
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: frontend/src/hooks/useServerPagination.ts
+
+import { useState } from 'react';
+
+/**
+ * Hook para manejar paginación server-side
+ * 
+ * @param initialPageSize - Tamaño inicial de página (default: 100)
+ * @returns Objeto con estado y funciones de paginación
+ */
+export function useServerPagination(initialPageSize = 100) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(initialPageSize);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  /**
+   * Cambiar a una página específica
+   */
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  /**
+   * Cambiar tamaño de página
+   */
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset a primera página
+  };
+
+  /**
+   * Actualizar información de paginación desde response del backend
+   */
+  const updatePaginationInfo = (pagination: any) => {
+    if (pagination) {
+      setTotalRecords(pagination.total || 0);
+      setTotalPages(pagination.totalPages || 0);
+    }
+  };
+
+  /**
+   * Reset a estado inicial
+   */
+  const resetPagination = () => {
+    setCurrentPage(1);
+    setTotalRecords(0);
+    setTotalPages(0);
+  };
+
+  return {
+    // Estado
+    currentPage,
+    pageSize,
+    totalRecords,
+    totalPages,
+    
+    // Funciones
+    handlePageChange,
+    handlePageSizeChange,
+    updatePaginationInfo,
+    resetPagination,
+    
+    // Helpers
+    hasNextPage: currentPage < totalPages,
+    hasPrevPage: currentPage > 1
+  };
+}
+
+
+USO EN COMPONENTE:
+───────────────────────────────────────────────────────────────────────────────
+
+import { useServerPagination } from '../hooks/useServerPagination';
+import { JoySenseService } from '../services/backend-api';
+
+function MiComponente() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  const { 
+    currentPage, 
+    pageSize, 
+    totalRecords,
+    totalPages,
+    handlePageChange, 
+    handlePageSizeChange,
+    updatePaginationInfo,
+    hasNextPage,
+    hasPrevPage
+  } = useServerPagination(100);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      const result = await JoySenseService.getTableDataPaginated('metricasensor', {
+        page: currentPage,
+        pageSize: pageSize,
+        statusid: 1
+      });
+      
+      setData(result.data);
+      
+      if (result.pagination) {
+        updatePaginationInfo(result.pagination);
+      }
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos cuando cambie la página
+  useEffect(() => {
+    loadData();
+  }, [currentPage, pageSize]);
+
+  return (
+    <div>
+      {/* Tabla de datos */}
+      <table>
+        <thead>
+          <tr>
+            <th>Nodo</th>
+            <th>Tipo</th>
+            <th>Métrica</th>
+          </tr>
+        </thead>
+        <tbody>
+          {loading ? (
+            <tr><td colSpan={3}>Cargando...</td></tr>
+          ) : (
+            data.map(row => (
+              <tr key={`${row.nodoid}-${row.tipoid}-${row.metricaid}`}>
+                <td>{row.nodoid}</td>
+                <td>{row.tipoid}</td>
+                <td>{row.metricaid}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+
+      {/* Controles de paginación */}
+      <div className="pagination-controls">
+        <button 
+          onClick={() => handlePageChange(1)} 
+          disabled={!hasPrevPage}
+        >
+          Primera
+        </button>
+        
+        <button 
+          onClick={() => handlePageChange(currentPage - 1)} 
+          disabled={!hasPrevPage}
+        >
+          Anterior
+        </button>
+        
+        <span>
+          Página {currentPage} de {totalPages} ({totalRecords} registros)
+        </span>
+        
+        <button 
+          onClick={() => handlePageChange(currentPage + 1)} 
+          disabled={!hasNextPage}
+        >
+          Siguiente
+        </button>
+        
+        <button 
+          onClick={() => handlePageChange(totalPages)} 
+          disabled={!hasNextPage}
+        >
+          Última
+        </button>
+        
+        {/* Selector de tamaño de página */}
+        <select 
+          value={pageSize} 
+          onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+        >
+          <option value={50}>50 por página</option>
+          <option value={100}>100 por página</option>
+          <option value={200}>200 por página</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+📝 PASO 5: FRONTEND - COMPONENTE DE CONTROLES DE PAGINACIÓN (OPCIONAL)
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: frontend/src/components/PaginationControls.tsx
+
+import React from 'react';
+
+interface PaginationControlsProps {
+  currentPage: number;
+  totalPages: number;
+  totalRecords: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export function PaginationControls({
+  currentPage,
+  totalPages,
+  totalRecords,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  hasNextPage,
+  hasPrevPage
+}: PaginationControlsProps) {
+  
+  return (
+    <div className="flex items-center justify-between mt-4 px-4 py-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      {/* Información */}
+      <div className="text-sm text-gray-700 dark:text-gray-300">
+        Mostrando {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalRecords)} de {totalRecords} registros
+      </div>
+
+      {/* Controles */}
+      <div className="flex items-center space-x-2">
+        {/* Primera página */}
+        <button
+          onClick={() => onPageChange(1)}
+          disabled={!hasPrevPage}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+        >
+          ««
+        </button>
+
+        {/* Página anterior */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={!hasPrevPage}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+        >
+          «
+        </button>
+
+        {/* Número de página */}
+        <span className="px-4 py-1 text-sm">
+          Página {currentPage} de {totalPages}
+        </span>
+
+        {/* Página siguiente */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={!hasNextPage}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+        >
+          »
+        </button>
+
+        {/* Última página */}
+        <button
+          onClick={() => onPageChange(totalPages)}
+          disabled={!hasNextPage}
+          className="px-3 py-1 rounded bg-blue-500 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+        >
+          »»
+        </button>
+
+        {/* Selector de tamaño */}
+        <select
+          value={pageSize}
+          onChange={(e) => onPageSizeChange(Number(e.target.value))}
+          className="ml-4 px-2 py-1 border rounded bg-white dark:bg-gray-700"
+        >
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
+          <option value={200}>200</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 RESUMEN: PASOS MÍNIMOS PARA REPLICAR
+═══════════════════════════════════════════════════════════════════════════════
+
+BACKEND (Node.js + Supabase):
+  1. Copiar función paginateAndFilter() completa
+  2. Configurar SEARCHABLE_FIELDS para tus tablas
+  3. Actualizar endpoints GET para usar paginateAndFilter()
+  4. Aplicar a tablas críticas (ver lista arriba)
+
+FRONTEND (React + TypeScript):
+  1. Agregar método getTableDataPaginated() en servicio API
+  2. (Opcional) Crear hook useServerPagination()
+  3. (Opcional) Crear componente PaginationControls
+  4. Actualizar componentes para usar nuevo método
+
+TESTING:
+  1. Sin 'page': GET /api/sense/metricasensor
+     → Debe devolver array con TODOS los registros
+     → Log: "📚 Modo legacy: Cargando todos los registros"
+  
+  2. Con 'page': GET /api/sense/metricasensor?page=1&pageSize=100
+     → Debe devolver { data: [], pagination: {} }
+     → Log: "✅ Backend: Metricasensor obtenidos: 100 de 1401"
+
+═══════════════════════════════════════════════════════════════════════════════
+📊 BENEFICIOS DE ESTA IMPLEMENTACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ ESCALABILIDAD:
+   - Soporta tablas con millones de registros
+   - Rendimiento constante sin importar tamaño de tabla
+
+✅ COMPATIBILIDAD:
+   - Modo legacy mantiene código existente funcionando
+   - Migración gradual sin romper funcionalidad
+
+✅ FLEXIBILIDAD:
+   - Búsqueda por texto en múltiples campos
+   - Filtros dinámicos (paisid, empresaid, statusid, etc.)
+   - Ordenamiento configurable
+
+✅ PERFORMANCE:
+   - Backend solo envía datos necesarios
+   - Reduce carga de red y memoria del cliente
+   - Queries optimizadas con indexes
+
+✅ UX PROFESIONAL:
+   - Controles de navegación claros
+   - Información de registros visible
+   - Carga rápida de datos
+
+═══════════════════════════════════════════════════════════════════════════════
+⚠️ CONSIDERACIONES IMPORTANTES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. INDEXES DE BASE DE DATOS:
+   - Asegúrate de tener indexes en campos de búsqueda y ordenamiento
+   - Ejemplo: CREATE INDEX idx_metricasensor_nodoid ON metricasensor(nodoid);
+
+2. CACHÉ:
+   - Considera implementar caché del lado del servidor (Redis)
+   - Para queries frecuentes (ej: página 1 con filtros comunes)
+
+3. BÚSQUEDA:
+   - Para búsquedas complejas, considera ElasticSearch o Algolia
+   - La búsqueda actual es básica (ILIKE)
+
+4. REAL-TIME:
+   - Si necesitas real-time, usa Supabase Realtime subscriptions
+   - Solo para la página actual, no todo el dataset
+
+5. LIMITS:
+   - Considera poner límite máximo de pageSize (ej: 500)
+   - Para evitar queries muy pesadas
+
+═══════════════════════════════════════════════════════════════════════════════
+🔗 REFERENCIAS Y RECURSOS
+═══════════════════════════════════════════════════════════════════════════════
+
+Documentación Supabase:
+  - Pagination: https://supabase.com/docs/guides/api/pagination
+  - Range queries: https://postgrest.org/en/stable/references/api/pagination.html
+
+Estándares de Paginación:
+  - REST API Best Practices
+  - Offset-based pagination (simple, implementado aquí)
+  - Cursor-based pagination (mejor para datasets muy grandes)
+  - Keyset pagination (mejor performance, más complejo)
+
+Proyecto Base:
+  - JoySense Dashboard
+  - GitHub: https://github.com/JemnerVera/lorawan-sense-app
+  - Azure: agromigiva-joysense-dev
+
+═══════════════════════════════════════════════════════════════════════════════
+📞 SOPORTE
+═══════════════════════════════════════════════════════════════════════════════
+
+Si tienes dudas al implementar esta solución:
+
+1. Revisa los logs del backend
+   - "📚 Modo legacy" significa que está funcionando sin paginación
+   - "✅ Backend: X de Y" significa que está paginando correctamente
+
+2. Verifica el response del API
+   - Sin paginación: Array directo []
+   - Con paginación: { data: [], pagination: {} }
+
+3. Debugging
+   - Usa console.log para ver params que llegan al backend
+   - Verifica que SEARCHABLE_FIELDS tenga tu tabla
+   - Revisa que los nombres de campos coincidan con la DB
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DE LA GUÍA
+═══════════════════════════════════════════════════════════════════════════════
+
+Implementado en JoySense Dashboard - Octubre 2025
+Tested con 1400+ registros en producción
+Funcionando en Azure App Service (agromigiva-joysense-dev)
+
+Esta implementación sigue estándares empresariales y es escalable para
+aplicaciones de nivel producción con millones de registros.
+

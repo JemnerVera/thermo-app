@@ -103,24 +103,20 @@ const MultipleMetricaSensorForm: React.FC<MultipleMetricaSensorFormProps> = memo
   // UTILITY FUNCTIONS
   // ============================================================================
 
-  // Función para obtener tipos basándose en los nodos seleccionados
-  const getTiposFromSelectedNodos = React.useCallback(() => {
+  // Función para obtener tipos basándose en los sensores seleccionados
+  // En Thermos, cada sensor YA tiene un tipo asignado (sensor.tipoid)
+  const getTiposFromSelectedSensors = React.useCallback(() => {
     if (selectedNodos.length === 0) return [];
 
-const tiposUnicos = new Set<string>();
+    const tiposUnicos = new Set<string>();
     
-    selectedNodos.forEach(nodoId => {
-      // Buscar sensores que pertenecen a este nodo específico
-      const sensoresDelNodo = sensorsData.filter(sensor => 
-        sensor.nodoid && sensor.nodoid.toString() === nodoId
-      );
-
-// Agregar los tipos únicos de este nodo
-      sensoresDelNodo.forEach(sensor => {
-        if (sensor.tipoid) {
-          tiposUnicos.add(sensor.tipoid.toString());
-        }
-      });
+    selectedNodos.forEach(sensorId => {
+      // En Thermos, sensorsData contiene directamente los sensores con su tipoid
+      const sensor = sensorsData.find(s => s.sensorid && s.sensorid.toString() === sensorId);
+      
+      if (sensor && sensor.tipoid) {
+        tiposUnicos.add(sensor.tipoid.toString());
+      }
     });
     
     const resultado = Array.from(tiposUnicos).map(tipoId => {
@@ -128,72 +124,13 @@ const tiposUnicos = new Set<string>();
       return tipo ? { tipoid: tipo.tipoid, tipo: tipo.tipo } : null;
     }).filter(Boolean);
 
-return resultado;
+    return resultado;
   }, [selectedNodos, sensorsData, tiposData]);
   
-  const tiposFromNodos = React.useMemo(() => getTiposFromSelectedNodos(), [getTiposFromSelectedNodos]);
+  const tiposFromSensors = React.useMemo(() => getTiposFromSelectedSensors(), [getTiposFromSelectedSensors]);
   
-  // Función para analizar similitud de nodos (similar a MassiveUmbralForm)
-  const analyzeNodoSimilarity = React.useCallback(() => {
-    if (selectedNodos.length <= 1) return null;
-
-const nodoAnalysis = selectedNodos.map(nodoId => {
-      const nodo = nodosData.find(n => n.nodoid.toString() === nodoId);
-      
-      // Obtener tipos específicos para este nodo usando getUniqueOptionsForField
-      const tiposDelNodo = getUniqueOptionsForField('tipoid', { 
-        entidadid: selectedEntidad,
-        nodoid: nodoId
-      });
-
-return {
-        nodoid: nodoId,
-        nodo: nodo?.nodo || nodoId,
-        tipos: tiposDelNodo.map(t => t.label),
-        tiposCount: tiposDelNodo.length,
-        tiposKey: tiposDelNodo.map(t => t.label).sort().join('|') // Clave única para agrupar
-      };
-    });
-
-// Agrupar nodos por similitud de tipos (mismo patrón que MassiveUmbralForm)
-    const groupedNodes: {[key: string]: {count: number, types: string[], nodos: any[]}} = {};
-    
-    nodoAnalysis.forEach(nt => {
-      const key = `${nt.tiposCount}-${nt.tiposKey}`;
-      if (!groupedNodes[key]) {
-        groupedNodes[key] = {
-          count: nt.tiposCount,
-          types: nt.tipos,
-          nodos: []
-        };
-      }
-      groupedNodes[key].nodos.push(nt);
-    });
-    
-    // Si solo hay un grupo, todos los nodos son consistentes
-    const hasDifferences = Object.keys(groupedNodes).length > 1;
-
-return {
-      nodoAnalysis,
-      similarityGroups: Object.values(groupedNodes).map(group => group.nodos),
-      hasDifferences,
-      groupedNodes
-    };
-  }, [selectedNodos, selectedEntidad, nodosData]); // Removido getUniqueOptionsForField de las dependencias
-  
-  const similarityAnalysis = React.useMemo(() => analyzeNodoSimilarity(), [analyzeNodoSimilarity]);
-  
-  // Función para validar si la selección de nodos es válida
-  const isValidNodoSelection = () => {
-    if (!similarityAnalysis?.hasDifferences) return true;
-    
-    // Verificar que todos los nodos seleccionados pertenecen al mismo grupo
-    const selectedNodoGroups = similarityAnalysis.similarityGroups.filter(group => 
-      group.some(nodo => selectedNodos.includes(nodo.nodoid))
-    );
-    
-    return selectedNodoGroups.length === 1;
-  };
+  // En Thermos, no necesitamos análisis de similitud de nodos
+  // porque cada sensor ya tiene su tipo asignado
   
   // ============================================================================
   // EVENT HANDLERS
@@ -210,15 +147,15 @@ return {
   // EFFECTS
   // ============================================================================
 
-  // Actualizar tipos seleccionados cuando cambien los nodos
+  // Actualizar tipos seleccionados cuando cambien los sensores
   React.useEffect(() => {
     if (selectedNodos.length > 0) {
-      const tiposIds = tiposFromNodos.filter(t => t !== null).map(t => t!.tipoid.toString());
+      const tiposIds = tiposFromSensors.filter(t => t !== null).map(t => t!.tipoid.toString());
       setSelectedTiposCheckboxes(tiposIds);
     } else {
       setSelectedTiposCheckboxes([]);
     }
-  }, [selectedNodos, selectedEntidad, tiposFromNodos]);
+  }, [selectedNodos, selectedEntidad, tiposFromSensors]);
   
   // Estado para métricas seleccionadas con checkboxes
   const [selectedMetricasCheckboxes, setSelectedMetricasCheckboxes] = React.useState<string[]>([]);
@@ -297,25 +234,21 @@ return {
     setSelectedMetricas(selectedMetricasCheckboxes);
     
     // Generar las combinaciones para multipleMetricas
-    if (selectedNodos.length > 0 && selectedMetricasCheckboxes.length > 0 && selectedTiposCheckboxes.length > 0 && selectedEntidad) {
+    // En THERMOS: solo (sensorid, metricaid) - el tipoid ya está en el sensor
+    if (selectedNodos.length > 0 && selectedMetricasCheckboxes.length > 0) {
       const combinaciones: Array<{
-        nodoid: number;
+        sensorid: number;
         metricaid: number;
-        tipoid: number;
         statusid: number;
       }> = [];
       
       selectedMetricasCheckboxes.forEach((metricaId) => {
-        
-        selectedNodos.forEach((nodoId) => {
-          selectedTiposCheckboxes.forEach((tipoId) => {
-            const key = `${nodoId}-${metricaId}-${tipoId}`;
-            combinaciones.push({
-              nodoid: parseInt(nodoId),
-              metricaid: parseInt(metricaId),
-              tipoid: parseInt(tipoId),
-              statusid: combinacionesStatus[key] !== false ? 1 : 0 // Por defecto true (activo)
-            });
+        selectedNodos.forEach((sensorId) => {
+          const key = `${sensorId}-${metricaId}`;
+          combinaciones.push({
+            sensorid: parseInt(sensorId),
+            metricaid: parseInt(metricaId),
+            statusid: combinacionesStatus[key] !== false ? 1 : 0 // Por defecto true (activo)
           });
         });
       });
@@ -324,7 +257,7 @@ return {
     } else {
       setMultipleMetricas([]);
     }
-  }, [selectedMetricasCheckboxes, selectedTiposCheckboxes, selectedNodos, selectedEntidad, combinacionesStatus, metricasData]); // Removidas funciones set para evitar loops
+  }, [selectedMetricasCheckboxes, selectedNodos, combinacionesStatus, metricasData]); // Removido selectedTiposCheckboxes
 
   // Agregar useEffect para generar combinaciones automáticamente
   React.useEffect(() => {
@@ -423,93 +356,32 @@ return {
                ? 'bg-gray-200 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-white' 
                : 'bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-700 cursor-not-allowed opacity-50 text-gray-500 dark:text-neutral-400'
            }`}>
-             <span className={selectedNodos.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}>
-               {selectedNodos.length > 0 
-                 ? tiposFromNodos.length > 0
-                   ? tiposFromNodos.filter(t => t !== null).map(t => t!.tipo).join(', ')
-                   : t('metricsensor.no_types_available')
-                 : t('metricsensor.select_nodes_first')
-               }
-             </span>
+            <span className={selectedNodos.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}>
+              {selectedNodos.length > 0 
+                ? tiposFromSensors.length > 0
+                  ? tiposFromSensors.filter(t => t !== null).map(t => t!.tipo).join(', ')
+                  : t('metricsensor.no_types_available')
+                : t('metricsensor.select_sensors_first')
+              }
+            </span>
            </div>
          </div>
        </div>
 
       {/* Mensaje de validación de similitud de nodos (compacto e interactivo) */}
-      {similarityAnalysis?.hasDifferences && (
-        <div className="mt-4 p-3 bg-yellow-100 dark:bg-yellow-900 bg-opacity-20 dark:bg-opacity-20 border border-yellow-500 rounded-lg">
-          <div className="flex items-start">
-            <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
-              <span className="text-black text-xs font-bold">⚠</span>
-            </div>
-            <div className="flex-1">
-              <h5 className="text-yellow-600 dark:text-yellow-400 font-bold text-sm font-mono tracking-wider mb-2">
-                TIPOS DE SENSORES INCONSISTENTES
-              </h5>
-              
-              {/* Resumen compacto de grupos con selección interactiva */}
-              <div className="space-y-2">
-                {Object.values(similarityAnalysis.groupedNodes).map((group, groupIndex) => (
-                  <div 
-                    key={groupIndex} 
-                    className="bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
-                    onClick={() => {
-                      // Seleccionar solo los nodos de este grupo
-                      const nodosDelGrupo = group.nodos.map(nodo => nodo.nodoid);
-                      setSelectedNodos(nodosDelGrupo);
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-blue-600 font-mono text-xs font-bold">
-                        GRUPO {groupIndex + 1} - {group.count} TIPO(S)
-                      </span>
-                      <span className="text-green-600 dark:text-green-400 font-mono text-xs">
-                        CLICK PARA SELECCIONAR
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-1">
-                      {group.nodos.slice(0, 3).map(nodo => (
-                        <span key={nodo.nodoid} className="text-gray-900 dark:text-white font-mono text-xs bg-gray-200 dark:bg-neutral-700 px-2 py-1 rounded">
-                          {nodo.nodo}
-                        </span>
-                      ))}
-                      {group.nodos.length > 3 && (
-                        <span className="text-gray-500 dark:text-neutral-400 font-mono text-xs px-2 py-1">
-                          +{group.nodos.length - 3} más
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {group.types.slice(0, 2).map((tipo, tipoIndex) => (
-                        <span key={tipoIndex} className="text-blue-600 dark:text-blue-300 font-mono text-xs bg-blue-100 dark:bg-blue-900 bg-opacity-50 dark:bg-opacity-30 px-2 py-1 rounded">
-                          {tipo}
-                        </span>
-                      ))}
-                      {group.types.length > 2 && (
-                        <span className="text-blue-600 dark:text-blue-300 font-mono text-xs px-2 py-1">
-                          +{group.types.length - 2} más
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* En Thermos no necesitamos validación de similitud porque cada sensor ya tiene su tipo */}
 
       {/* Nuevo diseño: 2 containers lado a lado */}
       {selectedEntidad && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Container 1: Nodos disponibles con checkboxes */}
+          {/* Container 1: Sensores disponibles con checkboxes */}
           <div className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
             <h4 className="text-lg font-bold text-blue-600 mb-4 font-mono tracking-wider">
-              {t('metricsensor.node')}
+              SENSOR
             </h4>
             <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-2">
-              {getUniqueOptionsForField('nodoid', { entidadid: selectedEntidad })
+              {getUniqueOptionsForField('sensorid', { entidadid: selectedEntidad })
                 .map((option) => (
                   <label key={option.value} className="flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-neutral-700 cursor-pointer transition-colors rounded">
                     <input
@@ -527,9 +399,9 @@ return {
                     <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">{option.label.toUpperCase()}</span>
                   </label>
                 ))}
-              {getUniqueOptionsForField('nodoid', { entidadid: selectedEntidad }).length === 0 && (
+              {getUniqueOptionsForField('sensorid', { entidadid: selectedEntidad }).length === 0 && (
                 <div className="px-3 py-2 text-gray-500 dark:text-neutral-400 text-sm font-mono">
-                  {t('metricsensor.no_nodes_available')}
+                  NO HAY SENSORES DISPONIBLES PARA ESTA ENTIDAD
                 </div>
               )}
             </div>
@@ -596,7 +468,7 @@ return {
       <div className="flex justify-center gap-4 mt-8">
         <button
           onClick={handleInsertMetricas}
-          disabled={loading || multipleMetricas.length === 0 || selectedNodos.length === 0 || selectedMetricasCheckboxes.length === 0 || (similarityAnalysis?.hasDifferences && !isValidNodoSelection())}
+          disabled={loading || multipleMetricas.length === 0 || selectedNodos.length === 0 || selectedMetricasCheckboxes.length === 0}
           className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-mono tracking-wider"
         >
           <span>➕</span>
