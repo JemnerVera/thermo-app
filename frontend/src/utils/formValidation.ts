@@ -68,12 +68,9 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
   ],
   
   localizacion: [
-    { field: 'entidadid', required: false, type: 'number', customMessage: 'Debe seleccionar una entidad' },
+    { field: 'entidadid', required: true, type: 'number', customMessage: 'Debe seleccionar una entidad' },
     { field: 'ubicacionid', required: true, type: 'number', customMessage: 'Debe seleccionar una ubicación' },
-    { field: 'nodoid', required: true, type: 'number', customMessage: 'Debe seleccionar un nodo' },
-    { field: 'latitud', required: false, type: 'number', customMessage: 'La latitud es obligatoria' },
-    { field: 'longitud', required: false, type: 'number', customMessage: 'La longitud es obligatoria' },
-    { field: 'referencia', required: false, type: 'string', customMessage: 'La referencia es obligatoria' }
+    { field: 'localizacion', required: true, type: 'string', minLength: 1, maxLength: 50, customMessage: 'El nombre de la localización es obligatorio' }
   ],
   
   entidad: [
@@ -738,6 +735,7 @@ const validateUbicacionData = async (
 };
 
 // Validación específica para Localización
+// THERMOS: localizacion tiene (ubicacionid, entidadid, localizacion) - NO tiene clave compuesta única
 const validateLocalizacionData = async (
   formData: Record<string, any>, 
   existingData?: any[]
@@ -761,49 +759,27 @@ const validateLocalizacionData = async (
     });
   }
   
-  if (!formData.nodoid) {
+  if (!formData.localizacion || formData.localizacion.trim() === '') {
     errors.push({
-      field: 'nodoid',
-      message: 'Debe seleccionar un nodo',
+      field: 'localizacion',
+      message: 'El nombre de la localización es obligatorio',
       type: 'required'
     });
   }
   
-  if (!formData.latitud || formData.latitud === '') {
+  // 2. Validar longitud máxima del nombre
+  if (formData.localizacion && formData.localizacion.length > 50) {
     errors.push({
-      field: 'latitud',
-      message: 'La latitud es obligatoria',
-      type: 'required'
+      field: 'localizacion',
+      message: 'El nombre no puede exceder 50 caracteres',
+      type: 'length'
     });
   }
   
-  if (!formData.longitud || formData.longitud === '') {
-    errors.push({
-      field: 'longitud',
-      message: 'La longitud es obligatoria',
-      type: 'required'
-    });
-  }
+  // 3. NO hay constraint única en Thermos para localizacion
+  // Se permiten múltiples localizaciones con el mismo nombre en la misma ubicación
   
-  // Referencia es opcional según el schema de la BD
-  
-  // 2. Validar duplicados si hay datos existentes
-  if (existingData && existingData.length > 0) {
-    const localizacionExists = existingData.some(item => 
-      item.ubicacionid && item.ubicacionid.toString() === formData.ubicacionid?.toString() &&
-      item.nodoid && item.nodoid.toString() === formData.nodoid?.toString()
-    );
-    
-    if (localizacionExists) {
-      errors.push({
-        field: 'ubicacionid',
-        message: 'La ubicación y nodo ya están asociados',
-        type: 'duplicate'
-      });
-    }
-  }
-  
-  // 3. Generar mensaje amigable
+  // 4. Generar mensaje amigable
   const userFriendlyMessage = generateUserFriendlyMessage(errors);
   
   return {
@@ -1879,73 +1855,39 @@ const validateLocalizacionUpdate = async (
     });
   }
   
-  if (!formData.nodoid || formData.nodoid === '') {
+  if (!formData.entidadid || formData.entidadid === '') {
     errors.push({
-      field: 'nodoid',
-      message: 'El nodo es obligatorio',
+      field: 'entidadid',
+      message: 'La entidad es obligatoria',
       type: 'required'
     });
   }
   
-  if (!formData.latitud || formData.latitud === '') {
+  if (!formData.localizacion || formData.localizacion.trim() === '') {
     errors.push({
-      field: 'latitud',
-      message: 'La latitud es obligatoria',
+      field: 'localizacion',
+      message: 'El nombre de la localización es obligatorio',
       type: 'required'
     });
   }
   
-  if (!formData.longitud || formData.longitud === '') {
+  // 2. Validar longitud máxima del nombre
+  if (formData.localizacion && formData.localizacion.length > 50) {
     errors.push({
-      field: 'longitud',
-      message: 'La longitud es obligatoria',
-      type: 'required'
+      field: 'localizacion',
+      message: 'El nombre no puede exceder 50 caracteres',
+      type: 'length'
     });
   }
   
-  // Referencia es opcional según el schema de la BD
-  
-  // 2. Validar duplicados (excluyendo el registro actual)
-  // Para localizacion, la clave primaria es compuesta (ubicacionid, nodoid)
-  if (formData.ubicacionid && formData.nodoid) {
-    const localizacionExists = existingData.some(item => 
-      (item.ubicacionid !== originalData.ubicacionid || item.nodoid !== originalData.nodoid) && 
-      item.ubicacionid === formData.ubicacionid && 
-      item.nodoid === formData.nodoid
-    );
-    
-    if (localizacionExists) {
-      errors.push({
-        field: 'composite',
-        message: 'Ya existe una localización para esta ubicación y nodo',
-        type: 'duplicate'
-      });
-    }
-  }
-  
-  // 3. Validar restricción "unico_nodo_activo" (solo si se está activando)
-  if (formData.statusid === 1 && originalData.statusid !== 1) {
-    // Se está activando una localización, verificar que no haya otra activa para el mismo nodo
-    const nodoActivoExists = existingData.some(item => 
-      item.nodoid === formData.nodoid && 
-      item.statusid === 1 &&
-      (item.ubicacionid !== originalData.ubicacionid || item.nodoid !== originalData.nodoid)
-    );
-    
-    if (nodoActivoExists) {
-      errors.push({
-        field: 'statusid',
-        message: 'Ya existe una localización activa para este nodo. Un nodo solo puede tener una localización activa a la vez.',
-        type: 'constraint'
-      });
-    }
-  }
+  // 3. NO hay constraint única en Thermos para localizacion
+  // Se permiten múltiples localizaciones con el mismo nombre
   
   // 4. Validar relaciones padre-hijo (solo si se está inactivando)
   // Según el schema, localizacion NO es referenciada por ninguna otra tabla
   // Por lo tanto, no hay restricciones para inactivar
   
-  // 4. Generar mensaje amigable para actualización (mensajes individuales)
+  // 5. Generar mensaje amigable para actualización (mensajes individuales)
   const userFriendlyMessage = generateUpdateUserFriendlyMessage(errors);
 
 return {

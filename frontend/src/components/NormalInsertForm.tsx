@@ -850,37 +850,22 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       result.push(contextualRow);
     }
     
-    // Segunda fila: Entidad, Ubicación, Nodo
+    // Segunda fila: Entidad, Ubicación, Localización
     const entidadField = visibleColumns.find(c => c.columnName === 'entidadid');
     const ubicacionField = visibleColumns.find(c => c.columnName === 'ubicacionid');
-    const nodoField = visibleColumns.find(c => c.columnName === 'nodoid');
+    const localizacionField = visibleColumns.find(c => c.columnName === 'localizacion');
 
-if (entidadField || ubicacionField || nodoField) {
+    if (entidadField || ubicacionField || localizacionField) {
       result.push(
         <div key="second-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {entidadField && renderLocalizacionField(entidadField, 'entidad')}
           {ubicacionField && renderLocalizacionField(ubicacionField, 'ubicacion')}
-          {nodoField && renderLocalizacionField(nodoField, 'nodo')}
+          {localizacionField && renderLocalizacionField(localizacionField, 'text')}
         </div>
       );
     }
     
-    // Tercera fila: Latitud, Longitud, Referencia
-    const latitudField = visibleColumns.find(c => c.columnName === 'latitud');
-    const longitudField = visibleColumns.find(c => c.columnName === 'longitud');
-    const referenciaField = visibleColumns.find(c => c.columnName === 'referencia');
-    
-    if (latitudField || longitudField || referenciaField) {
-      result.push(
-        <div key="third-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {latitudField && renderLocalizacionField(latitudField, 'coordenadas')}
-          {longitudField && renderLocalizacionField(longitudField, 'coordenadas')}
-          {referenciaField && renderLocalizacionField(referenciaField, 'coordenadas')}
-        </div>
-      );
-    }
-    
-    // Cuarta fila: Status al extremo derecho
+    // Tercera fila: Status al extremo derecho
     const statusField = visibleColumns.find(c => c.columnName === 'statusid');
     if (statusField) {
       result.push(
@@ -921,7 +906,7 @@ return filteredNodos;
   };
 
   // Función para renderizar campos de localización con dependencias en cascada
-  const renderLocalizacionField = (col: any, fieldType: 'entidad' | 'ubicacion' | 'nodo' | 'coordenadas'): React.ReactNode => {
+  const renderLocalizacionField = (col: any, fieldType: 'entidad' | 'ubicacion' | 'nodo' | 'coordenadas' | 'text'): React.ReactNode => {
     const displayName = getColumnDisplayNameTranslated(col.columnName, t);
     if (!displayName) return null;
     
@@ -935,6 +920,8 @@ return filteredNodos;
           return false; // Entidad siempre habilitada
         case 'ubicacion':
           return !formData.entidadid; // Ubicación solo habilitada si hay entidad
+        case 'text':
+          return !formData.ubicacionid; // Campo de texto solo habilitado si hay ubicación
         case 'nodo':
           return !formData.ubicacionid; // Nodo solo habilitado si hay ubicación
         case 'coordenadas':
@@ -1059,6 +1046,33 @@ return filteredNodos;
             })}
             placeholder={`${displayName.toUpperCase()}`}
             disabled={isDisabled}
+            className={`w-full px-3 py-2 bg-neutral-800 border rounded-lg text-white text-base font-mono focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+              isDisabled 
+                ? 'border-neutral-600 bg-neutral-700 cursor-not-allowed opacity-75' 
+                : 'border-neutral-600'
+            }`}
+          />
+        </div>
+      );
+    }
+
+    // Renderizar campo de texto (nombre de localización)
+    if (fieldType === 'text') {
+      return (
+        <div key={col.columnName} className="mb-4">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+            {displayName.toUpperCase()}{isRequired ? '*' : ''}
+          </label>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => setFormData({
+              ...formData,
+              [col.columnName]: e.target.value
+            })}
+            placeholder={`${displayName.toUpperCase()}`}
+            disabled={isDisabled}
+            maxLength={50}
             className={`w-full px-3 py-2 bg-neutral-800 border rounded-lg text-white text-base font-mono focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
               isDisabled 
                 ? 'border-neutral-600 bg-neutral-700 cursor-not-allowed opacity-75' 

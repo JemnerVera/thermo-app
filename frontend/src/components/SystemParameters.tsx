@@ -2031,13 +2031,7 @@ try {
 
       let hasCompositeKey = false;
 
-if (selectedTable === 'localizacion') {
-
-        primaryKey = 'ubicacionid,nodoid'; // Clave primaria compuesta
-
-        hasCompositeKey = true;
-
-      } else if (selectedTable === 'sensor') {
+if (selectedTable === 'sensor') {
 
         primaryKey = 'nodoid,tipoid'; // Clave primaria compuesta
 
@@ -2099,13 +2093,7 @@ const adaptedInfo: TableInfo = {
 
       let hasCompositeKey = false;
 
-if (selectedTable === 'localizacion') {
-
-        primaryKey = 'ubicacionid,nodoid';
-
-        hasCompositeKey = true;
-
-      } else if (selectedTable === 'sensor') {
+if (selectedTable === 'sensor') {
 
         primaryKey = 'nodoid,tipoid';
 
@@ -2983,15 +2971,7 @@ const newFormData: Record<string, any> = {};
 
       // Para tablas con claves compuestas
 
-      if (selectedTable === 'localizacion') {
-
-        newFormData['ubicacionid'] = row['ubicacionid'];
-
-        newFormData['nodoid'] = row['nodoid'];
-
-        newFormData['entidadid'] = row['entidadid'];
-
-      } else if (selectedTable === 'sensor') {
+      if (selectedTable === 'sensor') {
 
         newFormData['nodoid'] = row['nodoid'];
 
@@ -3320,7 +3300,7 @@ setMessage({
 
       case 'localizacion':
 
-        return ['ubicacionid', 'nodoid'];
+        return ['ubicacionid', 'entidadid', 'localizacion'];
 
       default:
 
@@ -4931,7 +4911,7 @@ if (errorCount > 0) {
       'empresa': ['empresa', 'empresabrev', 'paisid', 'statusid'],
       'fundo': ['fundo', 'fundoabrev', 'empresaid', 'statusid'],
       'ubicacion': ['ubicacion', 'fundoid', 'statusid'],
-      'localizacion': ['ubicacionid', 'nodoid', 'entidadid', 'latitud', 'longitud', 'referencia', 'statusid'],
+      'localizacion': ['ubicacionid', 'entidadid', 'localizacion', 'statusid'],
       'entidad': ['entidad', 'statusid'],
       'tipo': ['tipo', 'entidadid', 'statusid'],
       'nodo': ['nodo', 'deveui', 'appeui', 'appkey', 'atpin', 'statusid'],
@@ -4955,7 +4935,7 @@ if (errorCount > 0) {
       'empresa': [],
       'fundo': [],
       'ubicacion': [],
-      'localizacion': ['latitud', 'longitud', 'referencia', 'entidadid'],
+      'localizacion': [],
       'entidad': [],
       'tipo': [],
       'nodo': ['deveui', 'appeui', 'appkey', 'atpin'],
@@ -5223,7 +5203,7 @@ if (!rowId) {
 
         let result;
 
-        if (selectedTable === 'localizacion' || selectedTable === 'perfilumbral' || selectedTable === 'usuarioperfil') {
+        if (selectedTable === 'perfilumbral' || selectedTable === 'usuarioperfil') {
 
           // Para tablas con clave compuesta, usar clave compuesta
 
@@ -5231,33 +5211,7 @@ if (!rowId) {
 
           let filteredUpdateData: Record<string, any> = {};
 
-if (selectedTable === 'localizacion') {
-
-            compositeKey = {
-
-              ubicacionid: updateFormData.ubicacionid,
-
-              nodoid: updateFormData.nodoid,
-
-              entidadid: updateFormData.entidadid
-
-            };
-
-            // Filtrar solo campos válidos para localizacion
-
-            const fieldsToUpdate = ['statusid', 'latitud', 'longitud', 'referencia'];
-
-            fieldsToUpdate.forEach(field => {
-
-              if (updateFormData[field] !== undefined) {
-
-                filteredUpdateData[field] = updateFormData[field];
-
-              }
-
-            });
-
-          } else if (selectedTable === 'perfilumbral') {
+if (selectedTable === 'perfilumbral') {
 
             compositeKey = {
 
@@ -5538,7 +5492,7 @@ if (selectedTable === 'tipo') {
 
 if (selectedTable === 'localizacion') {
 
-        return ['paisid', 'empresaid', 'fundoid', 'ubicacionid', 'nodoid', 'latitud', 'longitud', 'referencia', 'statusid', 'entidadid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+        return ['paisid', 'empresaid', 'fundoid', 'ubicacionid', 'entidadid', 'localizacion', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
 
       }
 
@@ -5850,15 +5804,13 @@ if (selectedTable === 'fundo') {
 
       } else if (selectedTable === 'localizacion') {
 
-        // Entidad, Ubicacion, Nodo (sin Fundo, Empresa y Pais)
+        // Entidad, Ubicacion, Localizacion (sin Fundo, Empresa y Pais)
 
         reorderedColumns.push(...otherColumns.filter(col => ['entidadid'].includes(col.columnName)));
 
         reorderedColumns.push(...otherColumns.filter(col => ['ubicacionid'].includes(col.columnName)));
 
-        reorderedColumns.push(...otherColumns.filter(col => ['nodoid'].includes(col.columnName)));
-
-        reorderedColumns.push(...otherColumns.filter(col => ['latitud', 'longitud', 'referencia'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['localizacion'].includes(col.columnName)));
 
       } else if (selectedTable === 'tipo') {
 
