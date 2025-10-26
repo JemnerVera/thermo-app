@@ -559,31 +559,34 @@ const validateEmpresaData = async (
   }
   
   // 3. Validar duplicados si hay datos existentes
-  if (existingData && existingData.length > 0) {
+  // CONSTRAINT: unique (paisid, empresa) y unique (paisid, empresabrev)
+  if (existingData && existingData.length > 0 && formData.paisid) {
     const empresaExists = existingData.some(item => 
+      item.paisid && item.paisid.toString() === formData.paisid.toString() &&
       item.empresa && item.empresa.toLowerCase().trim() === formData.empresa?.toLowerCase().trim()
     );
     
     const abrevExists = existingData.some(item => 
+      item.paisid && item.paisid.toString() === formData.paisid.toString() &&
       item.empresabrev && item.empresabrev.toLowerCase().trim() === formData.empresabrev?.toLowerCase().trim()
     );
     
     if (empresaExists && abrevExists) {
       errors.push({
         field: 'both',
-        message: 'La empresa y abreviatura se repite',
+        message: 'La empresa y abreviatura ya existen en este país',
         type: 'duplicate'
       });
     } else if (empresaExists) {
       errors.push({
         field: 'empresa',
-        message: 'La empresa se repite',
+        message: 'La empresa ya existe en este país',
         type: 'duplicate'
       });
     } else if (abrevExists) {
       errors.push({
         field: 'empresabrev',
-        message: 'La abreviatura se repite',
+        message: 'La abreviatura ya existe en este país',
         type: 'duplicate'
       });
     }
@@ -1598,9 +1601,11 @@ const validateEmpresaUpdate = async (
   }
   
   // 2. Validar duplicados (excluyendo el registro actual)
-  if (formData.empresa && formData.empresa.trim() !== '') {
+  // CONSTRAINT: unique (paisid, empresa) y unique (paisid, empresabrev)
+  if (formData.empresa && formData.empresa.trim() !== '' && formData.paisid) {
     const empresaExists = existingData.some(item => 
       item.empresaid !== originalData.empresaid && 
+      item.paisid && item.paisid.toString() === formData.paisid.toString() &&
       item.empresa && 
       item.empresa.toLowerCase() === formData.empresa.toLowerCase()
     );
@@ -1608,15 +1613,16 @@ const validateEmpresaUpdate = async (
     if (empresaExists) {
       errors.push({
         field: 'empresa',
-        message: 'La empresa ya existe',
+        message: 'La empresa ya existe en este país',
         type: 'duplicate'
       });
     }
   }
   
-  if (formData.empresabrev && formData.empresabrev.trim() !== '') {
+  if (formData.empresabrev && formData.empresabrev.trim() !== '' && formData.paisid) {
     const empresabrevExists = existingData.some(item => 
       item.empresaid !== originalData.empresaid && 
+      item.paisid && item.paisid.toString() === formData.paisid.toString() &&
       item.empresabrev && 
       item.empresabrev.toLowerCase() === formData.empresabrev.toLowerCase()
     );
@@ -1624,7 +1630,7 @@ const validateEmpresaUpdate = async (
     if (empresabrevExists) {
       errors.push({
         field: 'empresabrev',
-        message: 'La abreviatura ya existe',
+        message: 'La abreviatura ya existe en este país',
         type: 'duplicate'
       });
     }
