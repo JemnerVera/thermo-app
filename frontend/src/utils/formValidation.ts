@@ -1807,9 +1807,11 @@ const validateUbicacionUpdate = async (
   }
   
   // 2. Validar duplicados (excluyendo el registro actual)
-  if (formData.ubicacion && formData.ubicacion.trim() !== '') {
+  // CONSTRAINT: unique (fundoid, ubicacion)
+  if (formData.ubicacion && formData.ubicacion.trim() !== '' && formData.fundoid) {
     const ubicacionExists = existingData.some(item => 
       item.ubicacionid !== originalData.ubicacionid && 
+      item.fundoid && item.fundoid.toString() === formData.fundoid.toString() &&
       item.ubicacion && 
       item.ubicacion.toLowerCase() === formData.ubicacion.toLowerCase()
     );
@@ -1817,7 +1819,7 @@ const validateUbicacionUpdate = async (
     if (ubicacionExists) {
       errors.push({
         field: 'ubicacion',
-        message: 'La ubicación ya existe',
+        message: 'La ubicación ya existe en este fundo',
         type: 'duplicate'
       });
     }
