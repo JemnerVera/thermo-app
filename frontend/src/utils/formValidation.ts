@@ -644,31 +644,34 @@ const validateFundoData = async (
   }
   
   // 3. Validar duplicados si hay datos existentes
-  if (existingData && existingData.length > 0) {
+  // CONSTRAINT: unique (empresaid, fundo) y unique (empresaid, fundoabrev)
+  if (existingData && existingData.length > 0 && formData.empresaid) {
     const fundoExists = existingData.some(item => 
+      item.empresaid && item.empresaid.toString() === formData.empresaid.toString() &&
       item.fundo && item.fundo.toLowerCase() === formData.fundo?.toLowerCase()
     );
     
     const abrevExists = existingData.some(item => 
+      item.empresaid && item.empresaid.toString() === formData.empresaid.toString() &&
       item.fundoabrev && item.fundoabrev.toLowerCase() === formData.fundoabrev?.toLowerCase()
     );
     
     if (fundoExists && abrevExists) {
       errors.push({
         field: 'both',
-        message: 'El fundo y abreviatura se repite',
+        message: 'El fundo y abreviatura ya existen en esta empresa',
         type: 'duplicate'
       });
     } else if (fundoExists) {
       errors.push({
         field: 'fundo',
-        message: 'El nombre del fundo se repite',
+        message: 'El nombre del fundo ya existe en esta empresa',
         type: 'duplicate'
       });
     } else if (abrevExists) {
       errors.push({
         field: 'fundoabrev',
-        message: 'La abreviatura se repite',
+        message: 'La abreviatura ya existe en esta empresa',
         type: 'duplicate'
       });
     }
@@ -1707,9 +1710,11 @@ const validateFundoUpdate = async (
   }
   
   // 2. Validar duplicados (excluyendo el registro actual)
-  if (formData.fundo && formData.fundo.trim() !== '') {
+  // CONSTRAINT: unique (empresaid, fundo) y unique (empresaid, fundoabrev)
+  if (formData.fundo && formData.fundo.trim() !== '' && formData.empresaid) {
     const fundoExists = existingData.some(item => 
       item.fundoid !== originalData.fundoid && 
+      item.empresaid && item.empresaid.toString() === formData.empresaid.toString() &&
       item.fundo && 
       item.fundo.toLowerCase() === formData.fundo.toLowerCase()
     );
@@ -1717,15 +1722,16 @@ const validateFundoUpdate = async (
     if (fundoExists) {
       errors.push({
         field: 'fundo',
-        message: 'El fundo ya existe',
+        message: 'El fundo ya existe en esta empresa',
         type: 'duplicate'
       });
     }
   }
   
-  if (formData.fundoabrev && formData.fundoabrev.trim() !== '') {
+  if (formData.fundoabrev && formData.fundoabrev.trim() !== '' && formData.empresaid) {
     const fundoabrevExists = existingData.some(item => 
       item.fundoid !== originalData.fundoid && 
+      item.empresaid && item.empresaid.toString() === formData.empresaid.toString() &&
       item.fundoabrev && 
       item.fundoabrev.toLowerCase() === formData.fundoabrev.toLowerCase()
     );
@@ -1733,7 +1739,7 @@ const validateFundoUpdate = async (
     if (fundoabrevExists) {
       errors.push({
         field: 'fundoabrev',
-        message: 'La abreviatura ya existe',
+        message: 'La abreviatura ya existe en esta empresa',
         type: 'duplicate'
       });
     }
