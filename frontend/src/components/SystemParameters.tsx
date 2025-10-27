@@ -5353,6 +5353,18 @@ if (selectedTable === 'fundo') {
 
         reorderedColumns.push(...otherColumns.filter(col => ['maximo'].includes(col.columnName)));
 
+      } else if (selectedTable === 'perfilumbral') {
+
+        // Thermos schema: Perfil, Umbral, Status, Audit fields
+
+        reorderedColumns.push(...otherColumns.filter(col => ['perfilid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['umbralid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['statusid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName)));
+
       } else if (selectedTable === 'usuario') {
 
         // Usuario, Nombre, Apellido
