@@ -431,7 +431,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
               }
             }}
             placeholder={`${displayName.toUpperCase()}`}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-white text-base placeholder-neutral-400 font-mono ${
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white text-base placeholder-neutral-400 font-mono ${
               isEnabled 
                 ? 'bg-neutral-800 border-neutral-600' 
                 : 'bg-neutral-700 border-neutral-600 opacity-50 cursor-not-allowed'
@@ -996,7 +996,7 @@ return filteredNodos;
             })}
             placeholder={`${displayName.toUpperCase()}`}
             disabled={isDisabled}
-            className={`w-full px-3 py-2 bg-neutral-800 border rounded-lg text-white text-base font-mono focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+            className={`w-full px-3 py-2 bg-neutral-800 border rounded-lg text-white text-base font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
               isDisabled 
                 ? 'border-neutral-600 bg-neutral-700 cursor-not-allowed opacity-75' 
                 : 'border-neutral-600'
@@ -1023,7 +1023,7 @@ return filteredNodos;
             placeholder={`${displayName.toUpperCase()}`}
             disabled={isDisabled}
             maxLength={50}
-            className={`w-full px-3 py-2 bg-neutral-800 border rounded-lg text-white text-base font-mono focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+            className={`w-full px-3 py-2 bg-neutral-800 border rounded-lg text-white text-base font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
               isDisabled 
                 ? 'border-neutral-600 bg-neutral-700 cursor-not-allowed opacity-75' 
                 : 'border-neutral-600'
@@ -1548,7 +1548,7 @@ return filteredNodos;
                   }
                 }}
                 disabled={!isEnabled}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-800 dark:text-white text-base placeholder-gray-500 dark:placeholder-neutral-400 font-mono ${
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-white text-base placeholder-gray-500 dark:placeholder-neutral-400 font-mono ${
                   isEnabled 
                     ? 'bg-gray-200 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600' 
                     : 'bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 opacity-50 cursor-not-allowed'
@@ -1664,7 +1664,7 @@ return filteredNodos;
                   }}
                   placeholder={formData.codigotelefonoid ? "EJ: 987654321" : `${t('buttons.previous')} ${t('buttons.select')} ${t('fields.country')}`}
                   disabled={!formData.codigotelefonoid}
-                  className={`flex-1 px-4 py-3 border border-l-0 rounded-r-lg text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-mono ${
+                  className={`flex-1 px-4 py-3 border border-l-0 rounded-r-lg text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono ${
                     formData.codigotelefonoid 
                       ? 'bg-neutral-700 border-neutral-600' 
                       : 'bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-50'
@@ -1690,7 +1690,7 @@ return filteredNodos;
               }}
               placeholder={formData.usuarioid ? "USUARIO@DOMINIO.COM" : t('contact.select_user_first')}
               disabled={!formData.usuarioid}
-              className={`w-full px-4 py-3 border rounded-lg text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-mono ${
+              className={`w-full px-4 py-3 border rounded-lg text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono ${
                 formData.usuarioid 
                   ? 'bg-neutral-700 border-neutral-600' 
                   : 'bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-50'

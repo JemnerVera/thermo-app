@@ -15,12 +15,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #f97316; /* orange-500 */
+  background: #2563eb; /* blue-600 */
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #ea580c; /* orange-600 */
+  background: #1d4ed8; /* blue-700 */
 }
 
 /* Para Firefox */
