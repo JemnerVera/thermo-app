@@ -28,6 +28,7 @@ const TableSelector: React.FC<TableSelectorProps> = ({
       { value: 'tipo', label: 'Tipo' },
       { value: 'nodo', label: 'Nodo' },
       { value: 'sensor', label: 'Sensor' },
+      { value: 'localizacionsensor', label: 'Localización-Sensor' },
       { value: 'metricasensor', label: 'Métrica Sensor' },
       { value: 'metrica', label: 'Métrica' }
     ],
