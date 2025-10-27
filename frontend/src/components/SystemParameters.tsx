@@ -53,7 +53,6 @@ import { MessageDisplay } from './SystemParameters/MessageDisplay';
 
 // Components - Forms
 import MultipleUsuarioPerfilForm from './MultipleUsuarioPerfilForm';
-import { MassiveSensorForm } from './MassiveSensorForm';
 import { MassiveMetricaSensorForm } from './MassiveMetricaSensorForm';
 import { AdvancedUsuarioPerfilUpdateForm } from './AdvancedUsuarioPerfilUpdateForm';
 import { AdvancedMetricaSensorUpdateForm } from './AdvancedMetricaSensorUpdateForm';
@@ -2466,152 +2465,6 @@ loadTableDataWrapper();
 } catch (error: any) {
 
       const errorResponse = handleInsertError(error);
-
-      setMessage({ type: errorResponse.type, text: errorResponse.message });
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
-
-// Función para manejar la creación masiva de sensores
-
-  const handleMassiveSensorCreation = async (dataToApply: any[]) => {
-
-    if (!selectedTable || !user || selectedTable !== 'sensor') return;
-
-try {
-
-      setLoading(true);
-
-const usuarioid = getCurrentUserId();
-
-      const currentTimestamp = new Date().toISOString();
-
-// Preparar datos con información de auditoría
-
-      const preparedData = dataToApply.map(item => ({
-
-        ...item,
-
-        usercreatedid: usuarioid,
-
-        usermodifiedid: usuarioid,
-
-        datecreated: currentTimestamp,
-
-        datemodified: currentTimestamp
-
-      }));
-
-// Verificar si hay duplicados antes de enviar
-
-      const duplicates = preparedData.filter((item, index, self) => 
-
-        index !== self.findIndex(t => 
-
-          t.nodoid === item.nodoid && 
-
-          t.tipoid === item.tipoid
-
-        )
-
-      );
-
-if (duplicates.length > 0) {
-
-        console.warn('⚠️ Se encontraron duplicados en los datos de sensores:', duplicates);
-
-        // Eliminar duplicados
-
-        const uniqueData = preparedData.filter((item, index, self) => 
-
-          index === self.findIndex(t => 
-
-            t.nodoid === item.nodoid && 
-
-            t.tipoid === item.tipoid
-
-          )
-
-        );
-
-preparedData.length = 0;
-
-        preparedData.push(...uniqueData);
-
-      }
-
-// Verificar que los sensorid y tipoid existen
-
-      const sensoresExistentes = sensorsData?.map(s => s.sensorid) || [];
-
-      const tiposExistentes = tiposData?.map(t => t.tipoid) || [];
-
-const sensoresInvalidos = preparedData.filter(item => !sensoresExistentes.includes(item.sensorid));
-
-      const tiposInvalidos = preparedData.filter(item => !tiposExistentes.includes(item.tipoid));
-
-if (sensoresInvalidos.length > 0) {
-
-        console.error('❌ Sensores inválidos encontrados:', sensoresInvalidos);
-
-      }
-
-if (tiposInvalidos.length > 0) {
-
-        console.error('❌ Tipos inválidos encontrados:', tiposInvalidos);
-
-      }
-
-// Realizar inserción masiva usando insertTableRow para cada registro
-
-      for (const record of preparedData) {
-
-        await ThermosService.insertTableRow(selectedTable, record);
-
-      }
-
-// Agregar registros insertados al sistema de mensajes
-
-      preparedData.forEach(record => {
-
-        addInsertedRecord(record);
-
-      });
-
-// Limpiar mensajes de alerta después de inserción exitosa
-
-      setMessage(null);
-
-// Recargar datos
-
-      loadTableDataWrapper();
-
-      loadTableInfo();
-
-      loadUpdateData();
-
-      loadCopyData();
-
-      loadRelatedTablesData();
-
-setMessage({ 
-
-        type: 'success', 
-
-        text: `Se crearon ${preparedData.length} sensores exitosamente` 
-
-      });
-
-} catch (error: any) {
-
-      console.error('Error en creación masiva de sensores:', error);
-
-      const errorResponse = handleMultipleInsertError(error, 'sensores');
 
       setMessage({ type: errorResponse.type, text: errorResponse.message });
 
@@ -9153,33 +9006,7 @@ return getDisplayValueLocal(row, col.columnName);
 
                         <div className="bg-gray-100 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-xl p-6">
 
-                  {selectedTable === 'sensor' ? (
-
-                    <MassiveSensorForm
-
-                      getUniqueOptionsForField={getUniqueOptionsForField}
-
-                      onApply={handleMassiveSensorCreation}
-
-                      onCancel={() => {
-
-                        setCancelAction(() => () => {
-
-                          setMessage(null);
-
-                        });
-
-                        setShowCancelModal(true);
-
-                      }}
-
-                      loading={loading}
-
-                      entidadesData={entidadesData}
-
-                    />
-
-                  ) : selectedTable === 'metricasensor' ? (
+                  {selectedTable === 'metricasensor' ? (
 
                     <MassiveMetricaSensorForm
 
