@@ -4185,31 +4185,31 @@ const getRowId = (row: any, tableName: string) => {
 
     if (tableName === 'sensor') {
 
-      // Para sensor, la clave compuesta es (nodoid, tipoid)
+      // En Thermos, sensor tiene clave primaria simple (sensorid)
 
-      if (row.nodoid !== undefined && row.tipoid !== undefined) {
+      if (row.sensorid !== undefined) {
 
-        return `${row.nodoid}-${row.tipoid}`;
+        return `sensor-${row.sensorid}`;
 
       }
 
     } else if (tableName === 'metricasensor') {
 
-      // Para metricasensor agrupado, usar solo nodoid como identificador único
+      // Para metricasensor agrupado, usar solo sensorid como identificador único
 
-      if (row.nodoid !== undefined) {
+      if (row.sensorid !== undefined) {
 
-        return `grouped-${row.nodoid}`;
+        return `grouped-${row.sensorid}`;
 
       }
 
     } else if (tableName === 'localizacion') {
 
-      // Para localizacion, la clave compuesta es (ubicacionid, nodoid)
+      // En Thermos, localizacion tiene clave primaria simple (localizacionid)
 
-      if (row.ubicacionid !== undefined && row.nodoid !== undefined) {
+      if (row.localizacionid !== undefined) {
 
-        return `${row.ubicacionid}-${row.nodoid}`;
+        return `localizacion-${row.localizacionid}`;
 
       }
 
@@ -4255,7 +4255,7 @@ const getRowId = (row: any, tableName: string) => {
 
       'localizacion': 'localizacionid',
 
-      'nodo': 'nodoid',
+      'sensor': 'sensorid',
 
       'umbral': 'umbralid',
 
@@ -7607,20 +7607,6 @@ const handleSelectRowForManualUpdate = (row: any, isSelected: boolean) => {
 
     const rowId = getRowIdForSelection(row);
 
-console.log('🔍 handleSelectRowForManualUpdate:', { 
-
-      rowId, 
-
-      isSelected, 
-
-      currentSelection: selectedRowsForManualUpdate.length,
-
-      hasOriginalRows: row.originalRows?.length,
-
-      selectedTable
-
-    });
-
 // Para tablas agrupadas (sensor, metricasensor, usuarioperfil), implementar selección única
 
     if (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
@@ -8818,11 +8804,11 @@ setIndividualRowStatus(newIndividualStatus);
 
                                           type="checkbox"
 
-                                          checked={individualRowStatus[`${row.nodoid || row.id || index}-${index}`] || false}
+                                          checked={individualRowStatus[`${row.sensorid || row.nodoid || row.id || index}-${index}`] || false}
 
                                           onChange={(e) => {
 
-                                            const rowKey = `${row.nodoid || row.id || index}-${index}`;
+                                            const rowKey = `${row.sensorid || row.nodoid || row.id || index}-${index}`;
 
                                             setIndividualRowStatus(prev => ({
 
@@ -8840,7 +8826,7 @@ setIndividualRowStatus(newIndividualStatus);
 
                                         <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">
 
-                                          {individualRowStatus[`${row.nodoid || row.id || index}-${index}`] ? 'ACTIVO' : 'INACTIVO'}
+                                          {individualRowStatus[`${row.sensorid || row.nodoid || row.id || index}-${index}`] ? 'ACTIVO' : 'INACTIVO'}
 
                                         </span>
 
