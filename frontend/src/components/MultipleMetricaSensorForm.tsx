@@ -345,98 +345,100 @@ const MultipleMetricaSensorForm: React.FC<MultipleMetricaSensorFormProps> = memo
                </div>
              )}
            </div>
-       </div>
+      </div>
+      </div>
 
+      {/* Thermos: Selector de 1 sensor (dropdown) y múltiples métricas (checkboxes) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         {/* Dropdown para seleccionar UN sensor */}
          <div>
            <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
-             {t('metricsensor.type_locked')}
+             SENSOR*
            </label>
-           <div className={`w-full px-3 py-2 border rounded-lg font-mono ${
-             selectedNodos.length > 0 
-               ? 'bg-gray-200 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 text-gray-900 dark:text-white' 
-               : 'bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-700 cursor-not-allowed opacity-50 text-gray-500 dark:text-neutral-400'
-           }`}>
-            <span className={selectedNodos.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}>
-              {selectedNodos.length > 0 
-                ? tiposFromSensors.length > 0
-                  ? tiposFromSensors.filter(t => t !== null).map(t => t!.tipo).join(', ')
-                  : t('metricsensor.no_types_available')
-                : t('metricsensor.select_sensors_first')
-              }
-            </span>
+           <div className="relative dropdown-container">
+             <div
+               onClick={() => setNodosDropdownOpen(!nodosDropdownOpen)}
+               className="w-full px-3 py-2 bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg text-gray-900 dark:text-white cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex justify-between items-center font-mono"
+             >
+               <span className={selectedNodos.length > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}>
+                 {selectedNodos.length > 0
+                   ? sensorsData.find(s => s.sensorid.toString() === selectedNodos[0])?.sensor || `Sensor ${selectedNodos[0]}`
+                   : 'Seleccionar sensor'
+                 }
+               </span>
+               <span className="text-gray-500 dark:text-neutral-400">▼</span>
+             </div>
+             
+             {nodosDropdownOpen && (
+               <div className="absolute z-50 w-full mt-1 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                 <div className="p-2 border-b border-gray-300 dark:border-neutral-700">
+                   <input
+                     type="text"
+                     placeholder="Buscar sensor..."
+                     value={nodosSearchTerm}
+                     onChange={(e) => setNodosSearchTerm(e.target.value)}
+                     className="w-full px-2 py-1 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded text-gray-900 dark:text-white text-sm font-mono placeholder-gray-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                     onClick={(e) => e.stopPropagation()}
+                   />
+                 </div>
+                 <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                   {getUniqueOptionsForField('sensorid')
+                     .filter(option => 
+                       option.label.toLowerCase().includes(nodosSearchTerm.toLowerCase())
+                     )
+                     .map((option, index) => (
+                       <div
+                         key={index}
+                         onClick={() => {
+                           setSelectedNodos([option.value.toString()]); // Solo 1 sensor
+                           setNodosDropdownOpen(false);
+                           setNodosSearchTerm('');
+                         }}
+                         className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-800 transition-colors"
+                       >
+                         <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">{option.label.toUpperCase()}</span>
+                       </div>
+                     ))}
+                   {getUniqueOptionsForField('sensorid')
+                     .filter(option => 
+                       option.label.toLowerCase().includes(nodosSearchTerm.toLowerCase())
+                     ).length === 0 && (
+                     <div className="px-3 py-2 text-gray-500 dark:text-neutral-400 text-sm font-mono">
+                       NO SE ENCONTRARON RESULTADOS
+                     </div>
+                   )}
+                 </div>
+               </div>
+             )}
            </div>
          </div>
-       </div>
 
-      {/* Mensaje de validación de similitud de nodos (compacto e interactivo) */}
-      {/* En Thermos no necesitamos validación de similitud porque cada sensor ya tiene su tipo */}
-
-      {/* Nuevo diseño: 2 containers lado a lado */}
-      {selectedEntidad && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* Container 1: Sensores disponibles con checkboxes */}
-          <div className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
-            <h4 className="text-lg font-bold text-blue-600 mb-4 font-mono tracking-wider">
-              SENSOR
-            </h4>
-            <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-2">
-              {getUniqueOptionsForField('sensorid', { entidadid: selectedEntidad })
-                .map((option) => (
-                  <label key={option.value} className="flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-neutral-700 cursor-pointer transition-colors rounded">
-                    <input
-                      type="checkbox"
-                      checked={selectedNodos.includes(option.value.toString())}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedNodos([...selectedNodos, option.value.toString()]);
-                        } else {
-                          setSelectedNodos(selectedNodos.filter(id => id !== option.value.toString()));
-                        }
-                      }}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2 mr-3"
-                    />
-                    <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">{option.label.toUpperCase()}</span>
-                  </label>
-                ))}
-              {getUniqueOptionsForField('sensorid', { entidadid: selectedEntidad }).length === 0 && (
-                <div className="px-3 py-2 text-gray-500 dark:text-neutral-400 text-sm font-mono">
-                  NO HAY SENSORES DISPONIBLES PARA ESTA ENTIDAD
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Container 2: Métricas disponibles con checkboxes */}
-          <div className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-lg font-bold text-blue-600 font-mono tracking-wider">
-                {t('metricsensor.metric')}
-              </h4>
-              <label className="flex items-center space-x-3 cursor-pointer bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-500/30 rounded-lg px-3 py-2 hover:bg-orange-200 dark:hover:bg-orange-900/30 transition-colors">
+          {/* Container: Métricas disponibles con checkboxes (múltiples) */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider">
+                {t('metricsensor.metric')}*
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-500/30 rounded-lg px-2 py-1 hover:bg-orange-200 dark:hover:bg-orange-900/30 transition-colors">
                 <input
                   type="checkbox"
-                  checked={selectedMetricasCheckboxes.length === getUniqueOptionsForField('metricaid', { entidadid: selectedEntidad }).length && getUniqueOptionsForField('metricaid', { entidadid: selectedEntidad }).length > 0}
+                  checked={selectedMetricasCheckboxes.length === getUniqueOptionsForField('metricaid').length && getUniqueOptionsForField('metricaid').length > 0}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      // Seleccionar todas las métricas
-                      const allMetricas = getUniqueOptionsForField('metricaid', { entidadid: selectedEntidad }).map(option => option.value.toString());
+                      const allMetricas = getUniqueOptionsForField('metricaid').map(option => option.value.toString());
                       setSelectedMetricasCheckboxes(allMetricas);
                     } else {
-                      // Deseleccionar todas las métricas
                       setSelectedMetricasCheckboxes([]);
                     }
                   }}
-                  className="w-5 h-5 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-blue-500 rounded focus:ring-blue-500 focus:ring-2"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-blue-500 rounded focus:ring-blue-500 focus:ring-2"
                 />
-                <div className="flex items-center space-x-2">
-                  <span className="text-blue-600 dark:text-blue-400 text-lg">📋</span>
-                  <span className="text-blue-600 dark:text-blue-400 font-bold text-sm font-mono tracking-wider">{t('metricsensor.all')}</span>
-                </div>
+                <span className="text-blue-600 dark:text-blue-400 text-xs">📋</span>
+                <span className="text-blue-600 dark:text-blue-400 font-bold text-xs font-mono tracking-wider">{t('metricsensor.all')}</span>
               </label>
             </div>
-            <div className="max-h-60 overflow-y-auto space-y-2">
-              {getUniqueOptionsForField('metricaid', { entidadid: selectedEntidad })
+            <div className="bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4">
+              <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-2">{getUniqueOptionsForField('metricaid')
                 .map((option) => (
                   <label key={option.value} className="flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-neutral-700 cursor-pointer transition-colors rounded">
                     <input
@@ -454,7 +456,7 @@ const MultipleMetricaSensorForm: React.FC<MultipleMetricaSensorFormProps> = memo
                     <span className="text-gray-900 dark:text-white text-sm font-mono tracking-wider">{option.label.toUpperCase()}</span>
                   </label>
                 ))}
-              {getUniqueOptionsForField('metricaid', { entidadid: selectedEntidad }).length === 0 && (
+              {getUniqueOptionsForField('metricaid').length === 0 && (
                 <div className="px-3 py-2 text-gray-500 dark:text-neutral-400 text-sm font-mono">
                   {t('metricsensor.no_metrics_available')}
                 </div>
@@ -462,7 +464,7 @@ const MultipleMetricaSensorForm: React.FC<MultipleMetricaSensorFormProps> = memo
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Botones de acción */}
       <div className="flex justify-center gap-4 mt-8">

@@ -482,8 +482,6 @@ acc[sensorid] = {
 
           sensor: sensor?.sensor || `Sensor ${sensorid}`,
 
-          tipos: new Set(),
-
           metricas: new Set(),
 
           usercreatedid: row.usercreatedid,
@@ -504,21 +502,13 @@ acc[sensorid] = {
 
       }
 
-// Buscar el nombre del tipo y métrica (siempre para enriquecer la fila)
-
-      const tipo = tiposData?.find(t => t.tipoid === row.tipoid);
+// Buscar el nombre de la métrica para enriquecer la fila
 
       const metrica = metricasData?.find(m => m.metricaid === row.metricaid);
 
-// Solo agregar tipos y métricas si están activos (statusid: 1)
+// Solo agregar métricas si están activas (statusid: 1)
 
       if (row.statusid === 1) {
-
-        if (tipo?.tipo) {
-
-          acc[sensorid].tipos.add(tipo.tipo);
-
-        }
 
 if (metrica?.metrica) {
 
@@ -534,13 +524,9 @@ if (metrica?.metrica) {
 
         ...row,
 
-        tipo: tipo?.tipo || `Tipo ${row.tipoid}`,
-
         metrica: metrica?.metrica || `Métrica ${row.metricaid}`,
 
-        sensor: acc[sensorid].sensor || `Sensor ${row.sensorid}`,
-
-        entidadid: tipo?.entidadid || row.entidadid // Obtener entidadid del tipo
+        sensor: acc[sensorid].sensor || `Sensor ${row.sensorid}`
 
       };
 
@@ -556,19 +542,15 @@ return acc;
 
     const result = Object.values(groupedData).map((group: any) => {
 
-      const hasActiveMetrics = group.tipos.size > 0 && group.metricas.size > 0;
+      const hasActiveMetrics = group.metricas.size > 0;
 
 return {
 
         ...group,
 
-        tipos: hasActiveMetrics ? Array.from(group.tipos).join(', ') : 'Sin sensores activos',
-
-        metricas: hasActiveMetrics ? Array.from(group.metricas).join(', ') : '',
+        metricas: hasActiveMetrics ? Array.from(group.metricas).join(', ') : 'Sin métricas activas',
 
         // Para compatibilidad con el sistema de selección
-
-        tipoid: group.originalRows[0]?.tipoid,
 
         metricaid: group.originalRows[0]?.metricaid
 
@@ -824,41 +806,41 @@ const handleReplicateSensorModal = (sensor: any) => {
 
   };
 
-const handleReplicateNodoForMetricaSensor = (nodo: any) => {
+const handleReplicateSensorForMetricaSensor = (sensor: any) => {
 
     // Activar modo replicación
 
     setIsReplicateMode(true);
 
-// Obtener todas las métricas sensor del nodo seleccionado
+// Obtener todas las métricas del sensor seleccionado
 
-    const metricasDelNodo = tableData.filter(metrica => metrica.nodoid === nodo.nodoid);
+    const metricasDelSensor = tableData.filter(metrica => metrica.sensorid === sensor.sensorid);
 
-console.log('🔍 Replicando nodo para métricas sensor:', {
+console.log('🔍 Replicando sensor para métricas:', {
 
-      nodo: nodo.nodo,
+      sensor: sensor.sensor,
 
-      nodoid: nodo.nodoid,
+      sensorid: sensor.sensorid,
 
-      metricasEncontradas: metricasDelNodo.length,
+      metricasEncontradas: metricasDelSensor.length,
 
-      metricas: metricasDelNodo
+      metricas: metricasDelSensor
 
     });
 
-if (metricasDelNodo.length > 0) {
+if (metricasDelSensor.length > 0) {
 
-      // NO cambiar el nodo destino (mantener el que ya está seleccionado en el formulario)
+      // NO cambiar el sensor destino (mantener el que ya está seleccionado en el formulario)
 
-      // Solo extraer las métricas únicas de las métricas sensor del nodo fuente
+      // Solo extraer las métricas únicas de las métricas del sensor fuente
 
-      const metricasUnicas = Array.from(new Set(metricasDelNodo.map(metrica => metrica.metricaid)));
+      const metricasUnicas = Array.from(new Set(metricasDelSensor.map(metrica => metrica.metricaid)));
 
 // Seleccionar automáticamente las métricas encontradas
 
       setSelectedMetricas(metricasUnicas.map(id => id.toString()));
 
-// Inicializar métricas con las métricas del nodo fuente, pero para el nodo destino actual
+// Inicializar métricas con las métricas del sensor fuente, pero para el sensor destino actual
 
       if (selectedSensors.length > 0) {
 
@@ -872,15 +854,15 @@ if (metricasDelNodo.length > 0) {
 
         type: 'success', 
 
-        text: `Se han seleccionado automáticamente ${metricasUnicas.length} métricas del nodo fuente para replicar.` 
+        text: `Se han seleccionado automáticamente ${metricasUnicas.length} métricas del sensor fuente para replicar.` 
 
       });
 
     } else {
 
-      // Si no hay métricas sensor en el nodo fuente, mostrar mensaje
+      // Si no hay métricas en el sensor fuente, mostrar mensaje
 
-      setMessage({ type: 'warning', text: 'El nodo seleccionado no tiene métricas sensor para replicar.' });
+      setMessage({ type: 'warning', text: 'El sensor seleccionado no tiene métricas para replicar.' });
 
     }
 
@@ -1002,11 +984,11 @@ modalData = sensoresConMetricas;
 
         modalVisibleColumns = [
 
-          { columnName: 'nodo', dataType: 'varchar', isNullable: true, defaultValue: null, isIdentity: false, isPrimaryKey: false },
+          { columnName: 'sensor', dataType: 'varchar', isNullable: true, defaultValue: null, isIdentity: false, isPrimaryKey: false, isForeignKey: false },
 
-          { columnName: 'deveui', dataType: 'varchar', isNullable: true, defaultValue: null, isIdentity: false, isPrimaryKey: false },
+          { columnName: 'tipoid', dataType: 'integer', isNullable: true, defaultValue: null, isIdentity: false, isPrimaryKey: false, isForeignKey: false },
 
-          { columnName: 'statusid', dataType: 'integer', isNullable: true, defaultValue: null, isIdentity: false, isPrimaryKey: false }
+          { columnName: 'statusid', dataType: 'integer', isNullable: true, defaultValue: null, isIdentity: false, isPrimaryKey: false, isForeignKey: false }
 
         ];
 
@@ -1088,9 +1070,9 @@ const options = {
 
         } else if (selectedTable === 'metricasensor') {
 
-          // Para metricasensor, entry es un nodo, no una métrica sensor
+          // Para metricasensor, entry es un sensor agrupado
 
-          handleReplicateNodoForMetricaSensor(entry);
+          handleReplicateSensorForMetricaSensor(entry);
 
         }
 
@@ -2562,68 +2544,8 @@ const handleSelectRowForUpdate = (row: any) => {
 
     const selectedEntries = findEntriesByTimestamp(row, tableData, updateData);
 
-// Para metricasensor, verificar si ya hay entradas seleccionadas
-
-    if (selectedTable === 'metricasensor') {
-
-      const hasSameTimestamp = selectedRowsForUpdate.some(selectedRow => {
-
-        return selectedRow.nodoid === row.nodoid && selectedRow.datecreated === row.datecreated;
-
-      });
-
-if (hasSameTimestamp) {
-
-        // Deseleccionar todas las entradas con el mismo timestamp
-
-        setSelectedRowsForUpdate([]);
-
-        setUpdateFormData({});
-
-        setIndividualRowStatus({});
-
-        setMessage({ type: 'success', text: 'Selección cancelada' });
-
-        return;
-
-      }
-
-setSelectedRowsForUpdate(selectedEntries);
-
-// Crear formulario con datos del primer nodo (para mostrar valores comunes)
-
-      const firstRow = selectedEntries[0];
-
-      const newFormData: Record<string, any> = {};
-
-      columns.forEach(col => {
-
-        if (!col.isIdentity && !['datecreated', 'datemodified', 'usercreatedid', 'usermodifiedid'].includes(col.columnName)) {
-
-          // Para statusid, preservar el valor 0 (inactivo) en lugar de convertirlo a cadena vacía
-          if (col.columnName === 'statusid') {
-            newFormData[col.columnName] = firstRow[col.columnName] !== undefined ? firstRow[col.columnName] : '';
-          } else {
-          newFormData[col.columnName] = firstRow[col.columnName] || '';
-          }
-
-        }
-
-      });
-
-      setUpdateFormData(newFormData);
-
-setMessage({ 
-
-        type: 'success', 
-
-        text: `${selectedEntries.length} entradas del nodo con timestamp ${new Date(row.datecreated).toLocaleString()} seleccionadas para actualizar` 
-
-      });
-
-      return;
-
-    }
+// En Thermos, metricasensor es una tabla simple N:M (no agrupada como en JoySense)
+// Solo usuarioperfil usa lógica de agrupación ahora
 
 // Para otras tablas, comportamiento normal (una sola fila)
 
@@ -2677,11 +2599,10 @@ const newFormData: Record<string, any> = {};
 
       } else if (selectedTable === 'metricasensor') {
 
-        newFormData['nodoid'] = row['nodoid'];
+        // En Thermos: solo sensorid y metricaid (PK compuesta)
+        newFormData['sensorid'] = row['sensorid'];
 
         newFormData['metricaid'] = row['metricaid'];
-
-        newFormData['tipoid'] = row['tipoid'];
 
       } else {
 
@@ -2886,7 +2807,7 @@ const handleCancelUpdate = () => {
 
       case 'metricasensor':
 
-        return ['nodoid', 'metricaid', 'tipoid'];
+        return ['sensorid', 'metricaid'];
 
       case 'localizacion':
 
@@ -4506,6 +4427,7 @@ if (errorCount > 0) {
       'tipo': ['tipo', 'statusid'],
       'sensor': ['sensor', 'tipoid', 'statusid'],
       'metrica': ['metrica', 'unidad', 'statusid'],
+      'metricasensor': ['sensorid', 'metricaid', 'statusid'],
     'umbral': ['umbral', 'ubicacionid', 'criticidadid', 'nodoid', 'metricaid', 'tipoid', 'minimo', 'maximo', 'statusid'],
     'perfilumbral': ['perfilid', 'umbralid', 'statusid'],
     'criticidad': ['criticidad', 'grado', 'frecuencia', 'escalamiento', 'escalon', 'statusid'],
@@ -4530,6 +4452,7 @@ if (errorCount > 0) {
       'tipo': [],
       'sensor': [],
       'metrica': [],
+      'metricasensor': [],
       'umbral': ['minimo', 'maximo'],
       'perfilumbral': [],
       'criticidad': [],
@@ -5084,7 +5007,7 @@ if (selectedTable === 'localizacion') {
 
 if (selectedTable === 'metricasensor') {
 
-        return ['nodoid', 'metricaid', 'tipoid', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+        return ['sensorid', 'metricaid', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
 
       }
 
@@ -5400,57 +5323,12 @@ if (selectedTable === 'fundo') {
 
       } else if (selectedTable === 'metricasensor') {
 
-        if (forTable) {
-
-          // Para metricasensor agrupado en Actualizar: Nodo, Tipos, Metricas
-
-        reorderedColumns.push(...otherColumns.filter(col => ['nodoid'].includes(col.columnName)));
-
-        // Agregar columnas virtuales para tipos y métricas agrupadas
-
-        reorderedColumns.push({
-
-          columnName: 'tipos',
-
-          dataType: 'varchar',
-
-          isNullable: true,
-
-          isIdentity: false,
-
-          isPrimaryKey: false,
-
-          isForeignKey: false,
-
-          defaultValue: null
-
-        });
-
-        reorderedColumns.push({
-
-          columnName: 'metricas',
-
-          dataType: 'varchar',
-
-          isNullable: true,
-
-          isIdentity: false,
-
-          isPrimaryKey: false,
-
-          isForeignKey: false,
-
-          defaultValue: null
-
-        });
-
-        } else {
-
-          // Para metricasensor desagregado en Estado: mantener orden original
-
-          reorderedColumns.push(...otherColumns);
-
-        }
+        // En Thermos, metricasensor es una tabla simple de relación N:M (sensorid, metricaid)
+        // Orden: sensor, metrica, status, audit fields
+        reorderedColumns.push(...otherColumns.filter(col => ['sensorid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['metricaid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['statusid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName)));
 
       } else if (selectedTable === 'sensor') {
 
@@ -5963,55 +5841,36 @@ setMultipleSensors(sensors);
 
      try {
 
-       // Crear todas las combinaciones válidas (nodoid, metricaid, tipoid)
+       // En Thermos: crear combinaciones simples (sensorid, metricaid)
+       // El parámetro 'nodos' representa 'sensores' (legacy name from JoySense)
 
        const metricasToCreate = [];
 
        let index = 1;
 
-for (const nodoid of nodos) {
+for (const sensorid of nodos) {
 
-         // 🔑 CAMBIO CLAVE: Obtener tipos de la tabla SENSOR, no de metricasensor
+         const sensorInfo = sensorsData.find(s => s.sensorid.toString() === sensorid);
 
-         // Necesitamos cargar los datos de la tabla sensor para este nodo
-
-         const sensorTableDataResponse = await ThermosService.getTableData('sensor', 1000);
-
-         const sensorTableData: any[] = Array.isArray(sensorTableDataResponse) ? sensorTableDataResponse : ((sensorTableDataResponse as any)?.data || []);
-
-const existingSensorsForNode = sensorTableData.filter((sensor: any) => sensor.nodoid === parseInt(nodoid));
-
-         const availableTiposForNode = existingSensorsForNode.map((sensor: any) => sensor.tipoid);
-
-if (availableTiposForNode.length === 0) {
-
-continue;
-
+         if (!sensorInfo) {
+           continue;
          }
 
-// Crear todas las combinaciones válidas: (nodoid, metricaid, tipoid)
+// Crear todas las combinaciones válidas: (sensorid, metricaid)
 
          for (const metricaid of metricas) {
 
-for (const tipoid of availableTiposForNode) {
-
-const tipoInfo = tiposData.find(t => t.tipoid === tipoid);
-
-             const metricaInfo = metricasData.find(m => m.metricaid.toString() === metricaid);
-
-             const nodoInfo = sensorsData.find(n => n.nodoid.toString() === nodoid);
+const metricaInfo = metricasData.find(m => m.metricaid.toString() === metricaid);
 
 metricasToCreate.push({
 
                metricaIndex: index++,
 
-               label: `Métrica ${metricaInfo?.metrica || metricaid} para Nodo ${nodoInfo?.nodo || nodoid} (${tipoInfo?.tipo || tipoid})`,
+               label: `Métrica ${metricaInfo?.metrica || metricaid} para Sensor ${sensorInfo?.sensor || sensorid}`,
 
-               nodoid: parseInt(nodoid),
+               sensorid: parseInt(sensorid),
 
                metricaid: parseInt(metricaid),
-
-               tipoid: tipoid,
 
                statusid: selectedStatus ? 1 : 0
 
@@ -6020,8 +5879,6 @@ metricasToCreate.push({
            }
 
          }
-
-       }
 
 setMultipleMetricas(metricasToCreate);
 
@@ -6055,7 +5912,7 @@ if (metricasToCreate.length > 0) {
 
      }
 
-   }, [selectedStatus, tiposData, metricasData, sensorsData, setMultipleMetricas, setMessage]);
+   }, [selectedStatus, metricasData, sensorsData, setMultipleMetricas, setMessage]);
 
 // Función para manejar inserción múltiple de sensores
 
@@ -6976,59 +6833,8 @@ try {
 
       const usuarioid = getCurrentUserId();
 
-// Validar que el nodo seleccionado tenga los sensores necesarios
-
-      const selectedNodoId = selectedSensors[0];
-
-      if (selectedNodoId) {
-
-        try {
-
-          // Obtener datos de sensores específicamente para validación
-
-          const sensorTableDataResponse = await ThermosService.getTableData('sensor', 1000);
-
-          const sensorTableData: any[] = Array.isArray(sensorTableDataResponse) ? sensorTableDataResponse : ((sensorTableDataResponse as any)?.data || []);
-
-// Obtener sensores del nodo seleccionado
-
-          const sensoresDelNodo = sensorTableData.filter((sensor: any) => sensor.nodoid.toString() === selectedNodoId);
-
-          const tiposDisponibles = sensoresDelNodo.map((sensor: any) => sensor.tipoid);
-
-// Verificar que todas las métricas tengan tipos de sensor disponibles
-
-          const tiposRequeridos = Array.from(new Set(multipleMetricas.map(metrica => metrica.tipoid)));
-
-          const tiposFaltantes = tiposRequeridos.filter(tipo => !tiposDisponibles.includes(tipo));
-
-if (tiposFaltantes.length > 0) {
-
-            const tiposFaltantesNombres = tiposFaltantes.map(tipo => {
-
-              const tipoData = tiposData.find(t => t.tipoid === tipo);
-
-              return tipoData ? tipoData.tipo : `Tipo ${tipo}`;
-
-            });
-
-alert(`❌ El nodo seleccionado no tiene sensores de los siguientes tipos: ${tiposFaltantesNombres.join(', ')}\n\nPor favor, selecciona un nodo que tenga todos los sensores necesarios o crea los sensores faltantes primero.`);
-
-            setLoading(false);
-
-            return;
-
-          }
-
-        } catch (error) {
-
-          console.error('Error validando sensores del nodo:', error);
-
-          // Continuar sin validación si hay error obteniendo datos de sensores
-
-        }
-
-      }
+// En Thermos: no necesitamos validar tipos de sensor
+// Solo validar que sensorid y metricaid sean válidos (la validación de existencia se hace en el backend)
 
 // Preparar datos para cada métrica (limpiar campos que no están en la tabla)
 

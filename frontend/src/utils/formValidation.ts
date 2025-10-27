@@ -143,9 +143,8 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
   ],
   
   metricasensor: [
-    { field: 'nodoid', required: true, type: 'number', customMessage: 'Debe seleccionar un nodo' },
-    { field: 'metricaid', required: true, type: 'number', customMessage: 'Debe seleccionar una métrica' },
-    { field: 'tipoid', required: true, type: 'number', customMessage: 'Debe seleccionar un tipo' }
+    { field: 'sensorid', required: true, type: 'number', customMessage: 'Debe seleccionar un sensor' },
+    { field: 'metricaid', required: true, type: 'number', customMessage: 'Debe seleccionar una métrica' }
   ],
   
   auditlogumbral: [
