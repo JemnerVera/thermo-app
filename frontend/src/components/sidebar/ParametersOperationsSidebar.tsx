@@ -114,6 +114,7 @@ const ParametersOperationsSidebar: React.FC<ParametersOperationsSidebarProps> = 
       'tipo': t('parameters.tables.type'),
       // 'nodo' eliminado - obsoleto para Thermos
       'sensor': t('parameters.tables.sensor'),
+      'localizacionsensor': 'Localización-Sensor',
       'metricasensor': t('parameters.tables.metric_sensor'),
       'metrica': t('parameters.tables.metric'),
       'umbral': t('parameters.tables.threshold'),
