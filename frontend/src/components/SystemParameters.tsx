@@ -2562,6 +2562,13 @@ const newFormData: Record<string, any> = {};
 
         newFormData['metricaid'] = row['metricaid'];
 
+      } else if (selectedTable === 'perfilumbral') {
+
+        // En Thermos: perfilid y umbralid (PK compuesta)
+        newFormData['perfilid'] = row['perfilid'];
+
+        newFormData['umbralid'] = row['umbralid'];
+
       } else {
 
         // Para tablas simples, agregar el campo ID
@@ -2587,8 +2594,6 @@ const newFormData: Record<string, any> = {};
           'usuario': 'usuarioid',
 
           'umbral': 'umbralid',
-
-          'perfilumbral': 'perfilumbralid',
 
           'audit_log_umbral': 'auditid',
 
@@ -2774,6 +2779,10 @@ const handleCancelUpdate = () => {
       case 'umbral':
 
         return ['umbral', 'localizacionsensorid', 'criticidadid', 'minimo', 'maximo'];
+
+      case 'perfilumbral':
+
+        return ['perfilid', 'umbralid'];
 
       default:
 
@@ -8005,6 +8014,50 @@ return (
                                       [col.columnName]: e.target.value ? parseFloat(e.target.value) : null
                                     }))}
                                     className="w-full px-3 py-2 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white text-base font-mono"
+                                  />
+                                </div>
+                              );
+                            }
+                          }
+
+// Campos específicos para perfilumbral (Thermos schema)
+                          if (selectedTable === 'perfilumbral') {
+                            // Dropdowns para perfilumbral
+                            if (col.columnName === 'perfilid') {
+                              const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
+                              return (
+                                <div key={col.columnName} className="mb-4">
+                                  <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                    {displayName.toUpperCase()}
+                                  </label>
+                                  <SelectWithPlaceholder
+                                    value={value}
+                                    onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
+                                      ...prev,
+                                      [col.columnName]: newValue ? parseInt(newValue.toString()) : null
+                                    }))}
+                                    options={options}
+                                    placeholder="SELECCIONAR PERFIL"
+                                  />
+                                </div>
+                              );
+                            }
+
+                            if (col.columnName === 'umbralid') {
+                              const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
+                              return (
+                                <div key={col.columnName} className="mb-4">
+                                  <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                    {displayName.toUpperCase()}
+                                  </label>
+                                  <SelectWithPlaceholder
+                                    value={value}
+                                    onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
+                                      ...prev,
+                                      [col.columnName]: newValue ? parseInt(newValue.toString()) : null
+                                    }))}
+                                    options={options}
+                                    placeholder="SELECCIONAR UMBRAL"
                                   />
                                 </div>
                               );
