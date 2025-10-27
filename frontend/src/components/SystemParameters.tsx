@@ -2788,6 +2788,10 @@ const handleCancelUpdate = () => {
 
         return ['criticidad', 'grado', 'frecuencia', 'escalamiento', 'escalon'];
 
+      case 'contacto':
+
+        return ['usuarioid', 'codigotelefonoid'];
+
       default:
 
         return [];
@@ -4408,7 +4412,7 @@ if (errorCount > 0) {
     'criticidad': ['criticidad', 'grado', 'frecuencia', 'escalamiento', 'escalon', 'statusid'],
     'perfil': ['perfil', 'nivel', 'jefeid', 'statusid'],
     'usuario': ['login', 'firstname', 'lastname', 'statusid'],
-    'contacto': ['usuarioid', 'celular', 'codigotelefonoid', 'correo', 'statusid'],
+    'contacto': ['usuarioid', 'codigotelefonoid', 'celular', 'statusid'],
     'usuarioperfil': ['usuarioid', 'perfilid', 'statusid']
     };
     
@@ -4434,7 +4438,7 @@ if (errorCount > 0) {
       'medio': [],
       'perfil': ['nivel'],
       'usuario': [],
-      'contacto': ['celular', 'correo'],
+      'contacto': ['celular'],
       'usuarioperfil': []
     };
     

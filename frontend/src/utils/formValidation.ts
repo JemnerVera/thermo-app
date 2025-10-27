@@ -1314,19 +1314,7 @@ const validateContactoData = async (
     });
   }
   
-  // 2. Validar constraint de negocio: al menos uno de celular debe estar presente
-  // (según el nuevo esquema, contacto solo maneja teléfonos, no correos)
-  if (!formData.celular || formData.celular.trim() === '') {
-    errors.push({
-      field: 'celular',
-      message: 'Debe proporcionar un número de teléfono',
-      type: 'required'
-    });
-  }
-  
-  // 3. Validar que si hay celular, también debe haber código de país
-  if (formData.celular && formData.celular.trim() !== '' && 
-      (!formData.codigotelefonoid || formData.codigotelefonoid === 0)) {
+  if (!formData.codigotelefonoid || formData.codigotelefonoid === 0) {
     errors.push({
       field: 'codigotelefonoid',
       message: 'Debe seleccionar un código de país',
@@ -1334,16 +1322,28 @@ const validateContactoData = async (
     });
   }
   
-  // 4. Validar duplicados si hay datos existentes (constraint: usuarioid único para contacto)
-  if (existingData && existingData.length > 0) {
+  // 2. Validar celular (opcional, pero si existe, validar formato y longitud)
+  if (formData.celular) {
+    if (formData.celular.length > 20) {
+      errors.push({
+        field: 'celular',
+        message: 'El número de teléfono no puede exceder 20 caracteres',
+        type: 'format'
+      });
+    }
+  }
+  
+  // 3. Validar duplicados si hay datos existentes (UNIQUE constraint: usuarioid, codigotelefonoid)
+  if (existingData && existingData.length > 0 && formData.usuarioid && formData.codigotelefonoid) {
     const contactoExists = existingData.some(item => 
-      item.usuarioid === formData.usuarioid
+      item.usuarioid === formData.usuarioid && 
+      item.codigotelefonoid === formData.codigotelefonoid
     );
     
     if (contactoExists) {
       errors.push({
-        field: 'general',
-        message: 'Ya existe un contacto para este usuario',
+        field: 'composite',
+        message: 'Ya existe un contacto para este usuario con el mismo código de país',
         type: 'duplicate'
       });
     }
