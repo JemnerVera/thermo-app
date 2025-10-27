@@ -157,17 +157,24 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
     }
   }
   
-  // Para Criticidad: habilitación progresiva criticidad -> criticidadbrev -> resto
+  // Para Criticidad: habilitación progresiva criticidad -> grado, frecuencia, escalamiento, escalon -> statusid
   if (selectedTable === 'criticidad') {
     if (columnName === 'criticidad') {
       return true; // Siempre habilitado
     }
-    if (columnName === 'criticidadbrev') {
+    // Campos numéricos habilitados si hay criticidad
+    if (['grado', 'frecuencia', 'escalamiento', 'escalon'].includes(columnName)) {
       return !!(formData.criticidad && formData.criticidad.trim() !== '');
     }
-    // Para el resto de campos (statusid)
+    // Status habilitado si hay criticidad y los campos numéricos obligatorios
     if (['statusid'].includes(columnName)) {
-      return !!(formData.criticidad && formData.criticidad.trim() !== '' && formData.criticidadbrev && formData.criticidadbrev.trim() !== '');
+      return !!(
+        formData.criticidad && formData.criticidad.trim() !== '' &&
+        formData.grado !== undefined && formData.grado !== null && formData.grado !== '' &&
+        formData.frecuencia !== undefined && formData.frecuencia !== null && formData.frecuencia !== '' &&
+        formData.escalamiento !== undefined && formData.escalamiento !== null && formData.escalamiento !== '' &&
+        formData.escalon !== undefined && formData.escalon !== null && formData.escalon !== ''
+      );
     }
   }
   
