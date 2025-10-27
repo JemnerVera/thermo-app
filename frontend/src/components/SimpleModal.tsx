@@ -44,10 +44,10 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-neutral-800 border border-orange-500 rounded-lg p-6 max-w-md mx-4">
+      <div className="bg-neutral-800 border border-blue-500 rounded-lg p-6 max-w-md mx-4">
         {/* Solo el icono centrado */}
         <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
@@ -57,10 +57,10 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
         {/* Mensaje centrado */}
         <div className="mb-6 text-center">
           <p className="text-white font-mono text-sm leading-relaxed">
-            Tienes datos sin guardar en <span className="text-orange-400 font-bold">{current}</span>.
+            Tienes datos sin guardar en <span className="text-blue-400 font-bold">{current}</span>.
           </p>
           <p className="text-white font-mono text-sm leading-relaxed mt-2">
-            Si cambias a <span className="text-orange-400 font-bold">{target}</span>, se perderá toda la información ingresada.
+            Si cambias a <span className="text-blue-400 font-bold">{target}</span>, se perderá toda la información ingresada.
           </p>
         </div>
 
@@ -68,7 +68,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
         <div className="flex gap-3 justify-center">
           <button
             onClick={onConfirm}
-            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-mono tracking-wider rounded-lg transition-colors"
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-mono tracking-wider rounded-lg transition-colors"
           >
             CONTINUAR
           </button>
