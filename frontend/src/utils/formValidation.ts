@@ -1240,7 +1240,7 @@ const validateMedioData = async (
   };
 };
 
-// Validación específica para Contacto
+// Validación específica para Correo
 const validateCorreoData = async (
   formData: Record<string, any>, 
   existingData?: any[]
@@ -1256,14 +1256,8 @@ const validateCorreoData = async (
     });
   }
   
-  // 2. Validar que el correo esté presente y tenga formato válido
-  if (!formData.correo || formData.correo.trim() === '') {
-    errors.push({
-      field: 'correo',
-      message: 'Debe proporcionar un correo electrónico',
-      type: 'required'
-    });
-  } else {
+  // 2. Validar correo (opcional, pero si existe, validar formato y longitud)
+  if (formData.correo) {
     // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.correo)) {
@@ -1273,25 +1267,21 @@ const validateCorreoData = async (
         type: 'format'
       });
     }
-  }
-  
-  // 3. Validar duplicados si hay datos existentes
-  if (existingData && existingData.length > 0) {
-    const correoExists = existingData.some(item => 
-      item.correo === formData.correo
-    );
     
-    if (correoExists) {
+    // Validar longitud máxima (50 caracteres según schema)
+    if (formData.correo.length > 50) {
       errors.push({
-        field: 'general',
-        message: 'Ya existe un correo con esta dirección',
-        type: 'duplicate'
+        field: 'correo',
+        message: 'El correo no puede exceder 50 caracteres',
+        type: 'format'
       });
     }
   }
   
-  const userFriendlyMessage = generateUserFriendlyMessage(errors);
+  // Nota: No hay UNIQUE constraint en el schema, solo el PK correoid
   
+  const userFriendlyMessage = generateUserFriendlyMessage(errors);
+
   return {
     isValid: errors.length === 0,
     errors,

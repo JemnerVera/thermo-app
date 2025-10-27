@@ -2792,6 +2792,10 @@ const handleCancelUpdate = () => {
 
         return ['usuarioid', 'codigotelefonoid'];
 
+      case 'correo':
+
+        return ['usuarioid'];
+
       default:
 
         return [];
@@ -4413,6 +4417,7 @@ if (errorCount > 0) {
     'perfil': ['perfil', 'nivel', 'jefeid', 'statusid'],
     'usuario': ['login', 'firstname', 'lastname', 'statusid'],
     'contacto': ['usuarioid', 'codigotelefonoid', 'celular', 'statusid'],
+    'correo': ['usuarioid', 'correo', 'statusid'],
     'usuarioperfil': ['usuarioid', 'perfilid', 'statusid']
     };
     
@@ -4439,6 +4444,7 @@ if (errorCount > 0) {
       'perfil': ['nivel'],
       'usuario': [],
       'contacto': ['celular'],
+      'correo': ['correo'],
       'usuarioperfil': []
     };
     
@@ -5045,6 +5051,10 @@ if (selectedTable === 'contacto') {
         }
       }
 
+if (selectedTable === 'correo') {
+        return ['usuarioid', 'correo', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+      }
+
 
 if (selectedTable === 'mensaje') {
 
@@ -5404,6 +5414,14 @@ if (selectedTable === 'fundo') {
         reorderedColumns.push(...otherColumns.filter(col => ['escalamiento'].includes(col.columnName)));
 
         reorderedColumns.push(...otherColumns.filter(col => ['escalon'].includes(col.columnName)));
+
+      } else if (selectedTable === 'correo') {
+
+        // Thermos schema: Usuario, Correo, Status
+
+        reorderedColumns.push(...otherColumns.filter(col => ['usuarioid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['correo'].includes(col.columnName)));
 
       } else if (selectedTable === 'usuario') {
 
