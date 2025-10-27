@@ -2804,6 +2804,10 @@ const handleCancelUpdate = () => {
 
         return ['usuarioid', 'perfilid'];
 
+      case 'perfil':
+
+        return ['perfil', 'nivel'];
+
       default:
 
         return [];
@@ -4449,7 +4453,7 @@ if (errorCount > 0) {
       'perfilumbral': [],
       'criticidad': [],
       'medio': [],
-      'perfil': ['nivel'],
+      'perfil': ['jefeid'],
       'usuario': [],
       'contacto': ['celular'],
       'correo': ['correo'],
@@ -5440,6 +5444,16 @@ if (selectedTable === 'fundo') {
         reorderedColumns.push(...otherColumns.filter(col => ['firstname'].includes(col.columnName)));
 
         reorderedColumns.push(...otherColumns.filter(col => ['lastname'].includes(col.columnName)));
+
+      } else if (selectedTable === 'perfil') {
+
+        // Perfil, Nivel, Jefe
+
+        reorderedColumns.push(...otherColumns.filter(col => ['perfil'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['nivel'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['jefeid'].includes(col.columnName)));
 
       } else if (selectedTable === 'usuarioperfil') {
 

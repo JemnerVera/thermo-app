@@ -1405,37 +1405,31 @@ const validatePerfilData = async (
   }
   
   // 5. Validar duplicados si hay datos existentes
+  // Solo 'perfil' tiene UNIQUE constraint en Supabase
   if (existingData && existingData.length > 0) {
     const perfilExists = existingData.some(item => 
       item.perfil && item.perfil.toLowerCase() === formData.perfil?.toLowerCase()
     );
     
-    const nivelExists = existingData.some(item => 
-      item.nivel && item.nivel.toString().toLowerCase() === formData.nivel?.toLowerCase()
-    );
-    
-    if (perfilExists && nivelExists) {
-      errors.push({
-        field: 'both',
-        message: 'El perfil y nivel ya existen',
-        type: 'duplicate'
-      });
-    } else if (perfilExists) {
+    if (perfilExists) {
       errors.push({
         field: 'perfil',
         message: 'El nombre del perfil ya existe',
         type: 'duplicate'
       });
-    } else if (nivelExists) {
-      errors.push({
-        field: 'nivel',
-        message: 'El nivel del perfil ya existe',
-        type: 'duplicate'
-      });
     }
   }
   
-  // 3. Generar mensaje amigable
+  // 6. Validar longitud máxima (VARCHAR 50)
+  if (formData.perfil && formData.perfil.length > 50) {
+    errors.push({
+      field: 'perfil',
+      message: 'El nombre del perfil no puede exceder 50 caracteres',
+      type: 'format'
+    });
+  }
+  
+  // 7. Generar mensaje amigable
   const userFriendlyMessage = generateUserFriendlyMessage(errors);
   
   return {
@@ -3262,6 +3256,7 @@ const validatePerfilUpdate = async (
   }
   
   // 5. Validar duplicados (excluyendo el registro actual)
+  // Solo 'perfil' tiene UNIQUE constraint en Supabase
   if (formData.perfil && formData.perfil.trim() !== '') {
     const perfilExists = existingData.some(item => 
       item.perfilid !== originalData.perfilid && 
@@ -3278,23 +3273,16 @@ const validatePerfilUpdate = async (
     }
   }
   
-  if (formData.nivel && formData.nivel !== '') {
-    const nivelExists = existingData.some(item => 
-      item.perfilid !== originalData.perfilid && 
-      item.nivel && 
-      item.nivel.toString() === formData.nivel.toString()
-    );
-    
-    if (nivelExists) {
-      errors.push({
-        field: 'nivel',
-        message: 'El nivel del perfil ya existe',
-        type: 'duplicate'
-      });
-    }
+  // 6. Validar longitud máxima (VARCHAR 50)
+  if (formData.perfil && formData.perfil.length > 50) {
+    errors.push({
+      field: 'perfil',
+      message: 'El nombre del perfil no puede exceder 50 caracteres',
+      type: 'format'
+    });
   }
   
-  // 6. Validar relaciones padre-hijo (solo si se está inactivando)
+  // 7. Validar relaciones padre-hijo (solo si se está inactivando)
   if (formData.statusid === 0 && originalData.statusid !== 0) {
     // Verificar si hay usuarioperfil o perfilumbral que referencian este perfil
     const hasDependentRecords = await checkPerfilDependencies(originalData.perfilid);
