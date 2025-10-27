@@ -17,6 +17,7 @@ export interface RelatedData {
   tiposData?: any[];
   metricasData?: any[];
   localizacionesData?: any[];
+  localizacionsensorData?: any[];
   criticidadesData?: any[];
   perfilesData?: any[];
   umbralesData?: any[];
@@ -40,6 +41,7 @@ export const getColumnDisplayName = (columnName: string): string => {
     'tipos': 'Tipo',
     'metricas': 'Métrica',
     'localizacionid': 'Localización',
+    'localizacionsensorid': 'Localización',
     'criticidadid': 'Criticidad',
     'perfilid': 'Perfil',
     'umbralid': 'Umbral',
@@ -186,6 +188,7 @@ export const getColumnDisplayNameTranslated = (columnName: string, t: (key: stri
     'tipos': t('table_headers.type'),
     'metricas': t('table_headers.metric'),
     'localizacionid': t('table_headers.localization'),
+    'localizacionsensorid': t('table_headers.localization'),
     'criticidadid': t('table_headers.criticality'),
     'perfilid': t('table_headers.profile'),
     'umbralid': t('table_headers.threshold'),
@@ -350,6 +353,7 @@ const getRelatedDataArray = (tableName: string, relatedData: RelatedData): any[]
     case 'tipo': return relatedData.tiposData || [];
     case 'metrica': return relatedData.metricasData || [];
     case 'localizacion': return relatedData.localizacionesData || [];
+    case 'localizacionsensor': return relatedData.localizacionsensorData || [];
     case 'criticidad': return relatedData.criticidadesData || [];
     case 'perfil': return relatedData.perfilesData || [];
     case 'umbral': return relatedData.umbralesData || [];
@@ -376,6 +380,7 @@ export const getDisplayValue = (row: any, columnName: string, relatedData: Relat
     'fundoid': { table: 'fundo', nameField: 'fundo' },
     'ubicacionid': { table: 'ubicacion', nameField: 'ubicacion' },
     'entidadid': { table: 'entidad', nameField: 'entidad' },
+    'localizacionsensorid': { table: 'localizacionsensor', nameField: 'localizacionsensor' },
     'nodoid': { table: 'nodo', nameField: 'nodo' },
     'sensorid': { table: 'sensor', nameField: 'sensor' },
     'tipoid': { table: 'tipo', nameField: 'tipo' },

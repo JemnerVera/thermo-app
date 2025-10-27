@@ -290,76 +290,62 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
     }
   };
 
-  // Función para renderizar campos de umbral con layout específico y cascada
+  // Función para renderizar campos de umbral con layout específico (Thermos schema)
   const renderUmbralFields = (): React.ReactNode[] => {
     const result: React.ReactNode[] = [];
     
-    // Fila contextual: País, Empresa, Fundo (si hay filtros globales)
-    const contextualRow = renderContextualRow(['pais', 'empresa', 'fundo']);
-    if (contextualRow) {
-      result.push(contextualRow);
-    }
-    
-    // Primera fila: Ubicación, Nodo, Tipo
-    const ubicacionField = visibleColumns.find(c => c.columnName === 'ubicacionid');
-    const nodoField = visibleColumns.find(c => c.columnName === 'nodoid');
-    const tipoField = visibleColumns.find(c => c.columnName === 'tipoid');
-    
-    if (ubicacionField || nodoField || tipoField) {
-      result.push(
-        <div key="first-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {/* Ubicación - siempre habilitada */}
-          {ubicacionField && renderUmbralField(ubicacionField, true)}
-          
-          {/* Nodo - habilitado solo si hay ubicación seleccionada */}
-          {nodoField && renderUmbralField(nodoField, !!formData.ubicacionid)}
-          
-          {/* Tipo - habilitado solo si hay nodo seleccionado */}
-          {tipoField && renderUmbralField(tipoField, !!formData.nodoid)}
-        </div>
-      );
-    }
-
-    // Segunda fila: Métrica, (Valor Mínimo, Valor Máximo), Criticidad
-    const metricaField = visibleColumns.find(c => c.columnName === 'metricaid');
-    const minimoField = visibleColumns.find(c => c.columnName === 'minimo');
-    const maximoField = visibleColumns.find(c => c.columnName === 'maximo');
+    // Primera fila: Localización-Sensor, Umbral, Criticidad
+    const localizacionsensorField = visibleColumns.find(c => c.columnName === 'localizacionsensorid');
+    const umbralField = visibleColumns.find(c => c.columnName === 'umbral');
     const criticidadField = visibleColumns.find(c => c.columnName === 'criticidadid');
     
-    if (metricaField || minimoField || maximoField || criticidadField) {
+    if (localizacionsensorField || umbralField || criticidadField) {
       result.push(
-        <div key="second-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {/* Métrica - habilitada solo si hay tipo seleccionado */}
-          {metricaField && renderUmbralField(metricaField, !!formData.tipoid)}
+        <div key="first-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {/* Localización-Sensor - siempre habilitada */}
+          {localizacionsensorField && renderUmbralField(localizacionsensorField, true)}
           
-          {/* Valores - habilitados solo si hay métrica seleccionada */}
-          <div className="bg-gray-600 bg-opacity-40 p-3 rounded-lg border border-gray-500">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {minimoField && renderUmbralField(minimoField, !!formData.metricaid)}
-              {maximoField && renderUmbralField(maximoField, !!formData.metricaid)}
-            </div>
-          </div>
+          {/* Umbral - habilitado solo si hay localizacionsensor seleccionado */}
+          {umbralField && renderUmbralField(umbralField, !!formData.localizacionsensorid)}
           
-          {/* Criticidad - habilitada solo si hay métrica seleccionada */}
-          {criticidadField && renderUmbralField(criticidadField, !!formData.metricaid)}
+          {/* Criticidad - habilitada solo si hay localizacionsensor seleccionado */}
+          {criticidadField && renderUmbralField(criticidadField, !!formData.localizacionsensorid)}
         </div>
       );
     }
 
-    // Tercera fila: Nombre Umbral, (vacío), Status
-    const umbralField = visibleColumns.find(c => c.columnName === 'umbral');
+    // Segunda fila: Estandar, (Valor Mínimo, Valor Máximo)
+    const estandarField = visibleColumns.find(c => c.columnName === 'estandar');
+    const minimoField = visibleColumns.find(c => c.columnName === 'minimo');
+    const maximoField = visibleColumns.find(c => c.columnName === 'maximo');
+    
+    if (estandarField || minimoField || maximoField) {
+      result.push(
+        <div key="second-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {/* Estandar - opcional, habilitado si hay localizacionsensor */}
+          {estandarField && renderUmbralField(estandarField, !!formData.localizacionsensorid)}
+          
+          {/* Valores Mínimo y Máximo - habilitados si hay localizacionsensor */}
+          <div className="bg-gray-600 bg-opacity-40 p-3 rounded-lg border border-gray-500 md:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {minimoField && renderUmbralField(minimoField, !!formData.localizacionsensorid)}
+              {maximoField && renderUmbralField(maximoField, !!formData.localizacionsensorid)}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Tercera fila: Status
     const statusField = visibleColumns.find(c => c.columnName === 'statusid');
     
-    if (umbralField || statusField) {
+    if (statusField) {
       result.push(
         <div key="third-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {/* Nombre Umbral - habilitado solo si hay métrica seleccionada */}
-          {umbralField && renderUmbralField(umbralField, !!formData.metricaid)}
-          
+          {/* Status - habilitado si hay localizacionsensor */}
+          {statusField && renderUmbralField(statusField, !!formData.localizacionsensorid)}
           <div></div> {/* Espacio vacío */}
-          
-          {/* Status - habilitado solo si hay métrica seleccionada */}
-          {statusField && renderUmbralField(statusField, !!formData.metricaid)}
+          <div></div> {/* Espacio vacío */}
         </div>
       );
     }
@@ -1308,8 +1294,8 @@ return filteredNodos;
             );
           }
 
-          // Combobox para umbral - ubicacionid, criticidadid, nodoid, metricaid, tipoid
-          if (col.columnName === 'ubicacionid' && selectedTable === 'umbral') {
+          // Combobox para umbral - localizacionsensorid, criticidadid (Thermos schema)
+          if (col.columnName === 'localizacionsensorid' && selectedTable === 'umbral') {
             const options = getUniqueOptionsForField(col.columnName);
             return (
               <div key={col.columnName} className="mb-4">
@@ -1323,7 +1309,7 @@ return filteredNodos;
                     [col.columnName]: newValue ? parseInt(newValue.toString()) : null
                   })}
                   options={options}
-                  placeholder={t('create.select_location')}
+                  placeholder="SELECCIONAR LOCALIZACIÓN-SENSOR"
                 />
               </div>
             );
@@ -1344,66 +1330,6 @@ return filteredNodos;
                   })}
                   options={options}
                   placeholder={t('create.select_criticality')}
-                />
-              </div>
-            );
-          }
-
-          if (col.columnName === 'nodoid' && selectedTable === 'umbral') {
-            const options = getUniqueOptionsForField(col.columnName);
-            return (
-              <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
-                  {displayName.toUpperCase()}{isRequired ? '*' : ''}
-                </label>
-                <SelectWithPlaceholder
-                  value={value}
-                  onChange={(newValue) => setFormData({
-                    ...formData,
-                    [col.columnName]: newValue ? parseInt(newValue.toString()) : null
-                  })}
-                  options={options}
-                  placeholder={t('create.select_node')}
-                />
-              </div>
-            );
-          }
-
-          if (col.columnName === 'metricaid' && selectedTable === 'umbral') {
-            const options = getUniqueOptionsForField(col.columnName);
-            return (
-              <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
-                  {displayName.toUpperCase()}{isRequired ? '*' : ''}
-                </label>
-                <SelectWithPlaceholder
-                  value={value}
-                  onChange={(newValue) => setFormData({
-                    ...formData,
-                    [col.columnName]: newValue ? parseInt(newValue.toString()) : null
-                  })}
-                  options={options}
-                  placeholder={t('create.select_metric')}
-                />
-              </div>
-            );
-          }
-
-          if (col.columnName === 'tipoid' && selectedTable === 'umbral') {
-            const options = getUniqueOptionsForField(col.columnName);
-            return (
-              <div key={col.columnName} className="mb-4">
-                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
-                  {displayName.toUpperCase()}{isRequired ? '*' : ''}
-                </label>
-                <SelectWithPlaceholder
-                  value={value}
-                  onChange={(newValue) => setFormData({
-                    ...formData,
-                    [col.columnName]: newValue ? parseInt(newValue.toString()) : null
-                  })}
-                  options={options}
-                  placeholder={`${displayName.toUpperCase()}`}
                 />
               </div>
             );

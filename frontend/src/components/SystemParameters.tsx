@@ -2771,6 +2771,10 @@ const handleCancelUpdate = () => {
 
         return ['ubicacionid', 'entidadid', 'localizacion'];
 
+      case 'umbral':
+
+        return ['umbral', 'localizacionsensorid', 'criticidadid', 'minimo', 'maximo'];
+
       default:
 
         return [];
@@ -4386,7 +4390,7 @@ if (errorCount > 0) {
       'sensor': ['sensor', 'tipoid', 'statusid'],
       'metrica': ['metrica', 'unidad', 'statusid'],
       'metricasensor': ['sensorid', 'metricaid', 'statusid'],
-    'umbral': ['umbral', 'ubicacionid', 'criticidadid', 'nodoid', 'metricaid', 'tipoid', 'minimo', 'maximo', 'statusid'],
+    'umbral': ['localizacionsensorid', 'umbral', 'criticidadid', 'minimo', 'maximo', 'estandar', 'statusid'],
     'perfilumbral': ['perfilid', 'umbralid', 'statusid'],
     'criticidad': ['criticidad', 'grado', 'frecuencia', 'escalamiento', 'escalon', 'statusid'],
     'perfil': ['perfil', 'nivel', 'jefeid', 'statusid'],
@@ -4411,7 +4415,7 @@ if (errorCount > 0) {
       'sensor': [],
       'metrica': [],
       'metricasensor': [],
-      'umbral': ['minimo', 'maximo'],
+      'umbral': ['estandar'],
       'perfilumbral': [],
       'criticidad': [],
       'medio': [],
@@ -4973,7 +4977,7 @@ if (selectedTable === 'metricasensor') {
 
       if (selectedTable === 'umbral') {
 
-        return ['ubicacionid', 'criticidadid', 'nodoid', 'metricaid', 'umbral', 'maximo', 'minimo', 'tipoid', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+        return ['localizacionsensorid', 'minimo', 'maximo', 'estandar', 'criticidadid', 'umbral', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
 
       }
 
@@ -5326,23 +5330,19 @@ if (selectedTable === 'fundo') {
 
       } else if (selectedTable === 'umbral') {
 
-        // Ubicacion, Nodo, Tipo, Metrica, Valor Minimo, Valor Maximo, Criticidad, Nombre Umbral, Status
+        // Thermos schema: Localizacion, Umbral, Criticidad, Estandar, Minimo, Maximo, Status
 
-        reorderedColumns.push(...otherColumns.filter(col => ['ubicacionid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['localizacionsensorid'].includes(col.columnName)));
 
-        reorderedColumns.push(...otherColumns.filter(col => ['nodoid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['umbral'].includes(col.columnName)));
 
-        reorderedColumns.push(...otherColumns.filter(col => ['tipoid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['criticidadid'].includes(col.columnName)));
 
-        reorderedColumns.push(...otherColumns.filter(col => ['metricaid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['estandar'].includes(col.columnName)));
 
         reorderedColumns.push(...otherColumns.filter(col => ['minimo'].includes(col.columnName)));
 
         reorderedColumns.push(...otherColumns.filter(col => ['maximo'].includes(col.columnName)));
-
-        reorderedColumns.push(...otherColumns.filter(col => ['criticidadid'].includes(col.columnName)));
-
-        reorderedColumns.push(...otherColumns.filter(col => ['umbral'].includes(col.columnName)));
 
       } else if (selectedTable === 'usuario') {
 
@@ -7926,25 +7926,90 @@ return (
                            }
 
 // Campo jefeid como combobox (solo para perfil)
-                           if (col.columnName === 'jefeid' && selectedTable === 'perfil') {
-                             const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
-                             return (
-                               <div key={col.columnName} className="mb-4">
-                                 <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
-                                   {displayName.toUpperCase()}
-                                 </label>
-                                 <SelectWithPlaceholder
-                                   value={value}
-                                   onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
-                                     ...prev,
-                                     [col.columnName]: newValue ? parseInt(newValue.toString()) : null
-                                   }))}
-                                   options={options}
-                                   placeholder="SELECCIONAR JEFE (NIVEL - PERFIL)"
-                                 />
-                               </div>
-                             );
-                           }
+                          if (col.columnName === 'jefeid' && selectedTable === 'perfil') {
+                            const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
+                            return (
+                              <div key={col.columnName} className="mb-4">
+                                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                  {displayName.toUpperCase()}
+                                </label>
+                                <SelectWithPlaceholder
+                                  value={value}
+                                  onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
+                                    ...prev,
+                                    [col.columnName]: newValue ? parseInt(newValue.toString()) : null
+                                  }))}
+                                  options={options}
+                                  placeholder="SELECCIONAR JEFE (NIVEL - PERFIL)"
+                                />
+                              </div>
+                            );
+                          }
+
+// Campos específicos para umbral (Thermos schema)
+                          if (selectedTable === 'umbral') {
+                            // Dropdowns para umbral
+                            if (col.columnName === 'localizacionsensorid') {
+                              const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
+                              return (
+                                <div key={col.columnName} className="mb-4">
+                                  <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                    {displayName.toUpperCase()}
+                                  </label>
+                                  <SelectWithPlaceholder
+                                    value={value}
+                                    onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
+                                      ...prev,
+                                      [col.columnName]: newValue ? parseInt(newValue.toString()) : null
+                                    }))}
+                                    options={options}
+                                    placeholder="SELECCIONAR LOCALIZACIÓN-SENSOR"
+                                  />
+                                </div>
+                              );
+                            }
+
+                            if (col.columnName === 'criticidadid') {
+                              const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
+                              return (
+                                <div key={col.columnName} className="mb-4">
+                                  <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                    {displayName.toUpperCase()}
+                                  </label>
+                                  <SelectWithPlaceholder
+                                    value={value}
+                                    onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
+                                      ...prev,
+                                      [col.columnName]: newValue ? parseInt(newValue.toString()) : null
+                                    }))}
+                                    options={options}
+                                    placeholder="SELECCIONAR CRITICIDAD"
+                                  />
+                                </div>
+                              );
+                            }
+
+                            // Campos numéricos para umbral
+                            if (['minimo', 'maximo', 'estandar'].includes(col.columnName)) {
+                              return (
+                                <div key={col.columnName} className="mb-4">
+                                  <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                    {displayName.toUpperCase()}{col.columnName === 'estandar' ? '' : '*'}
+                                  </label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    value={value}
+                                    onChange={(e) => setUpdateFormData((prev: Record<string, any>) => ({
+                                      ...prev,
+                                      [col.columnName]: e.target.value ? parseFloat(e.target.value) : null
+                                    }))}
+                                    className="w-full px-3 py-2 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white text-base font-mono"
+                                  />
+                                </div>
+                              );
+                            }
+                          }
 
 // Campos de texto normales (editables)
 
@@ -8637,44 +8702,6 @@ return getDisplayValueLocal(row, col.columnName);
                       </div>
 
                     </div>
-
-                  ) : selectedTable === 'umbral' ? (
-
-                    <MassiveUmbralFormLazyWithBoundary
-
-                      getUniqueOptionsForField={getUniqueOptionsForField}
-
-                      onApply={handleMassiveUmbralCreationSimple}
-
-                      onCancel={() => {
-
-                        setCancelAction(() => () => {
-
-                          setMessage(null);
-
-                        });
-
-                        setShowCancelModal(true);
-
-                      }}
-
-                      loading={loading}
-
-                      paisSeleccionado={paisSeleccionado}
-
-                      empresaSeleccionada={empresaSeleccionada}
-
-                      fundoSeleccionado={fundoSeleccionado}
-
-                      getPaisName={getPaisName}
-
-                      getEmpresaName={getEmpresaName}
-
-                      getFundoName={getFundoName}
-
-                      localizacionesData={localizacionesData}
-
-                    />
 
                   ) : (
 

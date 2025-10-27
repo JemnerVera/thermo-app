@@ -92,12 +92,12 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
   ],
   
   umbral: [
-    { field: 'umbral', required: true, type: 'string', minLength: 1, customMessage: 'El nombre del umbral es obligatorio' },
-    { field: 'ubicacionid', required: true, type: 'number', customMessage: 'Debe seleccionar una ubicación' },
+    { field: 'umbral', required: true, type: 'string', minLength: 1, maxLength: 50, customMessage: 'El nombre del umbral es obligatorio y no puede exceder 50 caracteres' },
+    { field: 'localizacionsensorid', required: true, type: 'number', customMessage: 'Debe seleccionar una localización-sensor' },
     { field: 'criticidadid', required: true, type: 'number', customMessage: 'Debe seleccionar una criticidad' },
-    { field: 'nodoid', required: true, type: 'number', customMessage: 'Debe seleccionar un nodo' },
-    { field: 'metricaid', required: true, type: 'number', customMessage: 'Debe seleccionar una métrica' },
-    { field: 'tipoid', required: true, type: 'number', customMessage: 'Debe seleccionar un tipo' }
+    { field: 'minimo', required: true, type: 'number', customMessage: 'El valor mínimo es obligatorio' },
+    { field: 'maximo', required: true, type: 'number', customMessage: 'El valor máximo es obligatorio' },
+    { field: 'estandar', required: false, type: 'number', customMessage: 'El valor estándar debe ser un número válido' }
   ],
   
   perfilumbral: [
@@ -988,18 +988,17 @@ const validateUmbralData = async (
 ): Promise<EnhancedValidationResult> => {
   const errors: ValidationError[] = [];
   
-  // 1. Validar campos obligatorios
-  const requiredFields = ['umbral', 'ubicacionid', 'criticidadid', 'nodoid', 'metricaid', 'tipoid'];
+  // 1. Validar campos obligatorios (Thermos schema)
+  const requiredFields = ['umbral', 'localizacionsensorid', 'criticidadid', 'minimo', 'maximo'];
   
   requiredFields.forEach(field => {
     if (!formData[field] || (typeof formData[field] === 'string' && formData[field].trim() === '')) {
       const fieldNames: Record<string, string> = {
         'umbral': 'El nombre del umbral es obligatorio',
-        'ubicacionid': 'Debe seleccionar una ubicación',
+        'localizacionsensorid': 'Debe seleccionar una localización-sensor',
         'criticidadid': 'Debe seleccionar una criticidad',
-        'nodoid': 'Debe seleccionar un nodo',
-        'metricaid': 'Debe seleccionar una métrica',
-        'tipoid': 'Debe seleccionar un tipo'
+        'minimo': 'El valor mínimo es obligatorio',
+        'maximo': 'El valor máximo es obligatorio'
       };
       
       errors.push({
@@ -1010,7 +1009,7 @@ const validateUmbralData = async (
     }
   });
   
-  // 2. Validar constraint de negocio: minimo < maximo
+  // 2. Validar constraint de negocio: minimo < maximo (trigger en DB)
   if (formData.minimo !== null && formData.minimo !== undefined && 
       formData.maximo !== null && formData.maximo !== undefined) {
     const minimo = parseFloat(formData.minimo);
@@ -1025,26 +1024,7 @@ const validateUmbralData = async (
     }
   }
   
-  // 3. Validar duplicados si hay datos existentes
-  if (existingData && existingData.length > 0) {
-    const umbralExists = existingData.some(item => 
-      item.umbral && item.umbral.toLowerCase() === formData.umbral?.toLowerCase() &&
-      item.ubicacionid === formData.ubicacionid &&
-      item.nodoid === formData.nodoid &&
-      item.metricaid === formData.metricaid &&
-      item.tipoid === formData.tipoid
-    );
-    
-    if (umbralExists) {
-      errors.push({
-        field: 'general',
-        message: 'Ya existe un umbral con la misma configuración (ubicación, nodo, métrica y tipo)',
-        type: 'duplicate'
-      });
-    }
-  }
-  
-  // 4. Generar mensaje amigable
+  // 3. Generar mensaje amigable
   const userFriendlyMessage = generateUserFriendlyMessage(errors);
   
   return {

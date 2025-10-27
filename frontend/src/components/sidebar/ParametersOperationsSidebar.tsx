@@ -94,9 +94,6 @@ const ParametersOperationsSidebar: React.FC<ParametersOperationsSidebarProps> = 
     } else if (selectedTable === 'correo') {
       // Solo Estado y Actualizar para CORREO (sin Crear ni Masivo)
       return allOperations.filter(op => op.id === 'status' || op.id === 'update');
-    } else if (selectedTable === 'umbral') {
-      // Para umbral: Estado, Crear, Actualizar y Masivo
-      return allOperations;
     } else {
       // Para otras tablas: Estado, Crear, Actualizar (sin Masivo)
       return allOperations.filter(op => op.id !== 'massive');
