@@ -2971,6 +2971,31 @@ const validateUsuarioData = async (
     });
   }
   
+  // Validar longitud máxima de campos (VARCHAR 50)
+  if (formData.login && formData.login.length > 50) {
+    errors.push({
+      field: 'login',
+      message: 'El login no puede exceder 50 caracteres',
+      type: 'format'
+    });
+  }
+  
+  if (formData.firstname && formData.firstname.length > 50) {
+    errors.push({
+      field: 'firstname',
+      message: 'El nombre no puede exceder 50 caracteres',
+      type: 'format'
+    });
+  }
+  
+  if (formData.lastname && formData.lastname.length > 50) {
+    errors.push({
+      field: 'lastname',
+      message: 'El apellido no puede exceder 50 caracteres',
+      type: 'format'
+    });
+  }
+  
   // Validar formato de email para login
   if (formData.login && formData.login.trim() !== '') {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

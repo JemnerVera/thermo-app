@@ -2796,6 +2796,10 @@ const handleCancelUpdate = () => {
 
         return ['usuarioid'];
 
+      case 'usuario':
+
+        return ['login', 'firstname', 'lastname'];
+
       default:
 
         return [];
@@ -5026,7 +5030,7 @@ if (selectedTable === 'criticidad') {
 
       if (selectedTable === 'usuario') {
 
-        return ['login', 'firstname', 'lastname', 'email', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+        return ['login', 'firstname', 'lastname', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
 
       }
 
@@ -5432,8 +5436,6 @@ if (selectedTable === 'fundo') {
         reorderedColumns.push(...otherColumns.filter(col => ['firstname'].includes(col.columnName)));
 
         reorderedColumns.push(...otherColumns.filter(col => ['lastname'].includes(col.columnName)));
-
-        reorderedColumns.push(...otherColumns.filter(col => ['email'].includes(col.columnName)));
 
       } else if (selectedTable === 'usuarioperfil') {
 
