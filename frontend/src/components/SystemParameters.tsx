@@ -2800,6 +2800,10 @@ const handleCancelUpdate = () => {
 
         return ['login', 'firstname', 'lastname'];
 
+      case 'usuarioperfil':
+
+        return ['usuarioid', 'perfilid'];
+
       default:
 
         return [];

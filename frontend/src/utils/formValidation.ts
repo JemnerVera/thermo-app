@@ -163,6 +163,11 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
   status: [
     { field: 'status', required: true, type: 'string', minLength: 1, customMessage: 'El nombre del status es obligatorio' },
     { field: 'statusabrev', required: false, type: 'string', maxLength: 10, customMessage: 'La abreviatura no puede exceder 10 caracteres' }
+  ],
+  
+  usuarioperfil: [
+    { field: 'usuarioid', required: true, type: 'number', customMessage: 'Debe seleccionar un usuario' },
+    { field: 'perfilid', required: true, type: 'number', customMessage: 'Debe seleccionar un perfil' }
   ]
 };
 
@@ -412,6 +417,8 @@ export const validateTableData = async (
       return await validatePerfilData(formData, existingData);
     case 'usuario':
       return await validateUsuarioData(formData, existingData || []);
+    case 'usuarioperfil':
+      return await validateUsuarioPerfilData(formData, existingData || []);
     default:
       // Fallback a validación básica
       const basicResult = validateFormData(tableName, formData);
@@ -3019,6 +3026,57 @@ const validateUsuarioData = async (
       errors.push({
         field: 'login',
         message: 'El login ya existe',
+        type: 'duplicate'
+      });
+    }
+  }
+  
+  // 3. Generar mensaje amigable para inserción
+  const userFriendlyMessage = generateUserFriendlyMessage(errors);
+  
+  return {
+    isValid: errors.length === 0,
+    errors,
+    userFriendlyMessage
+  };
+};
+
+// ===== VALIDACIÓN DE INSERCIÓN PARA USUARIOPERFIL =====
+const validateUsuarioPerfilData = async (
+  formData: Record<string, any>,
+  existingData: any[]
+): Promise<EnhancedValidationResult> => {
+  const errors: ValidationError[] = [];
+
+  // 1. Validar campos obligatorios
+  if (!formData.usuarioid || formData.usuarioid === '') {
+    errors.push({
+      field: 'usuarioid',
+      message: 'El usuario es obligatorio',
+      type: 'required'
+    });
+  }
+  
+  if (!formData.perfilid || formData.perfilid === '') {
+    errors.push({
+      field: 'perfilid',
+      message: 'El perfil es obligatorio',
+      type: 'required'
+    });
+  }
+  
+  // 2. Validar duplicados
+  // Para usuarioperfil, la clave primaria es compuesta (usuarioid, perfilid)
+  if (formData.usuarioid && formData.perfilid) {
+    const usuarioPerfilExists = existingData.some(item => 
+      item.usuarioid === formData.usuarioid && 
+      item.perfilid === formData.perfilid
+    );
+    
+    if (usuarioPerfilExists) {
+      errors.push({
+        field: 'composite',
+        message: 'Ya existe una relación entre este usuario y perfil',
         type: 'duplicate'
       });
     }
