@@ -35,25 +35,7 @@ export const useMultipleSelection = (selectedTable: string, searchByCriteria: an
   const findBusinessLogicMatches = (row: any, allData: any[]) => {
     const matches: any[] = [];
 
-    // Para sensor: buscar por nodoid y tipoid
-    if (selectedTable === 'sensor') {
-      const sensorMatches = allData.filter(dataRow => 
-        dataRow.nodoid === row.nodoid && dataRow.tipoid === row.tipoid
-      );
-      matches.push(...sensorMatches);
-    }
-
-    // Para metricasensor: buscar por nodoid, tipoid y metricaid
-    if (selectedTable === 'metricasensor') {
-      const metricaMatches = allData.filter(dataRow => 
-        dataRow.nodoid === row.nodoid && 
-        dataRow.tipoid === row.tipoid && 
-        dataRow.metricaid === row.metricaid
-      );
-      matches.push(...metricaMatches);
-    }
-
-    // Para usuarioperfil: buscar por usuarioid y perfilid
+    // Para usuarioperfil: buscar por usuarioid y perfilid (tabla agrupada en Thermos)
     if (selectedTable === 'usuarioperfil') {
       const perfilMatches = allData.filter(dataRow => 
         dataRow.usuarioid === row.usuarioid && dataRow.perfilid === row.perfilid
@@ -61,16 +43,8 @@ export const useMultipleSelection = (selectedTable: string, searchByCriteria: an
       matches.push(...perfilMatches);
     }
 
-    // Para umbral: buscar por nodoid, tipoid, metricaid y criticidadid
-    if (selectedTable === 'umbral') {
-      const umbralMatches = allData.filter(dataRow => 
-        dataRow.nodoid === row.nodoid && 
-        dataRow.tipoid === row.tipoid && 
-        dataRow.metricaid === row.metricaid &&
-        dataRow.criticidadid === row.criticidadid
-      );
-      matches.push(...umbralMatches);
-    }
+    // NOTA: sensor, metricasensor y umbral son tablas simples en Thermos
+    // No se agrupan automáticamente
 
     return matches;
   };
@@ -78,45 +52,8 @@ export const useMultipleSelection = (selectedTable: string, searchByCriteria: an
   const findBusinessCriteriaMatches = (row: any, allData: any[]) => {
     const matches: any[] = [];
 
-    const normalizeDate = (dateString: string) => {
-      try {
-        const date = new Date(dateString);
-        return date.toISOString().split('T')[0]; // YYYY-MM-DD
-      } catch {
-        return dateString;
-      }
-    };
-
-    // Buscar por criterios de negocio específicos
-    if (selectedTable === 'sensor') {
-      // Buscar sensores del mismo nodo y tipo
-      const sameNodeType = allData.filter(dataRow => 
-        dataRow.nodoid === row.nodoid && dataRow.tipoid === row.tipoid
-      );
-      matches.push(...sameNodeType);
-
-      // Buscar sensores creados en la misma fecha
-      if (row.datecreated) {
-        const sameDate = allData.filter(dataRow => 
-          dataRow.datecreated && 
-          normalizeDate(dataRow.datecreated) === normalizeDate(row.datecreated)
-        );
-        matches.push(...sameDate);
-      }
-    }
-
-    if (selectedTable === 'metricasensor') {
-      // Buscar métricas del mismo nodo, tipo y métrica
-      const sameNodeTypeMetric = allData.filter(dataRow => 
-        dataRow.nodoid === row.nodoid && 
-        dataRow.tipoid === row.tipoid && 
-        dataRow.metricaid === row.metricaid
-      );
-      matches.push(...sameNodeTypeMetric);
-    }
-
+    // Para usuarioperfil: buscar perfiles del mismo usuario
     if (selectedTable === 'usuarioperfil') {
-      // Buscar perfiles del mismo usuario
       const sameUser = allData.filter(dataRow => 
         dataRow.usuarioid === row.usuarioid
       );
@@ -128,6 +65,9 @@ export const useMultipleSelection = (selectedTable: string, searchByCriteria: an
       );
       matches.push(...sameProfile);
     }
+
+    // NOTA: sensor, metricasensor y umbral son tablas simples en Thermos
+    // No se buscan matches por criterios de negocio
 
     return matches;
   };

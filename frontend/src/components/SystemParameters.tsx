@@ -1094,16 +1094,12 @@ const options = {
   // PAGINATION FUNCTIONS
   // ============================================================================
 
-  // Para metricasensor y usuarioperfil, calcular totalPages basado en datos agrupados
+  // Para usuarioperfil, calcular totalPages basado en datos agrupados
   const getTotalPagesForGroupedTable = () => {
 
-    if ((selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') && updateData.length > 0) {
+    if (selectedTable === 'usuarioperfil' && updateData.length > 0) {
 
-      const groupedData = selectedTable === 'metricasensor' 
-
-        ? groupMetricaSensorData(updateData)
-
-        : groupUsuarioPerfilData(updateData);
+      const groupedData = groupUsuarioPerfilData(updateData);
 
       const calculatedPages = Math.ceil(groupedData.length / itemsPerPage);
 
@@ -1121,43 +1117,9 @@ return calculatedPages;
 
 // Funciones de navegación corregidas para tablas agrupadas
 
-  const correctedHasNextPage = (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') ? paginationCurrentPage < correctedTotalPages : hasNextPage;
+  const correctedHasNextPage = selectedTable === 'usuarioperfil' ? paginationCurrentPage < correctedTotalPages : hasNextPage;
 
-  const correctedHasPrevPage = (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') ? paginationCurrentPage > 1 : hasPrevPage;
-
-// Funciones de navegación personalizadas para metricasensor
-
-const handleMetricaSensorNextPage = () => {
-
-    if (paginationCurrentPage < correctedTotalPages) {
-
-      goToPage(paginationCurrentPage + 1);
-
-    }
-
-  };
-
-const handleMetricaSensorPrevPage = () => {
-
-    if (paginationCurrentPage > 1) {
-
-      goToPage(paginationCurrentPage - 1);
-
-    }
-
-  };
-
-const handleMetricaSensorFirstPage = () => {
-
-    goToPage(1);
-
-  };
-
-const handleMetricaSensorLastPage = () => {
-
-    goToPage(correctedTotalPages);
-
-  };
+  const correctedHasPrevPage = selectedTable === 'usuarioperfil' ? paginationCurrentPage > 1 : hasPrevPage;
 
 // Usar paginationCurrentPage para todas las tablas
 
@@ -2504,11 +2466,9 @@ loadTableDataWrapper();
     // Usar updateFilteredData para la tabla de Actualizar
     const sourceData = updateFilteredData;
 
-    // Para metricasensor y usuarioperfil, agrupar TODOS los datos primero, luego paginar
-    if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
-      const groupedData = selectedTable === 'metricasensor' 
-        ? groupMetricaSensorData(sourceData)
-        : groupUsuarioPerfilData(sourceData);
+    // Para usuarioperfil, agrupar TODOS los datos primero, luego paginar
+    if (selectedTable === 'usuarioperfil') {
+      const groupedData = groupUsuarioPerfilData(sourceData);
       
       // Aplicar paginación a los datos agrupados
       const startIndex = (effectiveCurrentPage - 1) * itemsPerPage;
@@ -2516,7 +2476,7 @@ loadTableDataWrapper();
       return groupedData.slice(startIndex, endIndex);
     }
 
-    // Para otras tablas, usar la paginación normal
+    // Para otras tablas (incluida metricasensor), usar la paginación normal
     return getPaginatedData();
 
   };
@@ -7120,25 +7080,17 @@ const handleSelectRowForManualUpdate = (row: any, isSelected: boolean) => {
 
     const rowId = getRowIdForSelection(row);
 
-// Para tablas agrupadas (metricasensor, usuarioperfil), implementar selección única
+// Para usuarioperfil (tabla agrupada), implementar selección única
 
-    if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
+    if (selectedTable === 'usuarioperfil') {
 
     if (isSelected) {
 
         // Limpiar selección anterior y seleccionar solo esta fila
 
-if (selectedTable === 'metricasensor' && row.originalRows && row.originalRows.length > 0) {
-
-          // Para metricasensor, expandir las originalRows
-
-          setSelectedRowsForManualUpdate([...row.originalRows]);
-
-} else if (selectedTable === 'usuarioperfil' && row.originalRows && row.originalRows.length > 0) {
+        if (row.originalRows && row.originalRows.length > 0) {
 
         // Para usuarioperfil, mantener la fila agrupada
-
-          setSelectedRowsForManualUpdate([row]);
 
           setSelectedRowsForManualUpdate([row]);
 
@@ -7160,7 +7112,7 @@ if (selectedTable === 'metricasensor' && row.originalRows && row.originalRows.le
 
     } else {
 
-      // Para otras tablas, mantener la lógica original de selección múltiple
+      // Para otras tablas (incluida metricasensor), mantener la lógica original de selección múltiple
 
       if (isSelected) {
 
@@ -8153,33 +8105,7 @@ return (
 
                       )}
 
-{/* Formulario avanzado para metricasensor */}
-
-                      {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable === 'metricasensor' && (
-
-                        <AdvancedMetricaSensorUpdateForm
-
-                          selectedRows={selectedRowsForUpdate.length > 0 ? selectedRowsForUpdate : selectedRowsForManualUpdate}
-
-                          onUpdate={handleAdvancedMetricaSensorUpdate}
-
-                          onCancel={handleCancelUpdate}
-
-                          getUniqueOptionsForField={getUniqueOptionsForField}
-
-                          entidadesData={entidadesData}
-
-                          tiposData={tiposData}
-
-                          nodosData={sensorsData}
-
-                          metricasData={metricasData}
-
-                        />
-
-                      )}
-
-{/* Formulario avanzado para usuarioperfil */}
+{/* Formulario avanzado para usuarioperfil (agrupado) */}
 
                       {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable === 'usuarioperfil' && (
 
@@ -8203,7 +8129,7 @@ return (
 
 {/* Tabla de entradas seleccionadas para actualización múltiple (otras tablas) */}
 
-                      {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable !== 'metricasensor' && selectedTable !== 'usuarioperfil' && (
+                      {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable !== 'usuarioperfil' && (
 
                         <div className="bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4 mb-6">
 
@@ -8528,11 +8454,11 @@ return (
 
                                    <tr key={(effectiveCurrentPage - 1) * itemsPerPage + index} className={`bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800 cursor-pointer ${hasNoActiveMetrics || hasNoActivePerfiles ? 'text-red-400' : ''}`} onClick={(e) => {
 
-                                     // Solo ejecutar si no se hizo clic en el checkbox
+                                    // Solo ejecutar si no se hizo clic en el checkbox
 
                                      if ((e.target as HTMLInputElement).type !== 'checkbox') {
 
-                                     if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
+                                     if (selectedTable === 'usuarioperfil') {
 
                                        // Toggle selection: if selected, unselect; if not selected, select
 
@@ -8548,7 +8474,7 @@ return (
 
                                    }}>
 
-                                     <td className="px-2 py-4 w-12">
+                                    <td className="px-2 py-4 w-12">
 
                                        <input
 
@@ -8560,7 +8486,7 @@ return (
 
                                            e.stopPropagation();
 
-                                           if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
+                                           if (selectedTable === 'usuarioperfil') {
 
                                              // Toggle selection: if selected, unselect; if not selected, select
 
@@ -8728,7 +8654,7 @@ return getDisplayValueLocal(row, col.columnName);
 
                                <button
 
-                                 onClick={handleMetricaSensorFirstPage}
+                                 onClick={() => goToPage(1)}
 
                                  disabled={!correctedHasPrevPage}
 
@@ -8744,7 +8670,7 @@ return getDisplayValueLocal(row, col.columnName);
 
                                <button
 
-                                 onClick={handleMetricaSensorPrevPage}
+                                 onClick={() => goToPage(paginationCurrentPage - 1)}
 
                                  disabled={!correctedHasPrevPage}
 
@@ -8764,7 +8690,7 @@ return getDisplayValueLocal(row, col.columnName);
 
                                <button
 
-                                 onClick={handleMetricaSensorNextPage}
+                                 onClick={() => goToPage(paginationCurrentPage + 1)}
 
                                  disabled={!correctedHasNextPage}
 
@@ -8778,7 +8704,7 @@ return getDisplayValueLocal(row, col.columnName);
 
                                <button
 
-                                 onClick={handleMetricaSensorLastPage}
+                                 onClick={() => goToPage(correctedTotalPages)}
 
                                  disabled={!correctedHasNextPage}
 

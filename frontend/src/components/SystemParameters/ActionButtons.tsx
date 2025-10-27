@@ -12,8 +12,8 @@ export function ActionButtons({
   onUpdate, 
   onCancelUpdate 
 }: ActionButtonsProps) {
-  // Solo mostrar para tablas que no sean metricasensor o usuarioperfil (que tienen formularios personalizados)
-  if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
+  // Solo ocultar para usuarioperfil (tabla agrupada con formulario personalizado)
+  if (selectedTable === 'usuarioperfil') {
     return null;
   }
 
