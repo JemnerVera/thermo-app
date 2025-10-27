@@ -12,8 +12,8 @@ export function ActionButtons({
   onUpdate, 
   onCancelUpdate 
 }: ActionButtonsProps) {
-  // Solo mostrar para tablas que no sean metricasensor, sensor o usuarioperfil
-  if (selectedTable === 'metricasensor' || selectedTable === 'sensor' || selectedTable === 'usuarioperfil') {
+  // Solo mostrar para tablas que no sean metricasensor o usuarioperfil (que tienen formularios personalizados)
+  if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
     return null;
   }
 

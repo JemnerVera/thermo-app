@@ -591,130 +591,6 @@ return {
 
   };
 
-// Función para agrupar datos de sensor por nodo
-
-  const groupSensorData = (data: any[]) => {
-
-    if (selectedTable !== 'sensor') {
-
-      return data;
-
-    }
-
-// Agrupar por sensorid (Thermos)
-
-    const groupedData = data.reduce((acc: any, row: any) => {
-
-      const sensorid = row.sensorid;
-
-      if (!acc[sensorid]) {
-
-        // Buscar el nombre del sensor
-
-        const sensor = sensorsData?.find(s => s.sensorid === sensorid);
-
-acc[sensorid] = {
-
-          sensorid: row.sensorid,
-
-          sensor: sensor?.sensor || `Sensor ${sensorid}`,
-
-          tipos: new Set(),
-
-          usercreatedid: row.usercreatedid,
-
-          datecreated: row.datecreated,
-
-          usermodifiedid: row.usermodifiedid,
-
-          datemodified: row.datemodified,
-
-          statusid: row.statusid,
-
-          // Mantener referencia a las filas originales para el formulario de edición
-
-          originalRows: []
-
-        };
-
-      }
-
-// Buscar el nombre del tipo
-
-      const tipo = tiposData?.find(t => t.tipoid === row.tipoid);
-
-// Solo agregar tipos si están activos (statusid: 1)
-
-      if (row.statusid === 1) {
-
-        if (tipo?.tipo) {
-
-          acc[sensorid].tipos.add(tipo.tipo);
-
-        }
-
-      }
-
-// Crear fila original con nombres incluidos
-
-      const enrichedRow = {
-
-        ...row,
-
-        tipo: tipo?.tipo || `Tipo ${row.tipoid}`,
-
-        sensor: acc[sensorid].sensor || `Sensor ${row.sensorid}`,
-
-        entidadid: tipo?.entidadid || row.entidadid // Obtener entidadid del tipo
-
-      };
-
-// Agregar fila original enriquecida
-
-      acc[sensorid].originalRows.push(enrichedRow);
-
-return acc;
-
-    }, {});
-
-// Convertir a array y formatear tipos
-
-    const result = Object.values(groupedData).map((group: any) => {
-
-      const hasActiveTypes = group.tipos.size > 0;
-
-return {
-
-        ...group,
-
-        tipos: hasActiveTypes ? Array.from(group.tipos).join(', ') : 'Sin sensores activos',
-
-        // Para compatibilidad con el sistema de selección
-
-        tipoid: group.originalRows[0]?.tipoid,
-
-        // Agregar todos los tipos para mostrar en la tabla
-
-        allTipos: Array.from(group.tipos).join(', ')
-
-      };
-
-    });
-
-// Ordenar por fecha de modificación más reciente primero
-
-    return result.sort((a: any, b: any) => {
-
-      const dateA = new Date(a.datemodified || a.datecreated || 0);
-
-      const dateB = new Date(b.datemodified || b.datecreated || 0);
-
-      return dateB.getTime() - dateA.getTime();
-
-    });
-
-  };
-
 // Función para agrupar datos de usuarioperfil por usuario
 
   const groupUsuarioPerfilData = (data: any[]) => {
@@ -1237,18 +1113,14 @@ const options = {
   // PAGINATION FUNCTIONS
   // ============================================================================
 
-  // Para metricasensor, sensor y usuarioperfil, calcular totalPages basado en datos agrupados
+  // Para metricasensor y usuarioperfil, calcular totalPages basado en datos agrupados
   const getTotalPagesForGroupedTable = () => {
 
-    if ((selectedTable === 'metricasensor' || selectedTable === 'sensor' || selectedTable === 'usuarioperfil') && updateData.length > 0) {
+    if ((selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') && updateData.length > 0) {
 
       const groupedData = selectedTable === 'metricasensor' 
 
         ? groupMetricaSensorData(updateData)
-
-        : selectedTable === 'sensor'
-
-        ? groupSensorData(updateData)
 
         : groupUsuarioPerfilData(updateData);
 
@@ -1268,9 +1140,9 @@ return calculatedPages;
 
 // Funciones de navegación corregidas para tablas agrupadas
 
-  const correctedHasNextPage = (selectedTable === 'metricasensor' || selectedTable === 'sensor' || selectedTable === 'usuarioperfil') ? paginationCurrentPage < correctedTotalPages : hasNextPage;
+  const correctedHasNextPage = (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') ? paginationCurrentPage < correctedTotalPages : hasNextPage;
 
-  const correctedHasPrevPage = (selectedTable === 'metricasensor' || selectedTable === 'sensor' || selectedTable === 'usuarioperfil') ? paginationCurrentPage > 1 : hasPrevPage;
+  const correctedHasPrevPage = (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') ? paginationCurrentPage > 1 : hasPrevPage;
 
 // Funciones de navegación personalizadas para metricasensor
 
@@ -2797,12 +2669,10 @@ setMessage({
     // Usar updateFilteredData para la tabla de Actualizar
     const sourceData = updateFilteredData;
 
-    // Para metricasensor, sensor y usuarioperfil, agrupar TODOS los datos primero, luego paginar
-    if (selectedTable === 'metricasensor' || selectedTable === 'sensor' || selectedTable === 'usuarioperfil') {
+    // Para metricasensor y usuarioperfil, agrupar TODOS los datos primero, luego paginar
+    if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
       const groupedData = selectedTable === 'metricasensor' 
         ? groupMetricaSensorData(sourceData)
-        : selectedTable === 'sensor'
-        ? groupSensorData(sourceData)
         : groupUsuarioPerfilData(sourceData);
       
       // Aplicar paginación a los datos agrupados
@@ -2839,23 +2709,13 @@ const handleSelectRowForUpdate = (row: any) => {
 
     const selectedEntries = findEntriesByTimestamp(row, tableData, updateData);
 
-// Para sensor y metricasensor, verificar si ya hay entradas seleccionadas
+// Para metricasensor, verificar si ya hay entradas seleccionadas
 
-    if (selectedTable === 'sensor' || selectedTable === 'metricasensor') {
+    if (selectedTable === 'metricasensor') {
 
       const hasSameTimestamp = selectedRowsForUpdate.some(selectedRow => {
 
-        if (selectedTable === 'sensor') {
-
-          return selectedRow.nodoid === row.nodoid && selectedRow.datecreated === row.datecreated;
-
-        } else if (selectedTable === 'metricasensor') {
-
-          return selectedRow.nodoid === row.nodoid && selectedRow.datecreated === row.datecreated;
-
-        }
-
-        return false;
+        return selectedRow.nodoid === row.nodoid && selectedRow.datecreated === row.datecreated;
 
       });
 
@@ -5369,12 +5229,6 @@ if (selectedTable === 'localizacion') {
 
       }
 
-if (selectedTable === 'sensor') {
-
-        return ['nodoid', 'tipoid', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
-
-      }
-
 if (selectedTable === 'metricasensor') {
 
         return ['nodoid', 'metricaid', 'tipoid', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
@@ -7607,9 +7461,9 @@ const handleSelectRowForManualUpdate = (row: any, isSelected: boolean) => {
 
     const rowId = getRowIdForSelection(row);
 
-// Para tablas agrupadas (sensor, metricasensor, usuarioperfil), implementar selección única
+// Para tablas agrupadas (metricasensor, usuarioperfil), implementar selección única
 
-    if (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
+    if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
 
     if (isSelected) {
 
@@ -7626,10 +7480,6 @@ if (selectedTable === 'metricasensor' && row.originalRows && row.originalRows.le
         // Para usuarioperfil, mantener la fila agrupada
 
           setSelectedRowsForManualUpdate([row]);
-
-} else if (selectedTable === 'sensor' && row.originalRows && row.originalRows.length > 0) {
-
-          // Para sensor, mantener la fila agrupada
 
           setSelectedRowsForManualUpdate([row]);
 
@@ -8396,7 +8246,7 @@ const handleCancelModal = () => {
 
                             Se han seleccionado <span className="font-bold text-blue-600">{selectedRowsForUpdate.length}</span> entradas del nodo <span className="font-bold text-blue-600">{selectedRowsForUpdate[0]?.nodoid}</span> para actualizar.
 
-                            {(selectedTable === 'sensor' || selectedTable === 'metricasensor') && (
+                            {selectedTable === 'metricasensor' && (
 
                               <span className="block text-sm text-neutral-400 mt-1 font-mono">
 
@@ -9003,7 +8853,7 @@ setIndividualRowStatus(newIndividualStatus);
 
                                  })().map((row, index) => {
 
-const isSelected = (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') 
+const isSelected = (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') 
 
                                      ? selectedRowsForManualUpdate.some(r => getRowIdForSelection(r) === getRowIdForSelection(row))
 
@@ -9023,7 +8873,7 @@ return (
 
                                      if ((e.target as HTMLInputElement).type !== 'checkbox') {
 
-                                     if (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
+                                     if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
 
                                        // Toggle selection: if selected, unselect; if not selected, select
 
@@ -9051,7 +8901,7 @@ return (
 
                                            e.stopPropagation();
 
-                                           if (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
+                                           if (selectedTable === 'metricasensor' || selectedTable === 'usuarioperfil') {
 
                                              // Toggle selection: if selected, unselect; if not selected, select
 
