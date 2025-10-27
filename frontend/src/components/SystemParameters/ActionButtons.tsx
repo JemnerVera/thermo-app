@@ -22,7 +22,7 @@ export function ActionButtons({
       <button
         onClick={onUpdate}
         disabled={updateLoading}
-        className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-mono tracking-wider"
+        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-mono tracking-wider"
       >
         <span>➕</span>
         <span>{updateLoading ? 'GUARDANDO...' : 'GUARDAR'}</span>
