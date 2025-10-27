@@ -129,20 +129,6 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
     }
   }
   
-  // Para Nodo: habilitación progresiva nodo -> deveui -> resto
-  if (selectedTable === 'nodo') {
-    if (columnName === 'nodo') {
-      return true; // Siempre habilitado
-    }
-    if (columnName === 'deveui') {
-      return !!(formData.nodo && formData.nodo.trim() !== '');
-    }
-    // Para el resto de campos (appeui, appkey, atpin, statusid)
-    if (['appeui', 'appkey', 'atpin', 'statusid'].includes(columnName)) {
-      return !!(formData.nodo && formData.nodo.trim() !== '' && formData.deveui && formData.deveui.trim() !== '');
-    }
-  }
-  
   // Para Métrica: habilitación progresiva metrica -> unidad -> resto
   if (selectedTable === 'metrica') {
     if (columnName === 'metrica') {
@@ -291,8 +277,6 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       return renderEntidadFields();
     } else if (selectedTable === 'tipo') {
       return renderTipoFields();
-    } else if (selectedTable === 'nodo') {
-      return renderNodoFields();
     } else if (selectedTable === 'sensor') {
       return renderSensorFields();
     } else if (selectedTable === 'metricasensor') {
@@ -723,23 +707,6 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
           {entidadField && renderField(entidadField)}
           <div></div> {/* Espacio vacío */}
           {statusField && renderField(statusField)}
-        </div>
-      );
-    }
-    
-    return result;
-  };
-
-  // Función para renderizar campos de Nodo con layout específico
-  const renderNodoFields = (): React.ReactNode[] => {
-    const result: React.ReactNode[] = [];
-    
-    // Renderizar el resto de campos normalmente
-    const otherFields = visibleColumns.filter(col => !['paisid', 'empresaid', 'fundoid'].includes(col.columnName));
-    if (otherFields.length > 0) {
-      result.push(
-        <div key="fields-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {otherFields.map(col => renderField(col))}
         </div>
       );
     }
@@ -1879,15 +1846,6 @@ return filteredNodos;
           >
             <span>↩️</span>
             <span>VOLVER</span>
-          </button>
-        )}
-        
-        {selectedTable === 'sensor' && onPasteFromClipboard && (
-          <button
-            onClick={onPasteFromClipboard}
-            className="px-6 py-2 bg-neutral-800 border border-neutral-600 text-white rounded-lg hover:bg-neutral-700 transition-colors font-medium font-mono tracking-wider"
-          >
-            PEGAR DESDE PORTAPAPELES
           </button>
         )}
       </div>

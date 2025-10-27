@@ -12,7 +12,8 @@ export interface RelatedData {
   fundosData?: any[];
   ubicacionesData?: any[];
   entidadesData?: any[];
-  nodosData?: any[];
+  nodosData?: any[]; // Legacy: JoySense nodos (IoT devices)
+  sensorsData?: any[]; // Thermos sensors
   tiposData?: any[];
   metricasData?: any[];
   localizacionesData?: any[];
@@ -345,6 +346,7 @@ const getRelatedDataArray = (tableName: string, relatedData: RelatedData): any[]
     case 'ubicacion': return relatedData.ubicacionesData || [];
     case 'entidad': return relatedData.entidadesData || [];
     case 'nodo': return relatedData.nodosData || [];
+    case 'sensor': return relatedData.sensorsData || [];
     case 'tipo': return relatedData.tiposData || [];
     case 'metrica': return relatedData.metricasData || [];
     case 'localizacion': return relatedData.localizacionesData || [];
@@ -375,6 +377,7 @@ export const getDisplayValue = (row: any, columnName: string, relatedData: Relat
     'ubicacionid': { table: 'ubicacion', nameField: 'ubicacion' },
     'entidadid': { table: 'entidad', nameField: 'entidad' },
     'nodoid': { table: 'nodo', nameField: 'nodo' },
+    'sensorid': { table: 'sensor', nameField: 'sensor' },
     'tipoid': { table: 'tipo', nameField: 'tipo' },
     'metricaid': { table: 'metrica', nameField: 'metrica' },
     'localizacionid': { table: 'localizacion', nameField: 'localizacionid' },
@@ -475,7 +478,9 @@ export const getDisplayValue = (row: any, columnName: string, relatedData: Relat
   }
 
   // Para valores de texto
-  return row[columnName]?.toString() || 'N/A';
+  const finalValue = row[columnName]?.toString() || 'N/A';
+  
+  return finalValue;
 };
 
 /**

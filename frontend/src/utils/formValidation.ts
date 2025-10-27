@@ -81,9 +81,9 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
     { field: 'tipo', required: true, type: 'string', minLength: 1, maxLength: 50, customMessage: 'El nombre del tipo es obligatorio' }
   ],
   
-  nodo: [
-    { field: 'nodo', required: true, type: 'string', minLength: 1, customMessage: 'El nombre del nodo es obligatorio' },
-    { field: 'deveui', required: true, type: 'string', minLength: 1, customMessage: 'El campo DEVEUI es obligatorio' }
+  sensor: [
+    { field: 'sensor', required: true, type: 'string', minLength: 1, maxLength: 50, customMessage: 'El nombre del sensor es obligatorio' },
+    { field: 'tipoid', required: true, type: 'number', customMessage: 'Debe seleccionar un tipo' }
   ],
   
   metrica: [
@@ -103,11 +103,6 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
   perfilumbral: [
     { field: 'perfilid', required: true, type: 'number', customMessage: 'Debe seleccionar un perfil' },
     { field: 'umbralid', required: true, type: 'number', customMessage: 'Debe seleccionar un umbral' }
-  ],
-  
-  sensor: [
-    { field: 'nodoid', required: true, type: 'number', customMessage: 'Debe seleccionar un nodo' },
-    { field: 'tipoid', required: true, type: 'number', customMessage: 'Debe seleccionar un tipo' }
   ],
   
   medicion: [
@@ -338,8 +333,8 @@ export const validateTableUpdate = async (
       return await validateEntidadUpdate(formData, originalData, existingData || []);
     case 'tipo':
       return await validateTipoUpdate(formData, originalData, existingData || []);
-    case 'nodo':
-      return await validateNodoUpdate(formData, originalData, existingData || []);
+    case 'sensor':
+      return await validateSensorUpdate(formData, originalData, existingData || []);
                 case 'metrica':
                   return await validateMetricaUpdate(formData, originalData, existingData || []);
                 case 'umbral':
@@ -398,8 +393,8 @@ export const validateTableData = async (
       return await validateEntidadData(formData, existingData);
     case 'tipo':
       return await validateTipoData(formData, existingData);
-    case 'nodo':
-      return await validateNodoData(formData, existingData);
+    case 'sensor':
+      return await validateSensorData(formData, existingData);
     case 'metrica':
       return await validateMetricaData(formData, existingData);
     case 'umbral':
@@ -880,62 +875,55 @@ const validateTipoData = async (
   };
 };
 
-// Validación específica para Nodo
-const validateNodoData = async (
+// Validación específica para Sensor
+const validateSensorData = async (
   formData: Record<string, any>, 
   existingData?: any[]
 ): Promise<EnhancedValidationResult> => {
   const errors: ValidationError[] = [];
   
   // 1. Validar campos obligatorios
-  if (!formData.nodo || formData.nodo.trim() === '') {
+  if (!formData.sensor || formData.sensor.trim() === '') {
     errors.push({
-      field: 'nodo',
-      message: 'El nombre del nodo es obligatorio',
+      field: 'sensor',
+      message: 'El nombre del sensor es obligatorio',
       type: 'required'
     });
   }
   
-  if (!formData.deveui || formData.deveui.trim() === '') {
+  if (!formData.tipoid) {
     errors.push({
-      field: 'deveui',
-      message: 'El DevEUI es obligatorio',
+      field: 'tipoid',
+      message: 'Debe seleccionar un tipo de sensor',
       type: 'required'
     });
   }
   
-  // 2. Validar duplicados si hay datos existentes
+  // 2. Validar longitud máxima (VARCHAR 50)
+  if (formData.sensor && formData.sensor.length > 50) {
+    errors.push({
+      field: 'sensor',
+      message: 'El nombre del sensor no puede exceder 50 caracteres',
+      type: 'length'
+    });
+  }
+  
+  // 3. Validar unique (sensor)
   if (existingData && existingData.length > 0) {
-    const nodoExists = existingData.some(item => 
-      item.nodo && item.nodo.toLowerCase() === formData.nodo?.toLowerCase()
+    const sensorExists = existingData.some(item => 
+      item.sensor && item.sensor.toLowerCase() === formData.sensor?.toLowerCase()
     );
     
-    const deveuiExists = existingData.some(item => 
-      item.deveui && item.deveui.toLowerCase() === formData.deveui?.toLowerCase()
-    );
-    
-    if (nodoExists && deveuiExists) {
+    if (sensorExists) {
       errors.push({
-        field: 'both',
-        message: 'El nodo y DevEUI ya existen',
-        type: 'duplicate'
-      });
-    } else if (nodoExists) {
-      errors.push({
-        field: 'nodo',
-        message: 'El nombre del nodo ya existe',
-        type: 'duplicate'
-      });
-    } else if (deveuiExists) {
-      errors.push({
-        field: 'deveui',
-        message: 'El DevEUI ya existe',
+        field: 'sensor',
+        message: 'El nombre del sensor ya existe',
         type: 'duplicate'
       });
     }
   }
   
-  // 3. Generar mensaje amigable
+  // 4. Generar mensaje amigable
   const userFriendlyMessage = generateUserFriendlyMessage(errors);
   
   return {
@@ -2070,8 +2058,8 @@ const checkTipoDependencies = async (tipoid: number): Promise<boolean> => {
   }
 };
 
-// Validación específica para actualización de Nodo
-const validateNodoUpdate = async (
+// Validación específica para actualización de Sensor
+const validateSensorUpdate = async (
   formData: Record<string, any>,
   originalData: Record<string, any>,
   existingData: any[]
@@ -2079,43 +2067,43 @@ const validateNodoUpdate = async (
   const errors: ValidationError[] = [];
 
 // 1. Validar campos obligatorios
-  if (!formData.nodo || formData.nodo.trim() === '') {
+  if (!formData.sensor || formData.sensor.trim() === '') {
     errors.push({
-      field: 'nodo',
-      message: 'El nodo es obligatorio',
+      field: 'sensor',
+      message: 'El nombre del sensor es obligatorio',
       type: 'required'
     });
   }
   
-  // 2. Validar duplicados (excluyendo el registro actual)
-  if (formData.nodo && formData.nodo.trim() !== '') {
-    const nodoExists = existingData.some(item => 
-      item.nodoid !== originalData.nodoid && 
-      item.nodo && 
-      item.nodo.toLowerCase() === formData.nodo.toLowerCase()
-    );
-    
-    if (nodoExists) {
-      errors.push({
-        field: 'nodo',
-        message: 'El nodo ya existe',
-        type: 'duplicate'
-      });
-    }
+  if (!formData.tipoid) {
+    errors.push({
+      field: 'tipoid',
+      message: 'Debe seleccionar un tipo de sensor',
+      type: 'required'
+    });
   }
   
-  // 3. Validar duplicados para deveui (si se proporciona)
-  if (formData.deveui && formData.deveui.trim() !== '') {
-    const deveuiExists = existingData.some(item => 
-      item.nodoid !== originalData.nodoid && 
-      item.deveui && 
-      item.deveui.toLowerCase() === formData.deveui.toLowerCase()
+  // 2. Validar longitud máxima (VARCHAR 50)
+  if (formData.sensor && formData.sensor.length > 50) {
+    errors.push({
+      field: 'sensor',
+      message: 'El nombre del sensor no puede exceder 50 caracteres',
+      type: 'length'
+    });
+  }
+  
+  // 3. Validar unique (sensor) - excluyendo el registro actual
+  if (formData.sensor && formData.sensor.trim() !== '') {
+    const sensorExists = existingData.some(item => 
+      item.sensorid !== originalData.sensorid && 
+      item.sensor && 
+      item.sensor.toLowerCase() === formData.sensor.toLowerCase()
     );
     
-    if (deveuiExists) {
+    if (sensorExists) {
       errors.push({
-        field: 'deveui',
-        message: 'El DevEUI ya existe',
+        field: 'sensor',
+        message: 'El nombre del sensor ya existe',
         type: 'duplicate'
       });
     }
@@ -2123,13 +2111,13 @@ const validateNodoUpdate = async (
   
   // 4. Validar relaciones padre-hijo (solo si se está inactivando)
   if (formData.statusid === 0 && originalData.statusid !== 0) {
-    // Verificar si hay sensores, metricasensor o localizaciones que referencian este nodo
-    const hasDependentRecords = await checkNodoDependencies(originalData.nodoid);
+    // Verificar si hay metricasensor que referencian este sensor
+    const hasDependentRecords = await checkSensorDependencies(originalData.sensorid);
     
     if (hasDependentRecords) {
       errors.push({
         field: 'statusid',
-        message: 'No se puede inactivar el nodo porque tiene sensores, métricas o localizaciones asociadas',
+        message: 'No se puede inactivar el sensor porque tiene métricas asociadas',
         type: 'constraint'
       });
     }
@@ -2145,28 +2133,16 @@ const validateNodoUpdate = async (
   };
 };
 
-// Función para verificar dependencias de Nodo
-const checkNodoDependencies = async (nodoid: number): Promise<boolean> => {
+// Función para verificar dependencias de Sensor
+const checkSensorDependencies = async (sensorid: number): Promise<boolean> => {
   try {
-    // Verificar en tabla sensor
-    const sensores = await ThermosService.getTableData('sensor');
-    const hasSensores = sensores.some(sensor => sensor.nodoid === nodoid);
-    
-    if (hasSensores) return true;
-    
     // Verificar en tabla metricasensor
     const metricasensores = await ThermosService.getTableData('metricasensor');
-    const hasMetricasensores = metricasensores.some(metricasensor => metricasensor.nodoid === nodoid);
+    const hasMetricasensores = metricasensores.some(metricasensor => metricasensor.sensorid === sensorid);
     
-    if (hasMetricasensores) return true;
-    
-    // Verificar en tabla localizacion
-    const localizaciones = await ThermosService.getLocalizaciones();
-    const hasLocalizaciones = localizaciones.some(localizacion => localizacion.nodoid === nodoid);
-    
-    return hasLocalizaciones;
+    return hasMetricasensores;
   } catch (error) {
-    console.error('Error checking nodo dependencies:', error);
+    console.error('Error checking sensor dependencies:', error);
     return true; // En caso de error, bloquear la operación por seguridad
   }
 };

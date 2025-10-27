@@ -52,13 +52,11 @@ import { SearchBarWithCounter } from './SystemParameters/SearchBarWithCounter';
 import { MessageDisplay } from './SystemParameters/MessageDisplay';
 
 // Components - Forms
-import MultipleSensorForm from './MultipleSensorForm';
 import MultipleUsuarioPerfilForm from './MultipleUsuarioPerfilForm';
 import { MassiveSensorForm } from './MassiveSensorForm';
 import { MassiveMetricaSensorForm } from './MassiveMetricaSensorForm';
 import { AdvancedUsuarioPerfilUpdateForm } from './AdvancedUsuarioPerfilUpdateForm';
 import { AdvancedMetricaSensorUpdateForm } from './AdvancedMetricaSensorUpdateForm';
-import { AdvancedSensorUpdateForm } from './AdvancedSensorUpdateForm';
 
 // Components - Lazy
 import { MultipleMetricaSensorFormLazyWithBoundary } from './LazyComponents';
@@ -931,9 +929,9 @@ if (sensoresDelSensor.length > 0) {
 
   };
 
-const handleReplicateNodo = (nodo: any) => {
+const handleReplicateSensorModal = (sensor: any) => {
 
-    // Llenar el formulario con los datos del nodo seleccionado
+    // Llenar el formulario con los datos del sensor seleccionado
 
     const initialData = initializeFormData(columns);
 
@@ -941,17 +939,11 @@ const handleReplicateNodo = (nodo: any) => {
 
       ...initialData,
 
-      nodo: nodo.nodo || '',
+      sensor: sensor.sensor || '',
 
-      deveui: nodo.deveui || '',
+      tipoid: sensor.tipoid || null,
 
-      appeui: nodo.appeui || '',
-
-      appkey: nodo.appkey || '',
-
-      atpin: nodo.atpin || '',
-
-      statusid: nodo.statusid || 1
+      statusid: sensor.statusid || 1
 
     });
 
@@ -1224,10 +1216,6 @@ const options = {
           // Para metricasensor, entry es un nodo, no una métrica sensor
 
           handleReplicateNodoForMetricaSensor(entry);
-
-        } else if (selectedTable === 'nodo') {
-
-          handleReplicateNodo(entry);
 
         }
 
@@ -2247,13 +2235,15 @@ const getCurrentUserId = () => {
 
   const getDisplayValueLocal = (row: any, columnName: string) => {
     // Usar la función importada con los datos relacionados
+    // Thermos: sensorsData agregado para soporte de tabla sensor
     const relatedData: RelatedData = {
       paisesData,
       empresasData,
       fundosData,
       ubicacionesData,
       entidadesData,
-      nodosData: sensorsData, // Mapear sensorsData a nodosData para compatibilidad
+      nodosData: sensorsData, // Mapear sensorsData a nodosData para compatibilidad con JoySense legacy
+      sensorsData, // Agregar sensorsData directamente para Thermos
       tiposData,
       metricasData,
       localizacionesData,
@@ -2334,7 +2324,7 @@ const getCurrentUserId = () => {
         case 'tipo':
           existingData = tiposData || [];
           break;
-        case 'nodo':
+        case 'sensor':
           existingData = sensorsData || [];
           break;
         case 'metrica':
@@ -2357,9 +2347,6 @@ const getCurrentUserId = () => {
           break;
         case 'perfil':
           existingData = perfilesData || [];
-          break;
-        case 'sensor':
-          existingData = sensorsData || [];
           break;
         case 'metricasensor':
           existingData = metricasensorData || [];
@@ -3146,119 +3133,11 @@ const handleCancelUpdate = () => {
     }
   };
 
-// Función para pegar datos del portapapeles en el formulario de inserción
-
-  const handlePasteFromClipboardForInsert = async () => {
-
-    try {
-
-      const text = await navigator.clipboard.readText();
-
-const pastedData = JSON.parse(text);
-
-if (Array.isArray(pastedData) && pastedData.length > 0) {
-
-        // Verificar que los datos sean de la tabla correcta
-
-        const firstEntry = pastedData[0];
-
-        const expectedFields = getExpectedFieldsForTable(selectedTable);
-
-if (!expectedFields.every(field => firstEntry.hasOwnProperty(field))) {
-
-          setMessage({ 
-
-            type: 'error', 
-
-            text: `❌ Los datos copiados no parecen ser de la tabla ${selectedTable}. Asegúrate de haber copiado datos desde la pestaña "Copiar" de la tabla correcta.` 
-
-          });
-
-          return;
-
-        }
-
-// Usar el primer registro como base para el formulario
-
-        const newFormData: Record<string, any> = {};
-
-// Copiar campos relevantes (excluir campos de auditoría y IDs)
-
-        Object.keys(firstEntry).forEach(key => {
-
-          if (!['usercreatedid', 'usermodifiedid', 'datecreated', 'datemodified', 'modified_by', 'modified_at'].includes(key)) {
-
-            // Para campos de ID, mantener el valor original
-
-            if (key.endsWith('id') && key !== 'statusid') {
-
-              newFormData[key] = firstEntry[key];
-
-            } else if (key === 'statusid') {
-
-              // Para status, usar el valor copiado
-
-              newFormData[key] = firstEntry[key];
-
-            } else {
-
-              // Para otros campos, usar el valor copiado
-
-              newFormData[key] = firstEntry[key];
-
-            }
-
-          }
-
-        });
-
-setFormData(newFormData);
-
-setMessage({ 
-
-          type: 'success', 
-
-          text: `✅ Datos pegados exitosamente desde ${pastedData.length} registro(s) copiado(s). Puedes modificar los campos antes de guardar.` 
-
-        });
-
-      } else {
-
-        setMessage({ 
-
-          type: 'error', 
-
-          text: '❌ No se pudieron parsear los datos del portapapeles. Asegúrate de haber copiado datos desde la pestaña "Copiar".' 
-
-        });
-
-      }
-
-    } catch (error) {
-
-      console.error('Error al pegar datos para inserción:', error);
-
-      setMessage({ 
-
-        type: 'error', 
-
-        text: '❌ Error al pegar datos del portapapeles. Asegúrate de que hay datos válidos copiados desde la pestaña "Copiar".' 
-
-      });
-
-    }
-
-  };
-
 // Función auxiliar para obtener los campos esperados para cada tabla
 
   const getExpectedFieldsForTable = (table: string): string[] => {
 
     switch (table) {
-
-      case 'nodo':
-
-        return ['nodo', 'deveui'];
 
       case 'pais':
 
@@ -3290,7 +3169,7 @@ setMessage({
 
       case 'sensor':
 
-        return ['nodoid', 'tipoid'];
+        return ['sensor', 'tipoid'];
 
       case 'metricasensor':
 
@@ -4912,7 +4791,7 @@ if (errorCount > 0) {
       'localizacion': ['ubicacionid', 'entidadid', 'localizacion', 'statusid'],
       'entidad': ['entidad', 'statusid'],
       'tipo': ['tipo', 'statusid'],
-      'nodo': ['nodo', 'deveui', 'appeui', 'appkey', 'atpin', 'statusid'],
+      'sensor': ['sensor', 'tipoid', 'statusid'],
       'metrica': ['metrica', 'unidad', 'statusid'],
     'umbral': ['umbral', 'ubicacionid', 'criticidadid', 'nodoid', 'metricaid', 'tipoid', 'minimo', 'maximo', 'statusid'],
     'perfilumbral': ['perfilid', 'umbralid', 'statusid'],
@@ -4936,7 +4815,7 @@ if (errorCount > 0) {
       'localizacion': [],
       'entidad': [],
       'tipo': [],
-      'nodo': ['deveui', 'appeui', 'appkey', 'atpin'],
+      'sensor': [],
       'metrica': [],
       'umbral': ['minimo', 'maximo'],
       'perfilumbral': [],
@@ -5406,13 +5285,13 @@ if (selectedTable === 'fundo') {
 
 }
 
-// Para la tabla nodo, necesitamos incluir campos que están después de usercreatedid
+// Para la tabla sensor, necesitamos incluir campos que están después de usercreatedid
 
-    if (selectedTable === 'nodo') {
+    if (selectedTable === 'sensor') {
 
-      const nodoColumns = sourceColumns.filter(col => {
+      const sensorColumns = sourceColumns.filter(col => {
 
-        return ['nodo', 'deveui', 'statusid', 'appeui', 'appkey', 'atpin', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+        return ['sensor', 'tipoid', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
 
       });
 
@@ -5420,21 +5299,17 @@ if (selectedTable === 'fundo') {
 
       const reorderedColumns = [];
 
-// Primero: nodo, deveui
+// Primero: sensor, tipoid
 
-      reorderedColumns.push(...nodoColumns.filter(col => ['nodo', 'deveui'].includes(col.columnName)));
+      reorderedColumns.push(...sensorColumns.filter(col => ['sensor', 'tipoid'].includes(col.columnName)));
 
-// Segundo: appeui, appkey, atpin
+// Segundo: usercreatedid, datecreated, usermodifiedid, datemodified (campos de auditoría)
 
-      reorderedColumns.push(...nodoColumns.filter(col => ['appeui', 'appkey', 'atpin'].includes(col.columnName)));
-
-// Tercero: usercreatedid, datecreated, usermodifiedid, datemodified (campos de auditoría)
-
-      reorderedColumns.push(...nodoColumns.filter(col => ['usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName)));
+      reorderedColumns.push(...sensorColumns.filter(col => ['usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName)));
 
 // Último: statusid (Status al final)
 
-      reorderedColumns.push(...nodoColumns.filter(col => ['statusid'].includes(col.columnName)));
+      reorderedColumns.push(...sensorColumns.filter(col => ['statusid'].includes(col.columnName)));
 
 return reorderedColumns;
 
@@ -8203,93 +8078,7 @@ const handleCancelModal = () => {
 
                     />
 
-                                         {selectedTable === 'sensor' ? (
-
-                                                <MultipleSensorForm
-
-                           selectedNodo={selectedNodo}
-
-                           setSelectedNodo={setSelectedNodo}
-
-                           selectedEntidad={selectedEntidad}
-
-                           setSelectedEntidad={setSelectedEntidad}
-
-                           selectedTipo={selectedTipo}
-
-                           setSelectedTipo={setSelectedTipo}
-
-                           selectedStatus={selectedStatus}
-
-                           setSelectedStatus={setSelectedStatus}
-
-                           selectedSensorCount={selectedSensorCount}
-
-                           setSelectedSensorCount={setSelectedSensorCount}
-
-                            multipleSensors={multipleSensors}
-
-                            nodosData={sensorsData}
-
-                            entidadesData={entidadesData}
-
-                           tiposData={tiposData}
-
-                           loading={loading}
-
-                           onInitializeSensors={initializeMultipleSensors}
-
-                           onUpdateSensorTipo={updateSensorTipo}
-
-                           onToggleSensorDelete={toggleSensorDelete}
-
-                           onUpdateSensorNodo={updateSensorNodo}
-
-                           onUpdateAllSensorsNodo={updateAllSensorsNodo}
-
-                           onInsertSensors={handleMultipleSensorInsert}
-
-                           onCancel={() => {
-
-                             setCancelAction(() => () => {
-
-                             setMultipleSensors([]);
-
-                             setSelectedNodo('');
-
-                               setSelectedEntidad('');
-
-                             setSelectedTipo('');
-
-                               setSelectedSensorCount(0);
-
-                               setMessage(null); // Limpiar mensaje de datos copiados
-
-                             });
-
-                             setShowCancelModal(true);
-
-                           }}
-
-                           getUniqueOptionsForField={getUniqueOptionsForField}
-
-                           onReplicateClick={openReplicateModalForTable}
-
-                           paisSeleccionado={paisSeleccionado}
-
-                           empresaSeleccionada={empresaSeleccionada}
-
-                           fundoSeleccionado={fundoSeleccionado}
-
-                           paisesData={paisesData}
-
-                           empresasData={empresasData}
-
-                           fundosData={fundosData}
-
-                         />
-
-                                          ) : selectedTable === 'metricasensor' ? (
+                                         {selectedTable === 'metricasensor' ? (
 
                                                                          <MultipleMetricaSensorFormLazyWithBoundary
 
@@ -8498,8 +8287,6 @@ const handleCancelModal = () => {
 
                             getUniqueOptionsForField={getUniqueOptionsForField}
 
-                              onPasteFromClipboard={handlePasteFromClipboardForInsert}
-
                             onReplicateClick={openReplicateModalForTable}
 
                             paisSeleccionado={paisSeleccionado}
@@ -8540,8 +8327,6 @@ const handleCancelModal = () => {
                             getColumnDisplayName={getColumnDisplayName}
 
                             getUniqueOptionsForField={getUniqueOptionsForField}
-
-                              onPasteFromClipboard={handlePasteFromClipboardForInsert}
 
                             onReplicateClick={openReplicateModalForTable}
 
@@ -8899,30 +8684,6 @@ return (
 
                       )}
 
-{/* Formulario avanzado para sensor */}
-
-                      {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable === 'sensor' && (
-
-                        <AdvancedSensorUpdateForm
-
-                          selectedRows={selectedRowsForUpdate.length > 0 ? selectedRowsForUpdate : selectedRowsForManualUpdate}
-
-                          onUpdate={handleAdvancedSensorUpdate}
-
-                          onCancel={handleCancelUpdate}
-
-                          getUniqueOptionsForField={getUniqueOptionsForField}
-
-                          entidadesData={entidadesData}
-
-                          tiposData={tiposData}
-
-                          nodosData={sensorsData}
-
-                        />
-
-                      )}
-
 {/* Formulario avanzado para usuarioperfil */}
 
                       {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable === 'usuarioperfil' && (
@@ -8947,7 +8708,7 @@ return (
 
 {/* Tabla de entradas seleccionadas para actualización múltiple (otras tablas) */}
 
-                      {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable !== 'metricasensor' && selectedTable !== 'sensor' && selectedTable !== 'usuarioperfil' && (
+                      {(selectedRowsForUpdate.length > 0 || selectedRowsForManualUpdate.length > 0) && selectedTable !== 'metricasensor' && selectedTable !== 'usuarioperfil' && (
 
                         <div className="bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg p-4 mb-6">
 

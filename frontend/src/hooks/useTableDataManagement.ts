@@ -293,8 +293,8 @@ export const useTableDataManagement = () => {
         return sortedData;
       });
 
-      // Cargar datos de sensores si estamos en el contexto de metricasensor o umbral
-      if (selectedTable === 'metricasensor' || selectedTable === 'umbral') {
+      // Cargar datos de sensores si estamos en el contexto de sensor, metricasensor o umbral
+      if (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'umbral') {
         try {
           const sensorResponse = await ThermosService.getTableData('sensor', 1000);
           const sensorData = Array.isArray(sensorResponse) ? sensorResponse : ((sensorResponse as any)?.data || []);
