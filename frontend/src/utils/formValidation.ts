@@ -153,11 +153,11 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
   ],
   
   criticidad: [
-    { field: 'criticidad', required: true, type: 'string', minLength: 1, customMessage: 'El nombre de la criticidad es obligatorio' },
-    { field: 'grado', required: false, type: 'number', customMessage: 'El grado debe ser un número válido' },
-    { field: 'frecuencia', required: false, type: 'number', customMessage: 'La frecuencia debe ser un número válido' },
-    { field: 'escalamiento', required: false, type: 'number', customMessage: 'El escalamiento debe ser un número válido' },
-    { field: 'escalon', required: false, type: 'number', customMessage: 'El escalón debe ser un número válido' }
+    { field: 'criticidad', required: true, type: 'string', minLength: 1, maxLength: 20, customMessage: 'El nombre de la criticidad es obligatorio y no puede exceder 20 caracteres' },
+    { field: 'grado', required: true, type: 'number', customMessage: 'El grado es obligatorio' },
+    { field: 'frecuencia', required: true, type: 'number', customMessage: 'La frecuencia es obligatoria' },
+    { field: 'escalamiento', required: true, type: 'number', customMessage: 'El escalamiento es obligatorio' },
+    { field: 'escalon', required: true, type: 'number', customMessage: 'El escalón es obligatorio' }
   ],
   
   status: [
@@ -1099,40 +1099,85 @@ const validateCriticidadData = async (
     });
   }
   
-  if (!formData.criticidadbrev || formData.criticidadbrev.trim() === '') {
+  // Validar longitud máxima (20 caracteres según schema)
+  if (formData.criticidad && formData.criticidad.length > 20) {
     errors.push({
-      field: 'criticidadbrev',
-      message: 'La abreviatura de la criticidad es obligatoria',
-      type: 'required'
+      field: 'criticidad',
+      message: 'El nombre de la criticidad no puede exceder 20 caracteres',
+      type: 'format'
     });
   }
   
-  // 2. Validar duplicados si hay datos existentes
-  if (existingData && existingData.length > 0) {
+  // Validar grado (obligatorio, número entero)
+  if (formData.grado === undefined || formData.grado === null || formData.grado === '') {
+    errors.push({
+      field: 'grado',
+      message: 'El grado es obligatorio',
+      type: 'required'
+    });
+  } else if (!Number.isInteger(Number(formData.grado))) {
+    errors.push({
+      field: 'grado',
+      message: 'El grado debe ser un número entero',
+      type: 'format'
+    });
+  }
+  
+  // Validar frecuencia (obligatorio, número entero)
+  if (formData.frecuencia === undefined || formData.frecuencia === null || formData.frecuencia === '') {
+    errors.push({
+      field: 'frecuencia',
+      message: 'La frecuencia es obligatoria',
+      type: 'required'
+    });
+  } else if (!Number.isInteger(Number(formData.frecuencia))) {
+    errors.push({
+      field: 'frecuencia',
+      message: 'La frecuencia debe ser un número entero',
+      type: 'format'
+    });
+  }
+  
+  // Validar escalamiento (obligatorio, número entero)
+  if (formData.escalamiento === undefined || formData.escalamiento === null || formData.escalamiento === '') {
+    errors.push({
+      field: 'escalamiento',
+      message: 'El escalamiento es obligatorio',
+      type: 'required'
+    });
+  } else if (!Number.isInteger(Number(formData.escalamiento))) {
+    errors.push({
+      field: 'escalamiento',
+      message: 'El escalamiento debe ser un número entero',
+      type: 'format'
+    });
+  }
+  
+  // Validar escalon (obligatorio, número entero)
+  if (formData.escalon === undefined || formData.escalon === null || formData.escalon === '') {
+    errors.push({
+      field: 'escalon',
+      message: 'El escalón es obligatorio',
+      type: 'required'
+    });
+  } else if (!Number.isInteger(Number(formData.escalon))) {
+    errors.push({
+      field: 'escalon',
+      message: 'El escalón debe ser un número entero',
+      type: 'format'
+    });
+  }
+  
+  // 2. Validar duplicados si hay datos existentes (UNIQUE criticidad)
+  if (existingData && existingData.length > 0 && formData.criticidad) {
     const criticidadExists = existingData.some(item => 
-      item.criticidad && item.criticidad.toLowerCase() === formData.criticidad?.toLowerCase()
+      item.criticidad && item.criticidad.toLowerCase() === formData.criticidad.toLowerCase()
     );
     
-    const criticidadbrevExists = existingData.some(item => 
-      item.criticidadbrev && item.criticidadbrev.toLowerCase() === formData.criticidadbrev?.toLowerCase()
-    );
-    
-    if (criticidadExists && criticidadbrevExists) {
-      errors.push({
-        field: 'both',
-        message: 'La criticidad y abreviatura ya existen',
-        type: 'duplicate'
-      });
-    } else if (criticidadExists) {
+    if (criticidadExists) {
       errors.push({
         field: 'criticidad',
         message: 'El nombre de la criticidad ya existe',
-        type: 'duplicate'
-      });
-    } else if (criticidadbrevExists) {
-      errors.push({
-        field: 'criticidadbrev',
-        message: 'La abreviatura de la criticidad ya existe',
         type: 'duplicate'
       });
     }

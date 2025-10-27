@@ -2784,6 +2784,10 @@ const handleCancelUpdate = () => {
 
         return ['perfilid', 'umbralid'];
 
+      case 'criticidad':
+
+        return ['criticidad', 'grado', 'frecuencia', 'escalamiento', 'escalon'];
+
       default:
 
         return [];
@@ -5382,6 +5386,20 @@ if (selectedTable === 'fundo') {
         reorderedColumns.push(...otherColumns.filter(col => ['old_criticidadid', 'new_criticidadid'].includes(col.columnName)));
 
         reorderedColumns.push(...otherColumns.filter(col => ['modified_by', 'modified_at'].includes(col.columnName)));
+
+      } else if (selectedTable === 'criticidad') {
+
+        // Thermos schema: Criticidad, Grado, Frecuencia, Escalamiento, Escalon, Status
+
+        reorderedColumns.push(...otherColumns.filter(col => ['criticidad'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['grado'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['frecuencia'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['escalamiento'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['escalon'].includes(col.columnName)));
 
       } else if (selectedTable === 'usuario') {
 
