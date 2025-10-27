@@ -5365,6 +5365,24 @@ if (selectedTable === 'fundo') {
 
         reorderedColumns.push(...otherColumns.filter(col => ['usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName)));
 
+      } else if (selectedTable === 'audit_log_umbral') {
+
+        // Thermos schema: Audit ID, Umbral, Old/New values, Accion, Modified info
+
+        reorderedColumns.push(...otherColumns.filter(col => ['auditid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['umbralid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['accion'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['old_minimo', 'new_minimo'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['old_maximo', 'new_maximo'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['old_criticidadid', 'new_criticidadid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['modified_by', 'modified_at'].includes(col.columnName)));
+
       } else if (selectedTable === 'usuario') {
 
         // Usuario, Nombre, Apellido
