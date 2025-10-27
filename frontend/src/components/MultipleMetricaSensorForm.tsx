@@ -3,7 +3,6 @@
 // ============================================================================
 
 import React, { memo } from 'react';
-import ReplicateButton from './ReplicateButton';
 import { useLanguage } from '../contexts/LanguageContext';
 
 // ============================================================================
@@ -419,7 +418,7 @@ const MultipleMetricaSensorForm: React.FC<MultipleMetricaSensorFormProps> = memo
               <label className="block text-lg font-bold text-blue-600 font-mono tracking-wider">
                 {t('metricsensor.metric')}*
               </label>
-              <label className="flex items-center space-x-2 cursor-pointer bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-500/30 rounded-lg px-2 py-1 hover:bg-orange-200 dark:hover:bg-orange-900/30 transition-colors">
+              <label className="flex items-center space-x-2 cursor-pointer bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-500/30 rounded-lg px-2 py-1 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
                 <input
                   type="checkbox"
                   checked={selectedMetricasCheckboxes.length === getUniqueOptionsForField('metricaid').length && getUniqueOptionsForField('metricaid').length > 0}
@@ -471,17 +470,11 @@ const MultipleMetricaSensorForm: React.FC<MultipleMetricaSensorFormProps> = memo
         <button
           onClick={handleInsertMetricas}
           disabled={loading || multipleMetricas.length === 0 || selectedNodos.length === 0 || selectedMetricasCheckboxes.length === 0}
-          className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-mono tracking-wider"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-mono tracking-wider"
         >
           <span>➕</span>
           <span>{loading ? 'GUARDANDO...' : 'GUARDAR'}</span>
         </button>
-        
-        {/* Botón de replicar */}
-        <ReplicateButton
-          onClick={onReplicateClick || (() => {})}
-          disabled={selectedNodos.length === 0 || !selectedEntidad}
-        />
         
         <button
           onClick={onCancel}
