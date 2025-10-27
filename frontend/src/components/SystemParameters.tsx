@@ -1649,6 +1649,23 @@ onSubTabChange(newSubTab);
 
   }, [loadUserData, loadRelatedTablesData]);
 
+  // Recargar datos de tabla cuando sensorsData se llene (para resolver FKs correctamente)
+  useEffect(() => {
+    console.log('🔄 useEffect sensorsData:', {
+      selectedTable,
+      sensorsDataLength: sensorsData.length,
+      tableDataLength: tableData.length,
+      shouldReload: selectedTable === 'localizacionsensor' && sensorsData.length > 0 && tableData.length > 0
+    });
+    
+    // Solo recargar si estamos en una tabla que usa sensorid y sensorsData acaba de cargarse
+    if (selectedTable === 'localizacionsensor' && sensorsData.length > 0 && tableData.length > 0) {
+      console.log('✅ Recargando tabla para resolver IDs...');
+      // Forzar recarga de la tabla actual para resolver los IDs
+      loadTableDataWrapper();
+    }
+  }, [sensorsData.length]); // Solo cuando cambie el length de sensorsData
+
 // Cargar datos cuando se selecciona una tabla
 
   useEffect(() => {
@@ -2050,6 +2067,8 @@ const getCurrentUserId = () => {
   const getDisplayValueLocal = (row: any, columnName: string) => {
     // Usar la función importada con los datos relacionados
     // Thermos: sensorsData agregado para soporte de tabla sensor
+    
+    
     const relatedData: RelatedData = {
       paisesData,
       empresasData,
@@ -2061,6 +2080,7 @@ const getCurrentUserId = () => {
       tiposData,
       metricasData,
       localizacionesData,
+      localizacionsensorData,
       criticidadesData,
       perfilesData,
       umbralesData,
@@ -5070,6 +5090,9 @@ if (selectedTable === 'correo') {
         return ['usuarioid', 'correo', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
       }
 
+      if (selectedTable === 'localizacionsensor') {
+        return ['localizacionid', 'sensorid', 'metricaid', 'localizacionsensor', 'statusid', 'usercreatedid', 'datecreated', 'usermodifiedid', 'datemodified'].includes(col.columnName);
+      }
 
 if (selectedTable === 'mensaje') {
 
@@ -5319,6 +5342,18 @@ if (selectedTable === 'fundo') {
 
         reorderedColumns.push(...otherColumns.filter(col => ['localizacion'].includes(col.columnName)));
 
+      } else if (selectedTable === 'localizacionsensor') {
+
+        // Localizacion Sensor, Localizacion, Sensor, Metrica
+
+        reorderedColumns.push(...otherColumns.filter(col => ['localizacionsensor'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['localizacionid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['sensorid'].includes(col.columnName)));
+
+        reorderedColumns.push(...otherColumns.filter(col => ['metricaid'].includes(col.columnName)));
+
       } else if (selectedTable === 'tipo') {
 
         // Tipo
@@ -5340,27 +5375,27 @@ if (selectedTable === 'fundo') {
 
           // Para sensor agrupado en Actualizar: Nodo, Tipos
 
-          reorderedColumns.push(...otherColumns.filter(col => ['nodoid'].includes(col.columnName)));
+        reorderedColumns.push(...otherColumns.filter(col => ['nodoid'].includes(col.columnName)));
 
           // Agregar columna virtual para tipos agrupados
 
-          reorderedColumns.push({
+        reorderedColumns.push({
 
-            columnName: 'tipos',
+          columnName: 'tipos',
 
-            dataType: 'varchar',
+          dataType: 'varchar',
 
-            isNullable: true,
+          isNullable: true,
 
-            isIdentity: false,
+          isIdentity: false,
 
-            isPrimaryKey: false,
+          isPrimaryKey: false,
 
-            isForeignKey: false,
+          isForeignKey: false,
 
-            defaultValue: null
+          defaultValue: null
 
-          });
+        });
 
         } else {
 
@@ -5913,14 +5948,14 @@ for (const sensorid of nodos) {
          const sensorInfo = sensorsData.find(s => s.sensorid.toString() === sensorid);
 
          if (!sensorInfo) {
-           continue;
+continue;
          }
 
 // Crear todas las combinaciones válidas: (sensorid, metricaid)
 
          for (const metricaid of metricas) {
 
-const metricaInfo = metricasData.find(m => m.metricaid.toString() === metricaid);
+             const metricaInfo = metricasData.find(m => m.metricaid.toString() === metricaid);
 
 metricasToCreate.push({
 
@@ -5936,9 +5971,9 @@ metricasToCreate.push({
 
              });
 
-           }
-
          }
+
+       }
 
 setMultipleMetricas(metricasToCreate);
 
@@ -8028,25 +8063,25 @@ return (
                            }
 
 // Campo jefeid como combobox (solo para perfil)
-                          if (col.columnName === 'jefeid' && selectedTable === 'perfil') {
-                            const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
-                            return (
-                              <div key={col.columnName} className="mb-4">
-                                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
-                                  {displayName.toUpperCase()}
-                                </label>
-                                <SelectWithPlaceholder
-                                  value={value}
-                                  onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
-                                    ...prev,
-                                    [col.columnName]: newValue ? parseInt(newValue.toString()) : null
-                                  }))}
-                                  options={options}
-                                  placeholder="SELECCIONAR JEFE (NIVEL - PERFIL)"
-                                />
-                              </div>
-                            );
-                          }
+                           if (col.columnName === 'jefeid' && selectedTable === 'perfil') {
+                             const options = getUniqueOptionsForField(col.columnName, { formData: updateFormData });
+                             return (
+                               <div key={col.columnName} className="mb-4">
+                                 <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                   {displayName.toUpperCase()}
+                                 </label>
+                                 <SelectWithPlaceholder
+                                   value={value}
+                                   onChange={(newValue: any) => setUpdateFormData((prev: Record<string, any>) => ({
+                                     ...prev,
+                                     [col.columnName]: newValue ? parseInt(newValue.toString()) : null
+                                   }))}
+                                   options={options}
+                                   placeholder="SELECCIONAR JEFE (NIVEL - PERFIL)"
+                                 />
+                               </div>
+                             );
+                           }
 
 // Campos específicos para umbral (Thermos schema)
                           if (selectedTable === 'umbral') {
@@ -8155,7 +8190,7 @@ return (
                                 </div>
                               );
                             }
-                          }
+                           }
 
 // Campos de texto normales (editables)
 
@@ -8547,7 +8582,7 @@ return (
 
                                    <tr key={(effectiveCurrentPage - 1) * itemsPerPage + index} className={`bg-white dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-800 cursor-pointer ${hasNoActiveMetrics || hasNoActivePerfiles ? 'text-red-400' : ''}`} onClick={(e) => {
 
-                                    // Solo ejecutar si no se hizo clic en el checkbox
+                                     // Solo ejecutar si no se hizo clic en el checkbox
 
                                      if ((e.target as HTMLInputElement).type !== 'checkbox') {
 
@@ -8567,7 +8602,7 @@ return (
 
                                    }}>
 
-                                    <td className="px-2 py-4 w-12">
+                                     <td className="px-2 py-4 w-12">
 
                                        <input
 

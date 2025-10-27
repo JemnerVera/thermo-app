@@ -189,6 +189,8 @@ export const getColumnDisplayNameTranslated = (columnName: string, t: (key: stri
     'metricas': t('table_headers.metric'),
     'localizacionid': t('table_headers.localization'),
     'localizacionsensorid': t('table_headers.localization'),
+    'localizacionsensor': 'Localización Sensor',
+    'sensorid': 'Sensor',
     'criticidadid': t('table_headers.criticality'),
     'perfilid': t('table_headers.profile'),
     'umbralid': t('table_headers.threshold'),
@@ -385,7 +387,7 @@ export const getDisplayValue = (row: any, columnName: string, relatedData: Relat
     'sensorid': { table: 'sensor', nameField: 'sensor' },
     'tipoid': { table: 'tipo', nameField: 'tipo' },
     'metricaid': { table: 'metrica', nameField: 'metrica' },
-    'localizacionid': { table: 'localizacion', nameField: 'localizacionid' },
+    'localizacionid': { table: 'localizacion', nameField: 'localizacion' },
     'criticidadid': { table: 'criticidad', nameField: 'criticidad' },
     'perfilid': { table: 'perfil', nameField: 'perfil' },
     'umbralid': { table: 'umbral', nameField: 'umbral' },
@@ -404,13 +406,24 @@ export const getDisplayValue = (row: any, columnName: string, relatedData: Relat
       // Crear clave de cache eficiente
       const cacheKey = `${mapping.table}_${idValue}`;
       
+      // Obtener datos relacionados de forma eficiente
+      const relatedDataArray = getRelatedDataArray(mapping.table, relatedData);
+      
       // Verificar cache primero (más rápido)
-      if (displayValueCache.has(cacheKey)) {
+      // PERO: No usar caché si los datos relacionados están vacíos (aún no cargados)
+      const hasCachedValue = displayValueCache.has(cacheKey);
+      const hasRelatedData = relatedDataArray.length > 0;
+      
+      if (hasCachedValue && hasRelatedData) {
         return displayValueCache.get(cacheKey)!;
       }
       
-      // Obtener datos relacionados de forma eficiente
-      const relatedDataArray = getRelatedDataArray(mapping.table, relatedData);
+      // Si el caché tiene un valor pero no hay datos relacionados,
+      // invalidar el caché (los datos se cargarán después)
+      if (hasCachedValue && !hasRelatedData) {
+        displayValueCache.delete(cacheKey);
+      }
+      
       
       // Si no hay datos, retornar ID directamente (más eficiente que "N/A")
       if (relatedDataArray.length === 0) {

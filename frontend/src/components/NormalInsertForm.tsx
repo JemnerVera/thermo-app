@@ -280,6 +280,8 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
       return renderUbicacionFields();
     } else if (selectedTable === 'localizacion') {
       return renderLocalizacionFields();
+    } else if (selectedTable === 'localizacionsensor') {
+      return renderLocalizacionSensorFields();
     } else if (selectedTable === 'entidad') {
       return renderEntidadFields();
     } else if (selectedTable === 'tipo') {
@@ -783,6 +785,110 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
           <div></div> {/* Espacio vacío */}
           <div></div> {/* Espacio vacío */}
           {renderField(statusField)}
+        </div>
+      );
+    }
+    
+    return result;
+  };
+
+  // Función para renderizar campos de Localización-Sensor con layout específico
+  const renderLocalizacionSensorFields = (): React.ReactNode[] => {
+    const result: React.ReactNode[] = [];
+    
+    // Primera fila: Localización, Sensor, Métrica
+    const localizacionField = visibleColumns.find(c => c.columnName === 'localizacionid');
+    const sensorField = visibleColumns.find(c => c.columnName === 'sensorid');
+    const metricaField = visibleColumns.find(c => c.columnName === 'metricaid');
+    
+    if (localizacionField || sensorField || metricaField) {
+      result.push(
+        <div key="first-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {localizacionField && (
+            <div key="localizacionid">
+              <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                LOCALIZACIÓN*
+              </label>
+              <SelectWithPlaceholder
+                value={formData.localizacionid || ''}
+                onChange={(value) => setFormData({ ...formData, localizacionid: value })}
+                options={getUniqueOptionsForField('localizacionid')}
+                placeholder="LOCALIZACIÓN"
+              />
+            </div>
+          )}
+          {sensorField && (
+            <div key="sensorid">
+              <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                SENSOR*
+              </label>
+              <SelectWithPlaceholder
+                value={formData.sensorid || ''}
+                onChange={(value) => setFormData({ ...formData, sensorid: value })}
+                options={getUniqueOptionsForField('sensorid')}
+                placeholder="SENSOR"
+              />
+            </div>
+          )}
+          {metricaField && (
+            <div key="metricaid">
+              <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                MÉTRICA*
+              </label>
+              <SelectWithPlaceholder
+                value={formData.metricaid || ''}
+                onChange={(value) => setFormData({ ...formData, metricaid: value })}
+                options={getUniqueOptionsForField('metricaid')}
+                placeholder="MÉTRICA"
+              />
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Segunda fila: Nombre descriptivo (localizacionsensor) y Status
+    const nameField = visibleColumns.find(c => c.columnName === 'localizacionsensor');
+    const statusField = visibleColumns.find(c => c.columnName === 'statusid');
+    
+    if (nameField || statusField) {
+      result.push(
+        <div key="second-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {nameField && (
+            <div key="localizacionsensor" className="md:col-span-2">
+              <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                LOCALIZACIÓN SENSOR*
+              </label>
+              <input
+                type="text"
+                value={formData.localizacionsensor || ''}
+                onChange={(e) => setFormData({ ...formData, localizacionsensor: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-white text-base placeholder-gray-500 dark:placeholder-neutral-400 font-mono bg-gray-200 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600"
+                placeholder="LOCALIZACIÓN SENSOR"
+              />
+            </div>
+          )}
+          {statusField && (
+            <div key="statusid">
+              <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                {getColumnDisplayName('statusid').toUpperCase()}*
+              </label>
+              <div className="flex items-center space-x-3 mt-2">
+                <input
+                  type="checkbox"
+                  checked={formData.statusid === 1}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    statusid: e.target.checked ? 1 : 0
+                  })}
+                  className="w-5 h-5 text-blue-600 bg-neutral-800 border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
+                />
+                <span className="text-white font-mono tracking-wider">
+                  {formData.statusid === 1 ? t('create.active') : t('create.inactive')}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
@@ -1736,7 +1842,7 @@ return filteredNodos;
     <div>
       {/* Contenido del formulario */}
       <div>
-        {['usuario', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'entidad', 'tipo', 'nodo', 'sensor', 'metricasensor', 'metrica', 'umbral', 'contacto'].includes(selectedTable) ? (
+        {['usuario', 'empresa', 'fundo', 'ubicacion', 'localizacion', 'localizacionsensor', 'entidad', 'tipo', 'nodo', 'sensor', 'metricasensor', 'metrica', 'umbral', 'contacto'].includes(selectedTable) ? (
           <div>
             {selectedTable === 'contacto' ? renderContactFields() : renderSpecialLayoutFields()}
           </div>

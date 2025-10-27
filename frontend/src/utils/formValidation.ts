@@ -73,6 +73,13 @@ export const tableValidationSchemas: Record<string, ValidationRule[]> = {
     { field: 'localizacion', required: true, type: 'string', minLength: 1, maxLength: 50, customMessage: 'El nombre de la localización es obligatorio' }
   ],
   
+  localizacionsensor: [
+    { field: 'localizacionid', required: true, type: 'number', customMessage: 'Debe seleccionar una localización' },
+    { field: 'sensorid', required: true, type: 'number', customMessage: 'Debe seleccionar un sensor' },
+    { field: 'metricaid', required: true, type: 'number', customMessage: 'Debe seleccionar una métrica' },
+    { field: 'localizacionsensor', required: true, type: 'string', minLength: 1, maxLength: 50, customMessage: 'El nombre descriptivo es obligatorio y no puede exceder 50 caracteres' }
+  ],
+  
   entidad: [
     { field: 'entidad', required: true, type: 'string', minLength: 1, customMessage: 'El nombre de la entidad es obligatorio' }
   ],

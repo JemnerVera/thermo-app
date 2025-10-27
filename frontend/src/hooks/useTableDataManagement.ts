@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { ThermosService } from '../services/backend-api';
 import { ColumnInfo } from '../types/systemParameters';
+import { clearDisplayValueCache } from '../utils/systemParametersUtils';
 
 /**
  * Hook para manejar la carga y gestión de datos de tablas
@@ -130,6 +131,10 @@ export const useTableDataManagement = () => {
       const contactos = Array.isArray(contactosResponse) ? contactosResponse : ((contactosResponse as any)?.data || []);
       const correos = Array.isArray(correosResponse) ? correosResponse : ((correosResponse as any)?.data || []);
 
+      // Limpiar caché de valores de display antes de actualizar datos
+      // Esto asegura que los IDs se resuelvan correctamente cuando los datos se recarguen
+      clearDisplayValueCache();
+      
       // Establecer todos los datos
       setPaisesData(paises);
       setEmpresasData(empresas);
@@ -298,19 +303,19 @@ export const useTableDataManagement = () => {
         return sortedData;
       });
 
-      // Cargar datos de sensores si estamos en el contexto de sensor, metricasensor o umbral
-      if (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'umbral') {
+      // Cargar datos de sensores si estamos en el contexto de tablas que los necesitan
+      // IMPORTANTE: No vaciar sensorsData cuando se cambia de tabla, otras tablas lo necesitan para FKs
+      if (selectedTable === 'sensor' || selectedTable === 'metricasensor' || selectedTable === 'umbral' || selectedTable === 'localizacionsensor') {
         try {
           const sensorResponse = await ThermosService.getTableData('sensor', 1000);
           const sensorData = Array.isArray(sensorResponse) ? sensorResponse : ((sensorResponse as any)?.data || []);
           setSensorsData(sensorData);
         } catch (error) {
           console.error('Error cargando datos de sensores:', error);
-          setSensorsData([]);
+          // No vaciar en caso de error - mantener los datos anteriores
         }
-      } else {
-        setSensorsData([]);
       }
+      // NO vaciar sensorsData cuando se cambia a otra tabla - otras tablas pueden necesitarlo para FKs
 
       // const endTime = performance.now(); // Para debugging de performance
 
