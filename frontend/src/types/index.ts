@@ -1,4 +1,4 @@
-// Tipos para la nueva estructura del schema "sense"
+// Tipos para la estructura del schema "thermo"
 
 export interface Pais {
   paisid: number;

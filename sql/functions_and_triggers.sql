@@ -11,7 +11,7 @@
 -- Tipo: Trigger Function
 -- Invoker: Invoker
 
-CREATE OR REPLACE FUNCTION sense.fn_auditar_umbral()
+CREATE OR REPLACE FUNCTION thermo.fn_auditar_umbral()
 RETURNS TRIGGER AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN

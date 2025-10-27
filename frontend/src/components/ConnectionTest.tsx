@@ -16,14 +16,14 @@ const ConnectionTest: React.FC = () => {
     
     try {
       
-      // 1. Listar schemas disponibles (solo sense)
-      const schemas = ['sense'];
+      // 1. Listar schemas disponibles (thermo)
+      const schemas = ['thermo'];
       setAvailableSchemas(schemas);
       
-      // 2. Listar tablas para schema sense
+      // 2. Listar tablas para schema thermo
       const tables: {[key: string]: string[]} = {};
-      const schemaTables = await ThermosService.listTables('sense');
-      tables['sense'] = schemaTables;
+      const schemaTables = await ThermosService.listTables('thermo');
+      tables['thermo'] = schemaTables;
       setAvailableTables(tables);
       
       // 3. Probar conexión
@@ -85,16 +85,16 @@ const ConnectionTest: React.FC = () => {
       {/* Detalles expandibles */}
       {showDetails && (
         <div className="mt-4 space-y-4">
-          {/* Schema sense */}
+          {/* Schema thermo */}
           <div>
-            <h3 className="text-md font-medium mb-2">📋 Schema sense:</h3>
+            <h3 className="text-md font-medium mb-2">📋 Schema thermo:</h3>
             <div className="bg-gray-50 p-3 rounded">
-              <div className="font-medium text-green-600">✅ Schema: sense</div>
-              {availableTables['sense'] && (
+              <div className="font-medium text-green-600">✅ Schema: thermo</div>
+              {availableTables['thermo'] && (
                 <div className="mt-2">
                   <div className="text-sm text-gray-600">Tablas disponibles:</div>
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {availableTables['sense'].map(table => (
+                    {availableTables['thermo'].map(table => (
                       <span key={table} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
                         {table}
                       </span>

@@ -290,7 +290,7 @@ export class ThermosService {
     }
   }
 
-  // Obtener fundos por empresa del schema sense
+  // Obtener fundos por empresa
   static async getFundosByEmpresa(empresaId: number): Promise<Fundo[]> {
     try {
       // Siempre detectar el schema primero
