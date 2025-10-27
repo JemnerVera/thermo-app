@@ -14,7 +14,7 @@ const SelectWithPlaceholder: React.FC<SelectWithPlaceholderProps> = ({
   onChange,
   options,
   placeholder,
-  className = "w-full px-3 py-2 bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-800 dark:text-white text-base font-mono",
+  className = "w-full px-3 py-2 bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 dark:text-white text-base font-mono",
   disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +75,7 @@ const SelectWithPlaceholder: React.FC<SelectWithPlaceholderProps> = ({
               placeholder="Buscar..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-2 py-1 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded text-gray-900 dark:text-white text-sm font-mono placeholder-gray-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="w-full px-2 py-1 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded text-gray-900 dark:text-white text-sm font-mono placeholder-gray-500 dark:placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
@@ -89,7 +89,7 @@ const SelectWithPlaceholder: React.FC<SelectWithPlaceholderProps> = ({
                   onClick={() => handleOptionClick(option.value)}
                   className={`px-3 py-2 cursor-pointer text-gray-900 dark:text-white font-mono tracking-wider transition-colors ${
                     selectedOption?.value === option.value 
-                      ? 'bg-orange-500' 
+                      ? 'bg-blue-600 text-white' 
                       : 'hover:bg-gray-100 dark:hover:bg-neutral-800'
                   }`}
                 >

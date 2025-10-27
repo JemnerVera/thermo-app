@@ -46,8 +46,8 @@ const DynamicFilterSelector: React.FC<DynamicFilterSelectorProps> = ({
       <button
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`w-full px-2 py-1.5 bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-md text-gray-800 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:bg-gray-300 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between font-mono ${
-          selectedOption ? 'border-orange-500' : ''
+        className={`w-full px-2 py-1.5 bg-gray-200 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-md text-gray-800 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-gray-300 dark:hover:bg-neutral-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-between font-mono ${
+          selectedOption ? 'border-blue-500' : ''
         }`}
       >
         <div className="flex items-center space-x-2 min-w-0 flex-1">
@@ -88,7 +88,7 @@ const DynamicFilterSelector: React.FC<DynamicFilterSelectorProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar..."
-              className="w-full px-2 py-1 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded text-gray-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-orange-500 font-mono"
+              className="w-full px-2 py-1 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded text-gray-800 dark:text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
               autoFocus
             />
           </div>
@@ -102,7 +102,7 @@ const DynamicFilterSelector: React.FC<DynamicFilterSelectorProps> = ({
                   onClick={() => handleSelect(option.id)}
                   className={`w-full text-left px-3 py-2 text-sm transition-colors font-mono tracking-wider ${
                     selectedOption?.id === option.id 
-                      ? 'bg-orange-500 text-white' 
+                      ? 'bg-blue-600 text-white' 
                       : 'text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800'
                   }`}
                 >
