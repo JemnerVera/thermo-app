@@ -5,7 +5,7 @@ import {
 
 // Configuración del Backend API
 // URL para desarrollo local: 'http://localhost:3001/api'
-// URL para deploy en Vercel: 'https://thermos-app.vercel.app/api'
+// URL para deploy en Azure: 'https://your-app.azurewebsites.net/api'
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001/api';
 
 // Cliente para llamadas al backend

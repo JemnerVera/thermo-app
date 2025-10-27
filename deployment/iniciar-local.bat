@@ -85,7 +85,6 @@ echo 📋 Información:
 echo    - Backend: http://localhost:3001
 echo    - Frontend: http://localhost:3000
 echo    - Schema: thermo
-echo    - Supabase: https://tnlbuupmkvqbqcdanldh.supabase.co
 echo.
 echo 🔄 Para detener los servicios, cierra las ventanas de CMD
 echo.

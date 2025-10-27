@@ -21,7 +21,7 @@ Thermos Dashboard es una aplicación web moderna para el monitoreo y análisis d
 - **Backend:** Node.js, Express.js
 - **Base de datos:** Supabase (PostgreSQL) - Schema `thermo`
 - **Autenticación:** Supabase Auth
-- **Despliegue:** Vercel
+- **Despliegue:** Azure
 
 ## 📁 Estructura del Proyecto
 
@@ -49,9 +49,10 @@ Thermos/
 │   └── archive/            # Scripts de migración
 ├── docs/                    # Documentación
 │   ├── DESPLIEGUE_WEB.md
+│   ├── ALERTAS_WHATSAPP_TABLES_MAPPING.md
 │   ├── AUTHENTICATION_README.md
 │   └── SCHEMA_DOCUMENTATION.txt
-└── vercel.json             # Configuración Vercel
+└── sql/                   # Scripts SQL de migración y schema
 ```
 
 ## 🛠️ Instalación y Configuración
@@ -84,16 +85,16 @@ Thermos/
    
    **Backend:** Crear `backend/.env`
    ```bash
-   SUPABASE_URL=https://tnlbuupmkvqbqcdanldh.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
    DB_SCHEMA=thermo
    PORT=3001
    ```
    
    **Frontend:** Crear `frontend/.env` (opcional para desarrollo local)
    ```bash
-   REACT_APP_SUPABASE_URL=https://tnlbuupmkvqbqcdanldh.supabase.co
-   REACT_APP_SUPABASE_ANON_KEY=tu-anon-key
+   REACT_APP_SUPABASE_URL=https://your-project-id.supabase.co
+   REACT_APP_SUPABASE_ANON_KEY=your-anon-key-here
    REACT_APP_BACKEND_URL=http://localhost:3001
    ```
 
@@ -105,13 +106,13 @@ Thermos/
 
 ## 🚀 Despliegue
 
-### **Despliegue en Vercel (Recomendado)**
+### **Despliegue en Azure**
 
-1. **Conectar repositorio con Vercel**
-2. **Configurar variables de entorno en Vercel**
-3. **Deploy automático**
+1. **Configurar Azure App Service**
+2. **Configurar variables de entorno en Azure**
+3. **Deploy desde repositorio Git**
 
-Ver `docs/DESPLIEGUE_WEB.md` para instrucciones detalladas.
+**Nota:** La guía detallada de despliegue en Azure será proporcionada por el equipo de infraestructura.
 
 ## 🔐 Seguridad
 
