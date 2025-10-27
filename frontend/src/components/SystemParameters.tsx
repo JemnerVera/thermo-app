@@ -53,9 +53,7 @@ import { MessageDisplay } from './SystemParameters/MessageDisplay';
 
 // Components - Forms
 import MultipleUsuarioPerfilForm from './MultipleUsuarioPerfilForm';
-import { MassiveMetricaSensorForm } from './MassiveMetricaSensorForm';
 import { AdvancedUsuarioPerfilUpdateForm } from './AdvancedUsuarioPerfilUpdateForm';
-import { AdvancedMetricaSensorUpdateForm } from './AdvancedMetricaSensorUpdateForm';
 
 // Components - Lazy
 import { MultipleMetricaSensorFormLazyWithBoundary } from './LazyComponents';
@@ -6599,122 +6597,6 @@ setMessage({
   };
   */
 
-// Función para manejar la creación masiva de métricas sensor
-
-  const handleMassiveMetricaSensorCreation = async (dataToApply: any[]) => {
-
-    if (!selectedTable || !user || selectedTable !== 'metricasensor') return;
-
-try {
-
-      setLoading(true);
-
-const usuarioid = getCurrentUserId();
-
-      const currentTimestamp = new Date().toISOString();
-
-// Preparar datos con campos de auditoría
-
-      const preparedData = dataToApply.map(item => ({
-
-        ...item,
-
-        usercreatedid: usuarioid,
-
-        usermodifiedid: usuarioid,
-
-        datecreated: currentTimestamp,
-
-        datemodified: currentTimestamp
-
-      }));
-
-// Verificar si hay duplicados antes de enviar
-
-      const duplicates = preparedData.filter((item, index, self) => 
-
-        index !== self.findIndex(t => 
-
-          t.nodoid === item.nodoid && 
-
-          t.tipoid === item.tipoid && 
-
-          t.metricaid === item.metricaid
-
-        )
-
-      );
-
-if (duplicates.length > 0) {
-
-        console.warn('⚠️ Se encontraron duplicados en los datos:', duplicates);
-
-        // Eliminar duplicados
-
-        const uniqueData = preparedData.filter((item, index, self) => 
-
-          index === self.findIndex(t => 
-
-            t.nodoid === item.nodoid && 
-
-            t.tipoid === item.tipoid && 
-
-            t.metricaid === item.metricaid
-
-          )
-
-        );
-
-preparedData.length = 0;
-
-        preparedData.push(...uniqueData);
-
-      }
-
-// Realizar inserciones individuales
-
-      for (const record of preparedData) {
-
-        await ThermosService.insertTableRow(selectedTable, record);
-
-      }
-
-// Recargar datos
-
-      loadTableDataWrapper();
-
-      loadTableInfo();
-
-      loadUpdateData();
-
-      loadCopyData();
-
-      loadRelatedTablesData();
-
-setMessage({ 
-
-        type: 'success', 
-
-        text: `Se crearon ${preparedData.length} métricas sensor exitosamente` 
-
-      });
-
-} catch (error: any) {
-
-      console.error('Error en creación masiva de métricas sensor:', error);
-
-      const errorResponse = handleMultipleInsertError(error, 'métricas sensor');
-
-      setMessage({ type: errorResponse.type, text: errorResponse.message });
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
-
 // Función para actualizar el tipo de un sensor específico
 
    const updateSensorTipo = (sensorIndex: number, tipoid: number) => {
@@ -8738,31 +8620,7 @@ return getDisplayValueLocal(row, col.columnName);
 
                         <div className="bg-gray-100 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-xl p-6">
 
-                  {selectedTable === 'metricasensor' ? (
-
-                    <MassiveMetricaSensorForm
-
-                      getUniqueOptionsForField={getUniqueOptionsForField}
-
-                      onApply={handleMassiveMetricaSensorCreation}
-
-                      onCancel={() => {
-
-                        setCancelAction(() => () => {
-
-                          setMessage(null);
-
-                        });
-
-                        setShowCancelModal(true);
-
-                      }}
-
-                      loading={loading}
-
-                    />
-
-                  ) : selectedTable === 'usuarioperfil' ? (
+                  {selectedTable === 'usuarioperfil' ? (
 
                     <div className="text-center py-8">
 
