@@ -956,32 +956,16 @@ const validateMetricaData = async (
     });
   }
   
-  // 2. Validar duplicados si hay datos existentes
+  // 2. Validar duplicados si hay datos existentes (solo metrica es unique)
   if (existingData && existingData.length > 0) {
     const metricaExists = existingData.some(item => 
       item.metrica && item.metrica.toLowerCase() === formData.metrica?.toLowerCase()
     );
     
-    const unidadExists = existingData.some(item => 
-      item.unidad && item.unidad.toLowerCase() === formData.unidad?.toLowerCase()
-    );
-    
-    if (metricaExists && unidadExists) {
-      errors.push({
-        field: 'both',
-        message: 'La métrica y unidad ya existen',
-        type: 'duplicate'
-      });
-    } else if (metricaExists) {
+    if (metricaExists) {
       errors.push({
         field: 'metrica',
         message: 'El nombre de la métrica ya existe',
-        type: 'duplicate'
-      });
-    } else if (unidadExists) {
-      errors.push({
-        field: 'unidad',
-        message: 'La unidad ya existe',
         type: 'duplicate'
       });
     }
