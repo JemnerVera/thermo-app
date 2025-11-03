@@ -293,7 +293,7 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
     } else if (selectedTable === 'metrica') {
       return renderMetricaFields();
     } else if (selectedTable === 'usuario') {
-      return renderStatusRightFields();
+      return renderUsuarioFields();
     } else {
       return visibleColumns.map(col => renderField(col));
     }
@@ -756,6 +756,58 @@ const NormalInsertForm: React.FC<NormalInsertFormProps> = memo(({
         </div>
       );
     }
+    
+    return result;
+  };
+
+  // Función para renderizar formulario de usuario con layout específico
+  const renderUsuarioFields = (): React.ReactNode[] => {
+    const result: React.ReactNode[] = [];
+    
+    // Primera fila: Login y Password
+    const loginField = visibleColumns.find(c => c.columnName === 'login');
+    const statusField = visibleColumns.find(c => c.columnName === 'statusid');
+    
+    result.push(
+      <div key="first-row" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Login */}
+        {loginField && renderField(loginField)}
+        
+        {/* Password - campo especial que no está en visibleColumns */}
+        <div className="mb-4">
+          <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+            {t('table_headers.password').toUpperCase()}*
+          </label>
+          <input
+            type="password"
+            value={formData.password || ''}
+            onChange={(e) => setFormData({
+              ...formData,
+              password: e.target.value
+            })}
+            className="w-full px-4 py-2 bg-neutral-800 border border-neutral-600 rounded text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+            placeholder={t('table_headers.password').toUpperCase()}
+          />
+        </div>
+      </div>
+    );
+    
+    // Segunda fila: Firstname, Lastname, Status
+    const firstnameField = visibleColumns.find(c => c.columnName === 'firstname');
+    const lastnameField = visibleColumns.find(c => c.columnName === 'lastname');
+    
+    result.push(
+      <div key="second-row" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Firstname */}
+        {firstnameField && renderField(firstnameField)}
+        
+        {/* Lastname */}
+        {lastnameField && renderField(lastnameField)}
+        
+        {/* Status */}
+        {statusField && renderField(statusField)}
+      </div>
+    );
     
     return result;
   };
@@ -1633,8 +1685,9 @@ return filteredNodos;
             );
           }
 
-          // Campo de texto normal
+          // Campo de texto normal (o password)
           const isEnabled = isFieldEnabled(col.columnName);
+          const inputType = col.columnName === 'password' ? 'password' : 'text';
           return (
             <div key={col.columnName} className="mb-4">
               <label className={`block text-lg font-bold mb-2 font-mono tracking-wider ${
@@ -1643,7 +1696,7 @@ return filteredNodos;
                 {displayName.toUpperCase()}{isRequired ? '*' : ''}
               </label>
               <input
-                type="text"
+                type={inputType}
                 value={value}
                 onChange={(e) => {
                   if (isEnabled) {

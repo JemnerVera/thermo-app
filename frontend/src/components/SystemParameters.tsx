@@ -2375,6 +2375,8 @@ preparedData.usercreatedid = usuarioid;
 
           login: preparedData.login,
 
+          password: preparedData.password, // Campo password para que backend lo hashee
+
           lastname: preparedData.lastname,
 
           firstname: preparedData.firstname,
@@ -4449,7 +4451,7 @@ if (errorCount > 0) {
     'perfilumbral': ['perfilid', 'umbralid', 'statusid'],
     'criticidad': ['criticidad', 'grado', 'frecuencia', 'escalamiento', 'escalon', 'statusid'],
     'perfil': ['perfil', 'nivel', 'jefeid', 'statusid'],
-    'usuario': ['login', 'firstname', 'lastname', 'statusid'],
+    'usuario': ['login', 'password', 'firstname', 'lastname', 'statusid'],
     'contacto': ['usuarioid', 'codigotelefonoid', 'celular', 'statusid'],
     'correo': ['usuarioid', 'correo', 'statusid'],
     'usuarioperfil': ['usuarioid', 'perfilid', 'statusid']
@@ -4829,6 +4831,12 @@ result = await ThermosService.updateTableRowByCompositeKey(
                   updateFormData[field].trim() === '' && 
                   isOptionalField(selectedTable, field)) {
                 // No incluir campos opcionales vacíos en la actualización
+                return;
+              }
+
+              // Para password en usuario: si está vacío, no incluir (backend solo actualiza si se proporciona)
+              if (selectedTable === 'usuario' && field === 'password' && 
+                  (!updateFormData[field] || updateFormData[field].trim() === '')) {
                 return;
               }
 
@@ -7921,9 +7929,111 @@ const handleCancelModal = () => {
                           {/* Filtros globales para formularios de actualización */}
                           {renderGlobalFiltersForUpdate()}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        {/* Layout especial para usuario */}
+                        {selectedTable === 'usuario' ? (
+                          <>
+                            {/* Fila 1: Login y Password */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                              {/* Login */}
+                              {updateVisibleColumns.find(col => col.columnName === 'login') && (() => {
+                                const col = updateVisibleColumns.find(col => col.columnName === 'login')!;
+                                const displayName = getColumnDisplayNameTranslated(col.columnName, t);
+                                const value = updateFormData[col.columnName] || '';
+                                return (
+                                  <div key={col.columnName} className="mb-4">
+                                    <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                      {displayName?.toUpperCase()}
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={value}
+                                      onChange={(e) => setUpdateFormData((prev: Record<string, any>) => ({
+                                        ...prev,
+                                        [col.columnName]: e.target.value
+                                      }))}
+                                      className="w-full px-3 py-2 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white font-mono"
+                                    />
+                                  </div>
+                                );
+                              })()}
+                              
+                              {/* Password */}
+                              <div className="mb-4">
+                                <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                  {t('table_headers.password').toUpperCase()}
+                                </label>
+                                <input
+                                  type="password"
+                                  value={updateFormData.password || ''}
+                                  onChange={(e) => setUpdateFormData((prev: Record<string, any>) => ({
+                                    ...prev,
+                                    password: e.target.value
+                                  }))}
+                                  placeholder={t('table_headers.password').toUpperCase() + ' (dejar vacío para no cambiar)'}
+                                  className="w-full px-3 py-2 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white font-mono"
+                                />
+                              </div>
+                            </div>
 
-                        {updateVisibleColumns.map(col => {
+                            {/* Fila 2: Firstname y Lastname */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                              {updateVisibleColumns.filter(col => ['firstname', 'lastname'].includes(col.columnName)).map(col => {
+                                const displayName = getColumnDisplayNameTranslated(col.columnName, t);
+                                if (!displayName) return null;
+                                const value = updateFormData[col.columnName] || '';
+                                return (
+                                  <div key={col.columnName} className="mb-4">
+                                    <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                      {displayName.toUpperCase()}
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={value}
+                                      onChange={(e) => setUpdateFormData((prev: Record<string, any>) => ({
+                                        ...prev,
+                                        [col.columnName]: e.target.value
+                                      }))}
+                                      className="w-full px-3 py-2 bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white font-mono"
+                                    />
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Fila 3: Status */}
+                            <div className="grid grid-cols-1 gap-6 mb-6">
+                              {updateVisibleColumns.find(col => col.columnName === 'statusid') && (() => {
+                                const col = updateVisibleColumns.find(col => col.columnName === 'statusid')!;
+                                const displayName = getColumnDisplayNameTranslated(col.columnName, t);
+                                const value = updateFormData[col.columnName] || '';
+                                return (
+                                  <div key={col.columnName} className="mb-4">
+                                    <label className="block text-lg font-bold text-blue-600 mb-2 font-mono tracking-wider">
+                                      {displayName?.toUpperCase()}
+                                    </label>
+                                    <div className="flex items-center space-x-3">
+                                      <input
+                                        type="checkbox"
+                                        id={'update-' + col.columnName}
+                                        checked={value === 1 || value === true}
+                                        onChange={(e) => setUpdateFormData((prev: Record<string, any>) => ({
+                                          ...prev,
+                                          [col.columnName]: e.target.checked ? 1 : 0
+                                        }))}
+                                        className="w-4 h-4 text-blue-600 bg-gray-100 dark:bg-neutral-800 border-gray-300 dark:border-neutral-600 rounded focus:ring-blue-600 focus:ring-2"
+                                      />
+                                      <label htmlFor={'update-' + col.columnName} className="text-gray-900 dark:text-white text-lg font-medium font-mono tracking-wider">
+                                        ACTIVO
+                                      </label>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                            {updateVisibleColumns.map(col => {
 
                           const displayName = getColumnDisplayNameTranslated(col.columnName, t);
 
@@ -8229,6 +8339,7 @@ return (
                         })}
 
                           </div>
+                        )}
                       </div>
 
                       )}

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 const { createClient } = require('@supabase/supabase-js');
 
 // Constantes de validación
@@ -1057,7 +1058,25 @@ app.post('/api/auth/login', async (req, res) => {
       });
     }
 
-    console.log('✅ Usuario autenticado en modo desarrollo:', email);
+    // Verificar contraseña con bcrypt
+    if (!userData.password_hash) {
+      console.error('❌ Usuario sin password_hash');
+      return res.status(401).json({ 
+        success: false,
+        error: 'Credenciales inválidas' 
+      });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, userData.password_hash);
+    if (!isValidPassword) {
+      console.error('❌ Contraseña incorrecta');
+      return res.status(401).json({ 
+        success: false,
+        error: 'Credenciales inválidas' 
+      });
+    }
+
+    console.log('✅ Usuario autenticado correctamente:', email);
 
     // Crear respuesta de usuario autenticado
     const authenticatedUser = {
@@ -1507,6 +1526,14 @@ app.put('/api/thermo/usuario/:id', async (req, res) => {
     const updateData = req.body;
     
     console.log(`🔍 Backend: Actualizando usuario con ID ${id}...`);
+    
+    // Hash password si se proporciona nueva contraseña
+    if (updateData.password) {
+      const saltRounds = 10;
+      updateData.password_hash = await bcrypt.hash(updateData.password, saltRounds);
+      delete updateData.password; // Remover campo plano
+      console.log('🔐 Backend: Password actualizada y hasheada con bcrypt');
+    }
     
     const { data, error } = await supabase
       .from('usuario')
@@ -2747,11 +2774,23 @@ app.post('/api/thermo/usuario', async (req, res) => {
       console.log(`⚠️ Backend: usuarioid=${usuarioid} fue enviado pero será ignorado (generado por secuencia)`);
     }
     
+    // Hash password si se proporciona
+    let passwordHash = null;
+    if (filteredInsertData.password) {
+      const saltRounds = 10;
+      passwordHash = await bcrypt.hash(filteredInsertData.password, saltRounds);
+      console.log('🔐 Backend: Password hasheada con bcrypt');
+    } else {
+      console.error('❌ Backend: Password no proporcionada. password_hash es requerido.');
+      return res.status(400).json({ error: 'Password es requerida' });
+    }
+    
     // Filtrar solo las columnas que existen en la tabla
     const filteredData = {
       login: filteredInsertData.login,
       lastname: filteredInsertData.lastname,
       firstname: filteredInsertData.firstname,
+      password_hash: passwordHash,
       statusid: filteredInsertData.statusid,
       usercreatedid: filteredInsertData.usercreatedid,
       usermodifiedid: filteredInsertData.usermodifiedid,
@@ -2759,7 +2798,7 @@ app.post('/api/thermo/usuario', async (req, res) => {
       datemodified: filteredInsertData.datemodified
     };
     
-    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify({ ...filteredData, password_hash: '***' }, null, 2));
     
     const { data, error } = await supabase
       .from('usuario')
