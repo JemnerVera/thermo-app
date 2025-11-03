@@ -57,8 +57,6 @@ const RealtimeTemperatureDashboard: React.FC = () => {
           fundosResponse.json(),
           zonasResponse.json()
         ]);
-        console.log('Fundos cargados:', fundosData);
-        console.log('Zonas cargadas:', zonasData);
         setFundos(fundosData);
         setZonas(zonasData);
       }
@@ -97,14 +95,6 @@ const RealtimeTemperatureDashboard: React.FC = () => {
         const fundoNombre = fundos.find(f => f.id === record.fundo_id)?.nombre || record.fundo_id;
         const zonaNombre = zonas.find(z => z.id === record.zona_id)?.nombre || record.zona_id;
         
-        console.log('Mapeando registro:', {
-          id: record.id,
-          fundo_id: record.fundo_id,
-          fundo_nombre: fundoNombre,
-          zona_id: record.zona_id,
-          zona_nombre: zonaNombre
-        });
-        
         return {
           ...record,
           fundo_nombre: fundoNombre,
@@ -112,7 +102,6 @@ const RealtimeTemperatureDashboard: React.FC = () => {
         };
       });
       
-      console.log('Datos con nombres:', dataWithNames.slice(0, 2)); // Solo los primeros 2 para debug
       setData(dataWithNames);
       setStats(statsResult);
     } catch (err) {

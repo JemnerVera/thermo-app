@@ -58,11 +58,7 @@ const AlertasTable: React.FC = () => {
       startTransition(() => {
         ThermosService.getTableData('alerta', 1000)
           .then(data => {
-            console.log('🔍 Frontend - Datos recibidos de alerta:', data);
             if (Array.isArray(data)) {
-              if (data.length > 0) {
-                console.log('🔍 Frontend - Primera alerta:', JSON.stringify(data[0], null, 2));
-              }
               setAlertas(data);
             } else {
               setAlertas([]);

@@ -26,10 +26,11 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Middleware de logging para todas las peticiones
+// Middleware de logging para todas las peticiones (solo en modo debug)
 app.use((req, res, next) => {
-  console.log(`📡 ${new Date().toISOString()} - ${req.method} ${req.url}`);
-  console.log(`📋 Headers:`, req.headers);
+  if (isDebugMode) {
+    logger.debug(`${req.method} ${req.url}`);
+  }
   next();
 });
 
@@ -160,15 +161,27 @@ const SEARCHABLE_FIELDS = {
  * @param {object} params - Parámetros de query
  * @returns {Promise<Array|Object>} Array directo (legacy) o { data, pagination } (paginado)
  */
+// Mapeo de columnas de ordenamiento por defecto para cada tabla
+const DEFAULT_SORT_COLUMNS = {
+  'alerta': 'fecha',              // alerta no tiene datemodified, usa fecha
+  'alertaconsolidado': 'fechainicio', // alertaconsolidado usa fechainicio
+  'mensaje': 'fecha',             // mensaje usa fecha
+  'medicion': 'fecha',            // medicion usa fecha
+  // Otras tablas usan datemodified por defecto
+};
+
 async function paginateAndFilter(tableName, params = {}) {
   const {
     page,                    // Número de página (1, 2, 3...) - OPCIONAL
     pageSize = 100,          // Registros por página - DEFAULT: 100
     search = '',             // Texto de búsqueda - OPCIONAL
-    sortBy = 'datemodified', // Campo para ordenar - DEFAULT: datemodified
+    sortBy,                  // Campo para ordenar - puede venir en params
     sortOrder = 'desc',      // asc o desc - DEFAULT: desc
     ...filters               // Filtros adicionales (paisid, empresaid, statusid, etc.)
   } = params;
+
+  // Determinar campo de ordenamiento: usar el que viene en params, o el default según tabla
+  const finalSortBy = sortBy || DEFAULT_SORT_COLUMNS[tableName] || 'datemodified';
 
   // Determinar si usar paginación o modo legacy
   const usePagination = page !== undefined && page !== null;
@@ -209,8 +222,8 @@ async function paginateAndFilter(tableName, params = {}) {
     // ========================================================================
     // 5. APLICAR ORDENAMIENTO
     // ========================================================================
-    if (sortBy) {
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+    if (finalSortBy) {
+      query = query.order(finalSortBy, { ascending: sortOrder === 'asc' });
     }
 
     // ========================================================================
@@ -247,11 +260,36 @@ async function paginateAndFilter(tableName, params = {}) {
 
       // Loop para obtener todos los registros en chunks
       while (true) {
-        const { data: chunk, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .range(currentOffset, currentOffset + chunkSize - 1)
-          .order(sortBy, { ascending: sortOrder === 'asc' });
+        // Construir query para este chunk (sin count, solo select)
+        let chunkQuery = supabase.from(tableName).select('*');
+        
+        // Aplicar los mismos filtros
+        Object.keys(filters).forEach(key => {
+          if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
+            chunkQuery = chunkQuery.eq(key, filters[key]);
+          }
+        });
+        
+        // Aplicar búsqueda si existe
+        if (search && search.trim() !== '') {
+          const searchFields = SEARCHABLE_FIELDS[tableName] || [];
+          if (searchFields.length > 0) {
+            const searchConditions = searchFields.map(field => 
+              `${field}.ilike.%${search}%`
+            ).join(',');
+            chunkQuery = chunkQuery.or(searchConditions);
+          }
+        }
+        
+        // Aplicar ordenamiento
+        if (finalSortBy) {
+          chunkQuery = chunkQuery.order(finalSortBy, { ascending: sortOrder === 'asc' });
+        }
+        
+        // Aplicar range para este chunk
+        chunkQuery = chunkQuery.range(currentOffset, currentOffset + chunkSize - 1);
+        
+        const { data: chunk, error } = await chunkQuery;
 
         if (error) throw error;
         if (!chunk || chunk.length === 0) break;
@@ -536,7 +574,7 @@ app.get('/api/thermo/empresa', createTableRoute('empresa', 'empresaid'));
 app.get('/api/thermo/fundo', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo fundo del schema thermo...');
+    logger.debug('Obteniendo fundo del schema thermo...');
     const { data, error } = await supabase
       .from('fundo')
       .select(`
@@ -551,7 +589,7 @@ app.get('/api/thermo/fundo', async (req, res) => {
       .order('fundoid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Fundo obtenido:', data?.length || 0);
+    logger.debug(`Fundo obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/fundo:', error); res.status(500).json({ error: error.message }); }
 });
@@ -559,14 +597,14 @@ app.get('/api/thermo/fundo', async (req, res) => {
 app.get('/api/thermo/ubicacion', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo ubicacion del schema thermo...');
+    logger.debug('Obteniendo ubicacion del schema thermo...');
     const { data, error } = await supabase
       .from('ubicacion')
       .select('*')
       .order('ubicacionid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Ubicacion obtenida:', data?.length || 0);
+    logger.debug(`Ubicacion obtenida: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/ubicacion:', error); res.status(500).json({ error: error.message }); }
 });
@@ -574,14 +612,14 @@ app.get('/api/thermo/ubicacion', async (req, res) => {
 app.get('/api/thermo/entidad', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo entidad del schema thermo...');
+    logger.debug('Obteniendo entidad del schema thermo...');
     const { data, error } = await supabase
       .from('entidad')
       .select('*')
       .order('entidadid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Entidad obtenida:', data?.length || 0);
+    logger.debug(`Entidad obtenida: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/entidad:', error); res.status(500).json({ error: error.message }); }
 });
@@ -589,14 +627,14 @@ app.get('/api/thermo/entidad', async (req, res) => {
 app.get('/api/thermo/metrica', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo metrica del schema thermo...');
+    logger.debug('Obteniendo metrica del schema thermo...');
     const { data, error } = await supabase
       .from('metrica')
       .select('*')
       .order('metricaid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Metrica obtenida:', data?.length || 0);
+    logger.debug(`Metrica obtenida: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/metrica:', error); res.status(500).json({ error: error.message }); }
 });
@@ -604,14 +642,14 @@ app.get('/api/thermo/metrica', async (req, res) => {
 app.get('/api/thermo/tipo', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo tipo del schema thermo...');
+    logger.debug('Obteniendo tipo del schema thermo...');
     const { data, error } = await supabase
       .from('tipo')
       .select('*')
       .order('tipoid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Tipo obtenido:', data?.length || 0);
+    logger.debug(`Tipo obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/tipo:', error); res.status(500).json({ error: error.message }); }
 });
@@ -621,14 +659,14 @@ app.get('/api/thermo/tipo', async (req, res) => {
 app.get('/api/thermo/criticidad', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo criticidad del schema thermo...');
+    logger.debug('Obteniendo criticidad del schema thermo...');
     const { data, error } = await supabase
       .from('criticidad')
       .select('*')
       .order('criticidadid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Criticidad obtenida:', data?.length || 0);
+    logger.debug(`Criticidad obtenida: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/criticidad:', error); res.status(500).json({ error: error.message }); }
 });
@@ -636,30 +674,30 @@ app.get('/api/thermo/criticidad', async (req, res) => {
 app.get('/api/thermo/perfil', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo perfil del schema thermo...');
+    logger.debug('Obteniendo perfil del schema thermo...');
     const { data, error } = await supabase
       .from('perfil')
       .select('*')
       .order('perfilid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Perfil obtenido:', data?.length || 0);
+    logger.debug(`Perfil obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/perfil:', error); res.status(500).json({ error: error.message }); }
 });
 
 app.get('/api/thermo/umbral', async (req, res) => {
   try {
-    console.log('🔍 Backend: Obteniendo umbral del schema thermo...');
+    logger.debug('Obteniendo umbral del schema thermo...');
     const result = await paginateAndFilter('umbral', req.query);
     
     if (result.pagination) {
       // MODO PAGINADO: devolver objeto con data + pagination
-      console.log(`✅ Backend: Umbral obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      logger.debug(`Umbral obtenidos: ${result.data.length} de ${result.pagination.total}`);
       res.json(result);
     } else {
       // MODO LEGACY: devolver array directo
-      console.log(`✅ Backend: Umbral obtenidos (modo legacy): ${result.length}`);
+      logger.debug(`Umbral obtenidos (modo legacy): ${result.length}`);
       res.json(result);
     }
   } catch (error) {
@@ -674,7 +712,7 @@ app.get('/api/thermo/umbral', async (req, res) => {
 app.get('/api/thermo/localizacionsensor', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo localizacionsensor del schema thermo...');
+    logger.debug('Obteniendo localizacionsensor del schema thermo...');
     const { data, error } = await supabase
       .from('localizacionsensor')
       .select('*')
@@ -682,7 +720,7 @@ app.get('/api/thermo/localizacionsensor', async (req, res) => {
       .order('localizacionsensorid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Localizacionsensor obtenido:', data?.length || 0);
+    logger.debug(`Localizacionsensor obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/localizacionsensor:', error); res.status(500).json({ error: error.message }); }
 });
@@ -690,30 +728,30 @@ app.get('/api/thermo/localizacionsensor', async (req, res) => {
 app.get('/api/thermo/mensaje_error', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo mensaje_error del schema thermo...');
+    logger.debug('Obteniendo mensaje_error del schema thermo...');
     const { data, error } = await supabase
       .from('mensaje_error')
       .select('*')
       .order('mensaje_errorid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Mensaje_error obtenido:', data?.length || 0);
+    logger.debug(`Mensaje_error obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/mensaje_error:', error); res.status(500).json({ error: error.message }); }
 });
 
 app.get('/api/thermo/sensor', async (req, res) => {
   try {
-    console.log('🔍 Backend: Obteniendo sensor del schema thermo...');
+    logger.debug('Obteniendo sensor del schema thermo...');
     const result = await paginateAndFilter('sensor', req.query);
     
     if (result.pagination) {
       // MODO PAGINADO: devolver objeto con data + pagination
-      console.log(`✅ Backend: Sensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      logger.debug(`Sensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
       res.json(result);
     } else {
       // MODO LEGACY: devolver array directo
-      console.log(`✅ Backend: Sensor obtenidos (modo legacy): ${result.length}`);
+      logger.debug(`Sensor obtenidos (modo legacy): ${result.length}`);
       res.json(result);
     }
   } catch (error) {
@@ -725,16 +763,16 @@ app.get('/api/thermo/sensor', async (req, res) => {
 // Ruta para metricasensor - usada por el frontend
 app.get('/api/thermo/metricasensor', async (req, res) => {
   try {
-    console.log('🔍 Backend: Obteniendo metricasensor del schema thermo...');
+    logger.debug('Obteniendo metricasensor del schema thermo...');
     const result = await paginateAndFilter('metricasensor', req.query);
     
     if (result.pagination) {
       // MODO PAGINADO: devolver objeto con data + pagination
-      console.log(`✅ Backend: Metricasensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
+      logger.debug(`Metricasensor obtenidos: ${result.data.length} de ${result.pagination.total}`);
       res.json(result);
     } else {
       // MODO LEGACY: devolver array directo
-      console.log(`✅ Backend: Metricasensor obtenidos (modo legacy): ${result.length}`);
+      logger.debug(`Metricasensor obtenidos (modo legacy): ${result.length}`);
       res.json(result);
     }
   } catch (error) {
@@ -747,14 +785,14 @@ app.get('/api/thermo/metricasensor', async (req, res) => {
 app.get('/api/thermo/perfilumbral', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo perfilumbral del schema thermo...');
+    logger.debug('Obteniendo perfilumbral del schema thermo...');
     const { data, error } = await supabase
       .from('perfilumbral')
       .select('*')
       .order('perfilid, umbralid') // Ordenar por clave primaria compuesta
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Perfilumbral obtenido:', data?.length || 0);
+    logger.debug(`Perfilumbral obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/perfilumbral:', error); res.status(500).json({ error: error.message }); }
 });
@@ -763,14 +801,14 @@ app.get('/api/thermo/perfilumbral', async (req, res) => {
 app.get('/api/thermo/usuarioperfil', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo usuarioperfil del schema thermo...');
+    logger.debug('Obteniendo usuarioperfil del schema thermo...');
     const { data, error } = await supabase
       .from('usuarioperfil')
       .select('*')
       .order('usuarioid, perfilid') // Ordenar por clave primaria compuesta
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Usuarioperfil obtenido:', data?.length || 0);
+    logger.debug(`Usuarioperfil obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/usuarioperfil:', error); res.status(500).json({ error: error.message }); }
 });
@@ -779,14 +817,14 @@ app.get('/api/thermo/usuarioperfil', async (req, res) => {
 app.get('/api/thermo/audit_log_umbral', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo audit_log_umbral del schema thermo...');
+    logger.debug('Obteniendo audit_log_umbral del schema thermo...');
     const { data, error } = await supabase
       .from('audit_log_umbral')
       .select('*')
       .order('auditid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Audit_log_umbral obtenido:', data?.length || 0);
+    logger.debug(`Audit_log_umbral obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/audit_log_umbral:', error); res.status(500).json({ error: error.message }); }
 });
@@ -795,7 +833,7 @@ app.get('/api/thermo/audit_log_umbral', async (req, res) => {
 app.get('/api/thermo/contacto', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo contacto del schema thermo...');
+    logger.debug('Obteniendo contacto del schema thermo...');
     const { data, error } = await supabase
       .from('contacto')
       .select(`
@@ -806,7 +844,7 @@ app.get('/api/thermo/contacto', async (req, res) => {
       .order('contactoid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Contacto obtenido:', data?.length || 0);
+    logger.debug(`Contacto obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/contacto:', error); res.status(500).json({ error: error.message }); }
 });
@@ -815,7 +853,7 @@ app.get('/api/thermo/contacto', async (req, res) => {
 app.get('/api/thermo/codigotelefono', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo codigotelefono del schema thermo...');
+    logger.debug('Obteniendo codigotelefono del schema thermo...');
     const { data, error } = await supabase
       .from('codigotelefono')
       .select('*')
@@ -823,7 +861,7 @@ app.get('/api/thermo/codigotelefono', async (req, res) => {
       .order('codigotelefonoid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Codigotelefono obtenido:', data?.length || 0);
+    logger.debug(`Codigotelefono obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/codigotelefono:', error); res.status(500).json({ error: error.message }); }
 });
@@ -832,7 +870,7 @@ app.get('/api/thermo/codigotelefono', async (req, res) => {
 app.get('/api/thermo/correo', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo correo del schema thermo...');
+    logger.debug('Obteniendo correo del schema thermo...');
     const { data, error } = await supabase
       .from('correo')
       .select(`
@@ -843,7 +881,7 @@ app.get('/api/thermo/correo', async (req, res) => {
       .order('correoid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Correo obtenido:', data?.length || 0);
+    logger.debug(`Correo obtenido: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/correo:', error); res.status(500).json({ error: error.message }); }
 });
@@ -852,14 +890,14 @@ app.get('/api/thermo/correo', async (req, res) => {
 app.get('/api/thermo/localizacion', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Backend: Obteniendo localizacion del schema thermo...');
+    logger.debug('Obteniendo localizacion del schema thermo...');
     const { data, error } = await supabase
       .from('localizacion')
       .select('*')
       .order('localizacionid') // Ordenar por clave primaria
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Backend: Localizacion obtenida:', data?.length || 0);
+    logger.debug(`Localizacion obtenida: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/localizacion:', error); res.status(500).json({ error: error.message }); }
 });
@@ -868,14 +906,14 @@ app.get('/api/thermo/localizacion', async (req, res) => {
 app.get('/api/thermo/usuario', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Obteniendo usuarios de thermo.usuario...');
+    logger.debug('Obteniendo usuarios de thermo.usuario...');
     const { data, error } = await supabase
       .from('usuario')
       .select('*')
       .order('usuarioid')
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Usuarios encontrados:', data?.length || 0);
+    logger.debug(`Usuarios encontrados: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/usuario:', error); res.status(500).json({ error: error.message }); }
 });
@@ -883,16 +921,16 @@ app.get('/api/thermo/usuario', async (req, res) => {
 // Ruta para alerta - usada por el frontend
 app.get('/api/thermo/alerta', async (req, res) => {
   try {
-    console.log('🔍 Obteniendo alertas de thermo.alerta...');
+    logger.debug('Obteniendo alertas de thermo.alerta...');
     const result = await paginateAndFilter('alerta', req.query);
     
     if (result.pagination) {
       // MODO PAGINADO: devolver objeto con data + pagination
-      console.log(`✅ Backend: Alertas obtenidas: ${result.data.length} de ${result.pagination.total}`);
+      logger.debug(`Alertas obtenidas: ${result.data.length} de ${result.pagination.total}`);
       res.json(result);
     } else {
       // MODO LEGACY: devolver array directo
-      console.log(`✅ Backend: Alertas obtenidas (modo legacy): ${result.length}`);
+      logger.debug(`Alertas obtenidas (modo legacy): ${result.length}`);
       res.json(result);
     }
   } catch (error) {
@@ -905,7 +943,7 @@ app.get('/api/thermo/alerta', async (req, res) => {
 app.get('/api/thermo/mensaje', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Obteniendo mensajes de thermo.mensaje...');
+    logger.debug('Obteniendo mensajes de thermo.mensaje...');
     const { data, error } = await supabase
       .from('mensaje')
       .select(`
@@ -920,10 +958,7 @@ app.get('/api/thermo/mensaje', async (req, res) => {
       .order('fecha', { ascending: false })
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Mensajes encontrados:', data?.length || 0);
-    if (data && data.length > 0) {
-      console.log('🔍 Primer mensaje:', JSON.stringify(data[0], null, 2));
-    }
+    logger.debug(`Mensajes encontrados: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/mensaje:', error); res.status(500).json({ error: error.message }); }
 });
@@ -932,14 +967,14 @@ app.get('/api/thermo/mensaje', async (req, res) => {
 app.get('/api/thermo/alertaconsolidado', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log('🔍 Obteniendo alertas consolidadas de thermo.alertaconsolidado...');
+    logger.debug('Obteniendo alertas consolidadas de thermo.alertaconsolidado...');
     const { data, error } = await supabase
       .from('alertaconsolidado')
       .select('*')
       .order('fecha_inicio', { ascending: false })
       .limit(parseInt(limit));
     if (error) { console.error('❌ Error backend:', error); return res.status(500).json({ error: error.message }); }
-    console.log('✅ Alertas consolidadas encontradas:', data?.length || 0);
+    logger.debug(`Alertas consolidadas encontradas: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) { console.error('❌ Error in /api/thermo/alertaconsolidado:', error); res.status(500).json({ error: error.message }); }
 });
@@ -948,7 +983,7 @@ app.get('/api/thermo/alertaconsolidado', async (req, res) => {
 app.get('/api/thermo/:tableName/columns', async (req, res) => {
   try {
     const { tableName } = req.params;
-    console.log(`🔍 Backend: Obteniendo columnas de la tabla ${tableName}...`);
+    logger.debug(`Obteniendo columnas de la tabla ${tableName}...`);
     
     // Usar metadatos dinámicos con fallback a hardcodeados
     const metadata = await getTableMetadata(tableName);
@@ -957,7 +992,7 @@ app.get('/api/thermo/:tableName/columns', async (req, res) => {
       return res.status(404).json({ error: `Tabla ${tableName} no encontrada` });
     }
 
-    console.log(`✅ Backend: Columnas obtenidas para ${tableName}:`, metadata.columns.length);
+    logger.debug(`Columnas obtenidas para ${tableName}: ${metadata.columns.length}`);
     res.json(metadata.columns);
   } catch (error) {
     console.error(`❌ Error in /api/thermo/${req.params.tableName}/columns:`, error);
@@ -968,7 +1003,7 @@ app.get('/api/thermo/:tableName/columns', async (req, res) => {
 app.get('/api/thermo/:tableName/info', async (req, res) => {
   try {
     const { tableName } = req.params;
-    console.log(`🔍 Backend: Obteniendo información de la tabla ${tableName}...`);
+    logger.debug(`Obteniendo información de la tabla ${tableName}...`);
     
     // Usar metadatos dinámicos con fallback a hardcodeados
     const metadata = await getTableMetadata(tableName);
@@ -977,7 +1012,7 @@ app.get('/api/thermo/:tableName/info', async (req, res) => {
       return res.status(404).json({ error: `Tabla ${tableName} no encontrada` });
     }
 
-    console.log(`✅ Backend: Información obtenida para ${tableName}`);
+    logger.debug(`Información obtenida para ${tableName}`);
     res.json(metadata.info);
   } catch (error) {
     console.error(`❌ Error in /api/thermo/${req.params.tableName}/info:`, error);
@@ -988,7 +1023,7 @@ app.get('/api/thermo/:tableName/info', async (req, res) => {
 app.get('/api/thermo/:tableName/constraints', async (req, res) => {
   try {
     const { tableName } = req.params;
-    console.log(`🔍 Backend: Obteniendo constraints de la tabla ${tableName}...`);
+    logger.debug(`Obteniendo constraints de la tabla ${tableName}...`);
     
     // Usar metadatos dinámicos con fallback a hardcodeados
     const metadata = await getTableMetadata(tableName);
@@ -997,7 +1032,7 @@ app.get('/api/thermo/:tableName/constraints', async (req, res) => {
       return res.status(404).json({ error: `Tabla ${tableName} no encontrada` });
     }
 
-    console.log(`✅ Backend: Constraints obtenidos para ${tableName}:`, metadata.constraints.length);
+    logger.debug(`Constraints obtenidos para ${tableName}: ${metadata.constraints.length}`);
     res.json(metadata.constraints);
   } catch (error) {
     console.error(`❌ Error in /api/thermo/${req.params.tableName}/constraints:`, error);
@@ -1875,7 +1910,7 @@ app.get('/api/detect', async (req, res) => {
 app.get('/api/thermo/paises', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo paises del schema thermo...`);
+    logger.debug(`Obteniendo paises del schema thermo...`);
     
     const { data, error } = await supabase
       .from('pais')
@@ -1888,7 +1923,7 @@ app.get('/api/thermo/paises', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    console.log(`✅ Backend: Paises obtenidos: ${data.length}`);
+    logger.debug(`Paises obtenidos: ${data.length}`);
     res.json(data);
   } catch (error) {
     console.error('❌ Error backend:', error);
@@ -1899,7 +1934,7 @@ app.get('/api/thermo/paises', async (req, res) => {
 app.get('/api/thermo/empresas', async (req, res) => {
   try {
     const { limit = 100, paisId } = req.query;
-    console.log(`🔍 Backend: Obteniendo empresas del schema thermo...`);
+    logger.debug(`Obteniendo empresas del schema thermo...`);
     
     let query = supabase
       .from('empresa')
@@ -1928,7 +1963,7 @@ app.get('/api/thermo/empresas', async (req, res) => {
 app.get('/api/thermo/fundos', async (req, res) => {
   try {
     const { limit = 100, empresaId } = req.query;
-    console.log(`🔍 Backend: Obteniendo fundos del schema thermo...`);
+    logger.debug(`Obteniendo fundos del schema thermo...`);
 
     let query = supabase
       .from('fundo')
@@ -1946,7 +1981,7 @@ app.get('/api/thermo/fundos', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    console.log(`✅ Backend: Fundos obtenidos: ${data.length}`);
+    logger.debug(`Fundos obtenidos: ${data.length}`);
     res.json(data);
   } catch (error) {
     console.error('❌ Error backend:', error);
@@ -1957,7 +1992,7 @@ app.get('/api/thermo/fundos', async (req, res) => {
 app.get('/api/thermo/ubicaciones', async (req, res) => {
   try {
     const { limit = 100, fundoId } = req.query;
-    console.log(`🔍 Backend: Obteniendo ubicaciones del schema thermo...`);
+    logger.debug(`Obteniendo ubicaciones del schema thermo...`);
     
     let query = supabase
       .from('ubicacion')
@@ -1986,7 +2021,7 @@ app.get('/api/thermo/ubicaciones', async (req, res) => {
 app.get('/api/thermo/entidades', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo entidades del schema thermo...`);
+    logger.debug(`Obteniendo entidades del schema thermo...`);
     
     const { data, error } = await supabase
       .from('entidad')
@@ -2010,7 +2045,7 @@ app.get('/api/thermo/entidades', async (req, res) => {
 app.get('/api/thermo/metricas', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo metricas del schema thermo...`);
+    logger.debug(`Obteniendo metricas del schema thermo...`);
     
     const { data, error } = await supabase
       .from('metrica')
@@ -2038,7 +2073,7 @@ app.get('/api/thermo/metricas', async (req, res) => {
 app.get('/api/thermo/tipos', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo tipos del schema thermo...`);
+    logger.debug(`Obteniendo tipos del schema thermo...`);
     
     const { data, error } = await supabase
       .from('tipo')
@@ -2051,7 +2086,7 @@ app.get('/api/thermo/tipos', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    console.log(`✅ Backend: Tipos obtenidos: ${data.length}`);
+    logger.debug(`Tipos obtenidos: ${data.length}`);
     res.json(data);
   } catch (error) {
     console.error('❌ Error backend:', error);
@@ -2062,7 +2097,7 @@ app.get('/api/thermo/tipos', async (req, res) => {
 app.get('/api/thermo/localizaciones', async (req, res) => {
   try {
     const { limit = 100 } = req.query;
-    console.log(`🔍 Backend: Obteniendo localizaciones del schema thermo...`);
+    logger.debug(`Obteniendo localizaciones del schema thermo...`);
     
     const { data, error } = await supabase
       .from('localizacion')
@@ -3005,7 +3040,7 @@ app.post('/api/thermo/metricasensor', async (req, res) => {
 app.get('/api/thermo/mediciones', async (req, res) => {
   try {
     const { ubicacionId, startDate, endDate, limit, countOnly, getAll } = req.query;
-    console.log('🔍 Backend: Obteniendo mediciones del schema thermo...', { ubicacionId, startDate, endDate, limit, countOnly, getAll });
+    logger.debug('Obteniendo mediciones del schema thermo...', { ubicacionId, startDate, endDate, limit, countOnly, getAll });
     
     let query = supabase
       .from('medicion')
@@ -3061,7 +3096,7 @@ app.get('/api/thermo/mediciones', async (req, res) => {
 app.get('/api/thermo/mediciones-con-entidad', async (req, res) => {
   try {
     const { ubicacionId, startDate, endDate, limit, entidadId, countOnly, getAll } = req.query;
-    console.log('🔍 Backend: Obteniendo mediciones con entidad del schema thermo...', { ubicacionId, startDate, endDate, limit, entidadId, countOnly, getAll });
+    logger.debug('Obteniendo mediciones con entidad del schema thermo...', { ubicacionId, startDate, endDate, limit, entidadId, countOnly, getAll });
     
     // Query simple primero - solo mediciones
     let query = supabase
@@ -3181,7 +3216,7 @@ app.get('/api/public/test-public-tables', async (req, res) => {
 app.get('/api/public/temperatura-zona', async (req, res) => {
   try {
     const { limit = 100, fundo_id, zona_id, start_date, end_date } = req.query;
-    console.log('🔍 Backend: Obteniendo datos de temperatura_zona...');
+    logger.debug('Obteniendo datos de temperatura_zona...');
     
       // Usar consulta directa a la tabla public.temperatura - zona (como funcionaba antes)
       let query = supabasePublic
@@ -3217,7 +3252,7 @@ app.get('/api/public/temperatura-zona', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    console.log('✅ Backend: Datos de temperatura obtenidos:', data?.length || 0);
+    logger.debug(`Datos de temperatura obtenidos: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) {
     console.error('❌ Error in /api/thermo/temperatura-zona:', error);
@@ -3229,7 +3264,7 @@ app.get('/api/public/temperatura-zona', async (req, res) => {
 app.get('/api/public/temperatura-zona/stats', async (req, res) => {
   try {
     const { fundo_id, zona_id, start_date, end_date } = req.query;
-    console.log('🔍 Backend: Obteniendo estadísticas de temperatura_zona...');
+    logger.debug('Obteniendo estadísticas de temperatura_zona...');
     
     let query = supabasePublic
       .from('temperatura-zona')
@@ -3292,7 +3327,7 @@ app.get('/api/public/temperatura-zona/stats', async (req, res) => {
 app.get('/api/public/temperatura-zona/by-zone', async (req, res) => {
   try {
     const { fundo_id, start_date, end_date } = req.query;
-    console.log('🔍 Backend: Obteniendo datos de temperatura agrupados por zona...');
+    logger.debug('Obteniendo datos de temperatura agrupados por zona...');
     
     let query = supabasePublic
       .from('temperatura-zona')
@@ -3332,7 +3367,7 @@ app.get('/api/public/temperatura-zona/by-zone', async (req, res) => {
       });
     }
     
-    console.log('✅ Backend: Datos agrupados por zona obtenidos:', Object.keys(groupedData).length, 'zonas');
+    logger.debug(`Datos agrupados por zona obtenidos: ${Object.keys(groupedData).length} zonas`);
     res.json(groupedData);
   } catch (error) {
     console.error('❌ Error in /api/thermo/temperatura-zona/by-zone:', error);
@@ -3347,7 +3382,7 @@ app.get('/api/public/temperatura-zona/by-zone', async (req, res) => {
 // Obtener todos los fundos
 app.get('/api/public/fundo', async (req, res) => {
   try {
-    console.log('🔍 Backend: Obteniendo fundos...');
+    logger.debug('Obteniendo fundos...');
     
     const { data, error } = await supabasePublic
       .from('fundo')
@@ -3359,7 +3394,7 @@ app.get('/api/public/fundo', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    console.log('✅ Backend: Fundos obtenidos:', data?.length || 0);
+    logger.debug(`Fundos obtenidos: ${data?.length || 0}`);
     res.json(data || []);
   } catch (error) {
     console.error('❌ Error in /api/public/fundo:', error);
@@ -3370,7 +3405,7 @@ app.get('/api/public/fundo', async (req, res) => {
 // Obtener todas las zonas
 app.get('/api/public/zona', async (req, res) => {
   try {
-    console.log('🔍 Backend: Obteniendo zonas...');
+    logger.debug('Obteniendo zonas...');
     
     const { data, error } = await supabasePublic
       .from('zona')

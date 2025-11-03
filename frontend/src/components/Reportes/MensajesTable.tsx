@@ -43,11 +43,7 @@ const MensajesTable: React.FC = () => {
       startTransition(() => {
         ThermosService.getTableData('mensaje', 1000)
           .then(data => {
-            console.log('🔍 Frontend - Datos recibidos de mensaje:', data);
             if (Array.isArray(data)) {
-              if (data.length > 0) {
-                console.log('🔍 Frontend - Primer mensaje:', JSON.stringify(data[0], null, 2));
-              }
               setMensajes(data);
             } else {
               setMensajes([]);

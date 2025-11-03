@@ -36,17 +36,6 @@ const SeparateCharts: React.FC<SeparateChartsProps> = React.memo(({
 
     // Preparar datos para el gráfico
     const datosGrafico = prepararDatosGrafico(mediciones, selectedMetrica || null, tipos);
-    
-    console.log('🔍 SeparateCharts: Datos del gráfico:', {
-      mediciones: mediciones.length,
-      selectedMetrica: selectedMetrica,
-      medicionesFiltradas: mediciones.filter(m => m.metricaid === selectedMetrica).length,
-      labels: datosGrafico.labels.length,
-      datasets: datosGrafico.datasets.length,
-      fechasUnicas: Array.from(new Set(mediciones.filter(m => m.metricaid === selectedMetrica).map(m => m.fecha))).length,
-      primeraMedicion: mediciones[0],
-      metricasDisponibles: mediciones.map(m => m.metricaid).filter((v, i, a) => a.indexOf(v) === i)
-    });
 
     // Crear nuevo gráfico
     const ctx = chartRef.current.getContext('2d');
