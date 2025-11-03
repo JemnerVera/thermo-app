@@ -2254,11 +2254,19 @@ app.post('/api/thermo/pais', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando país...');
-    console.log('🔍 Backend: Insertando datos');
+    console.log('🔍 Backend: Datos recibidos:', JSON.stringify(insertData, null, 2));
+    
+    // Filtrar paisid si está presente (no debe enviarse, la secuencia lo genera)
+    const { paisid, ...filteredInsertData } = insertData;
+    if (paisid !== undefined) {
+      console.log(`⚠️ Backend: paisid=${paisid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
 
     const { data, error } = await supabase
       .from('pais')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
 
     if (error) {
@@ -2279,11 +2287,18 @@ app.post('/api/thermo/empresa', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando empresa...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar empresaid si está presente (no debe enviarse, la secuencia lo genera)
+    const { empresaid, ...filteredInsertData } = insertData;
+    if (empresaid !== undefined) {
+      console.log(`⚠️ Backend: empresaid=${empresaid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
     
     const { data, error } = await supabase
       .from('empresa')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
     
     if (error) {
@@ -2304,11 +2319,18 @@ app.post('/api/thermo/fundo', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando fundo...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar fundoid si está presente (no debe enviarse, la secuencia lo genera)
+    const { fundoid, ...filteredInsertData } = insertData;
+    if (fundoid !== undefined) {
+      console.log(`⚠️ Backend: fundoid=${fundoid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
     
     const { data, error } = await supabase
       .from('fundo')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
 
     if (error) {
@@ -2329,18 +2351,25 @@ app.post('/api/thermo/ubicacion', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando ubicación...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar ubicacionid si está presente (no debe enviarse, la secuencia lo genera)
+    const { ubicacionid, ...filteredInsertData } = insertData;
+    if (ubicacionid !== undefined) {
+      console.log(`⚠️ Backend: ubicacionid=${ubicacionid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
     
     // Filtrar solo las columnas que existen en la tabla (omitir ubicacionabrev por problemas de cache)
     const filteredData = {
-      ubicacion: insertData.ubicacion,
-      fundoid: insertData.fundoid,
-      statusid: insertData.statusid,
-      usercreatedid: insertData.usercreatedid,
-      usermodifiedid: insertData.usermodifiedid,
-      datecreated: insertData.datecreated,
-      datemodified: insertData.datemodified
+      ubicacion: filteredInsertData.ubicacion,
+      fundoid: filteredInsertData.fundoid,
+      statusid: filteredInsertData.statusid,
+      usercreatedid: filteredInsertData.usercreatedid,
+      usermodifiedid: filteredInsertData.usermodifiedid,
+      datecreated: filteredInsertData.datecreated,
+      datemodified: filteredInsertData.datemodified
     };
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
 
     const { data, error } = await supabase
       .from('ubicacion')
@@ -2365,11 +2394,18 @@ app.post('/api/thermo/entidad', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando entidad...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar entidadid si está presente (no debe enviarse, la secuencia lo genera)
+    const { entidadid, ...filteredInsertData } = insertData;
+    if (entidadid !== undefined) {
+      console.log(`⚠️ Backend: entidadid=${entidadid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
     
     const { data, error } = await supabase
       .from('entidad')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
     
     if (error) {
@@ -2390,11 +2426,18 @@ app.post('/api/thermo/tipo', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando tipo...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar tipoid si está presente (no debe enviarse, la secuencia lo genera)
+    const { tipoid, ...filteredInsertData } = insertData;
+    if (tipoid !== undefined) {
+      console.log(`⚠️ Backend: tipoid=${tipoid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
     
     const { data, error } = await supabase
       .from('tipo')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
 
     if (error) {
@@ -2440,11 +2483,18 @@ app.post('/api/thermo/metrica', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando métrica...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar metricaid si está presente (no debe enviarse, la secuencia lo genera)
+    const { metricaid, ...filteredInsertData } = insertData;
+    if (metricaid !== undefined) {
+      console.log(`⚠️ Backend: metricaid=${metricaid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
     
     const { data, error } = await supabase
       .from('metrica')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
     
     if (error) {
@@ -2465,26 +2515,29 @@ app.post('/api/thermo/umbral', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando umbral...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar umbralid si está presente (no debe enviarse, la secuencia lo genera)
+    const { umbralid, ...filteredInsertData } = insertData;
+    if (umbralid !== undefined) {
+      console.log(`⚠️ Backend: umbralid=${umbralid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
     
     // Filtrar solo las columnas que existen en la tabla
     const filteredData = {
-      ubicacionid: insertData.ubicacionid,
-      nodoid: insertData.nodoid,
-      tipoid: insertData.tipoid,
-      metricaid: insertData.metricaid,
-      criticidadid: insertData.criticidadid,
-      umbral: insertData.umbral,
-      minimo: insertData.minimo,
-      maximo: insertData.maximo,
-      statusid: insertData.statusid,
-      usercreatedid: insertData.usercreatedid,
-      usermodifiedid: insertData.usermodifiedid,
-      datecreated: insertData.datecreated,
-      datemodified: insertData.datemodified
+      localizacionsensorid: filteredInsertData.localizacionsensorid,
+      criticidadid: filteredInsertData.criticidadid,
+      umbral: filteredInsertData.umbral,
+      minimo: filteredInsertData.minimo,
+      maximo: filteredInsertData.maximo,
+      estandar: filteredInsertData.estandar,
+      statusid: filteredInsertData.statusid,
+      usercreatedid: filteredInsertData.usercreatedid,
+      usermodifiedid: filteredInsertData.usermodifiedid,
+      datecreated: filteredInsertData.datecreated,
+      datemodified: filteredInsertData.datemodified
     };
     
-    console.log('🔍 Backend: Datos filtrados:', JSON.stringify(filteredData, null, 2));
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
     
     const { data, error } = await supabase
       .from('umbral')
@@ -2515,21 +2568,28 @@ app.post('/api/thermo/criticidad', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando criticidad...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar criticidadid si está presente (no debe enviarse, la secuencia lo genera)
+    const { criticidadid, ...filteredInsertData } = insertData;
+    if (criticidadid !== undefined) {
+      console.log(`⚠️ Backend: criticidadid=${criticidadid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
     
     // Filtrar solo las columnas que existen en la tabla
     const filteredData = {
-      criticidad: insertData.criticidad,
-      grado: insertData.grado,
-      statusid: insertData.statusid,
-      usercreatedid: insertData.usercreatedid,
-      usermodifiedid: insertData.usermodifiedid,
-      datecreated: insertData.datecreated,
-      datemodified: insertData.datemodified,
-      frecuencia: insertData.frecuencia,
-      escalamiento: insertData.escalamiento,
-      escalon: insertData.escalon
+      criticidad: filteredInsertData.criticidad,
+      grado: filteredInsertData.grado,
+      statusid: filteredInsertData.statusid,
+      usercreatedid: filteredInsertData.usercreatedid,
+      usermodifiedid: filteredInsertData.usermodifiedid,
+      datecreated: filteredInsertData.datecreated,
+      datemodified: filteredInsertData.datemodified,
+      frecuencia: filteredInsertData.frecuencia,
+      escalamiento: filteredInsertData.escalamiento,
+      escalon: filteredInsertData.escalon
     };
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
     
     const { data, error } = await supabase
       .from('criticidad')
@@ -2589,19 +2649,26 @@ app.post('/api/thermo/contacto', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando contacto...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar contactoid si está presente (no debe enviarse, la secuencia lo genera)
+    const { contactoid, ...filteredInsertData } = insertData;
+    if (contactoid !== undefined) {
+      console.log(`⚠️ Backend: contactoid=${contactoid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
     
     // Filtrar solo las columnas que existen en la tabla
     const filteredData = {
-      usuarioid: insertData.usuarioid,
-      celular: insertData.celular,
-      codigotelefonoid: insertData.codigotelefonoid,
-      statusid: insertData.statusid || 1,
-      usercreatedid: insertData.usercreatedid,
-      usermodifiedid: insertData.usermodifiedid,
-      datecreated: insertData.datecreated,
-      datemodified: insertData.datemodified
+      usuarioid: filteredInsertData.usuarioid,
+      celular: filteredInsertData.celular,
+      codigotelefonoid: filteredInsertData.codigotelefonoid,
+      statusid: filteredInsertData.statusid || 1,
+      usercreatedid: filteredInsertData.usercreatedid,
+      usermodifiedid: filteredInsertData.usermodifiedid,
+      datecreated: filteredInsertData.datecreated,
+      datemodified: filteredInsertData.datemodified
     };
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
     
     const { data, error } = await supabase
       .from('contacto')
@@ -2626,22 +2693,29 @@ app.post('/api/thermo/correo', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando correo...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar correoid si está presente (no debe enviarse, la secuencia lo genera)
+    const { correoid, ...filteredInsertData } = insertData;
+    if (correoid !== undefined) {
+      console.log(`⚠️ Backend: correoid=${correoid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
     
     // Validar formato de correo
-    if (!EMAIL_REGEX.test(insertData.correo)) {
+    if (!EMAIL_REGEX.test(filteredInsertData.correo)) {
       return res.status(400).json({ error: 'Formato de correo inválido' });
     }
     
     const filteredData = {
-      usuarioid: insertData.usuarioid,
-      correo: insertData.correo,
-      statusid: insertData.statusid || 1,
-      usercreatedid: insertData.usercreatedid,
-      usermodifiedid: insertData.usermodifiedid,
-      datecreated: insertData.datecreated,
-      datemodified: insertData.datemodified
+      usuarioid: filteredInsertData.usuarioid,
+      correo: filteredInsertData.correo,
+      statusid: filteredInsertData.statusid || 1,
+      usercreatedid: filteredInsertData.usercreatedid,
+      usermodifiedid: filteredInsertData.usermodifiedid,
+      datecreated: filteredInsertData.datecreated,
+      datemodified: filteredInsertData.datemodified
     };
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
     
     const { data, error } = await supabase
       .from('correo')
@@ -2666,19 +2740,26 @@ app.post('/api/thermo/usuario', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando usuario...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar usuarioid si está presente (no debe enviarse, la secuencia lo genera)
+    const { usuarioid, ...filteredInsertData } = insertData;
+    if (usuarioid !== undefined) {
+      console.log(`⚠️ Backend: usuarioid=${usuarioid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
     
     // Filtrar solo las columnas que existen en la tabla
     const filteredData = {
-      login: insertData.login,
-      lastname: insertData.lastname,
-      firstname: insertData.firstname,
-      statusid: insertData.statusid,
-      usercreatedid: insertData.usercreatedid,
-      usermodifiedid: insertData.usermodifiedid,
-      datecreated: insertData.datecreated,
-      datemodified: insertData.datemodified
+      login: filteredInsertData.login,
+      lastname: filteredInsertData.lastname,
+      firstname: filteredInsertData.firstname,
+      statusid: filteredInsertData.statusid,
+      usercreatedid: filteredInsertData.usercreatedid,
+      usermodifiedid: filteredInsertData.usermodifiedid,
+      datecreated: filteredInsertData.datecreated,
+      datemodified: filteredInsertData.datemodified
     };
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
     
     const { data, error } = await supabase
       .from('usuario')
@@ -2703,19 +2784,26 @@ app.post('/api/thermo/perfil', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando perfil...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar perfilid si está presente (no debe enviarse, la secuencia lo genera)
+    const { perfilid, ...filteredInsertData } = insertData;
+    if (perfilid !== undefined) {
+      console.log(`⚠️ Backend: perfilid=${perfilid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
     
     // Filtrar solo las columnas que existen en la tabla
     const filteredData = {
-      perfil: insertData.perfil,
-      statusid: insertData.statusid,
-      usercreatedid: insertData.usercreatedid,
-      datecreated: insertData.datecreated,
-      usermodifiedid: insertData.usermodifiedid,
-      datemodified: insertData.datemodified,
-      nivel: insertData.nivel,
-      jefeid: insertData.jefeid
+      perfil: filteredInsertData.perfil,
+      statusid: filteredInsertData.statusid,
+      usercreatedid: filteredInsertData.usercreatedid,
+      datecreated: filteredInsertData.datecreated,
+      usermodifiedid: filteredInsertData.usermodifiedid,
+      datemodified: filteredInsertData.datemodified,
+      nivel: filteredInsertData.nivel,
+      jefeid: filteredInsertData.jefeid
     };
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredData, null, 2));
     
     const { data, error } = await supabase
       .from('perfil')
@@ -2740,11 +2828,18 @@ app.post('/api/thermo/localizacion', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando localización...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar localizacionid si está presente (no debe enviarse, la secuencia lo genera)
+    const { localizacionid, ...filteredInsertData } = insertData;
+    if (localizacionid !== undefined) {
+      console.log(`⚠️ Backend: localizacionid=${localizacionid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
     
     const { data, error } = await supabase
       .from('localizacion')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
     
     if (error) {
@@ -2815,11 +2910,18 @@ app.post('/api/thermo/sensor', async (req, res) => {
   try {
     const insertData = req.body;
     console.log('🔍 Backend: Insertando sensor...');
-    console.log('🔍 Backend: Insertando datos');
+    
+    // Filtrar sensorid si está presente (no debe enviarse, la secuencia lo genera)
+    const { sensorid, ...filteredInsertData } = insertData;
+    if (sensorid !== undefined) {
+      console.log(`⚠️ Backend: sensorid=${sensorid} fue enviado pero será ignorado (generado por secuencia)`);
+    }
+    
+    console.log('🔍 Backend: Datos filtrados para INSERT:', JSON.stringify(filteredInsertData, null, 2));
     
     const { data, error } = await supabase
         .from('sensor')
-      .insert(insertData)
+      .insert(filteredInsertData)
       .select();
     
     if (error) {
