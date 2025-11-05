@@ -1,8 +1,7 @@
 # ============================================================================
-# JOYSENSE PROJECT - .GITIGNORE
+# THERMOS PROJECT - .GITIGNORE
 # ============================================================================
-# Archivo optimizado para el proyecto JoySense
-# Eliminadas entradas no utilizadas para mantener el archivo limpio
+# Archivo optimizado para el proyecto Thermos
 # ============================================================================
 
 # ============================================================================
@@ -23,12 +22,10 @@ backend/dist/
 # ============================================================================
 # VARIABLES DE ENTORNO (CRÍTICO - NO COMMITEAR)
 # ============================================================================
-# Variables base (baja prioridad)
 .env
-
-# Variables de desarrollo local (alta prioridad)
 .env.local
 .env.development.local
+.env.production.local
 
 # ============================================================================
 # ARCHIVOS DE CONFIGURACIÓN SENSIBLES
@@ -37,6 +34,8 @@ config.json
 secrets.json
 *.key
 *.pem
+*.publishsettings
+*.PublishSettings
 
 # ============================================================================
 # LOGS Y ARCHIVOS TEMPORALES
