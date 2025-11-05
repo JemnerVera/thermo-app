@@ -160,8 +160,6 @@ az webapp log tail --name agromigiva-joysense-dev --resource-group [RESOURCE_GRO
 - ✅ Archivos sensibles protegidos por `.gitignore`
 - ✅ Archivos con credenciales eliminados del repositorio
 
-**Ver:** `VERIFICACION_SEGURIDAD.md` para detalles completos.
-
 ---
 
 ## 📊 SECRETS DE GITHUB
@@ -186,11 +184,24 @@ az webapp log tail --name agromigiva-joysense-dev --resource-group [RESOURCE_GRO
 
 - Este App Service (`agromigiva-joysense-dev`) es un ambiente de prueba compartido
 - JoySense ya tiene su ambiente oficial diferente
-- Para producción, considera crear un App Service separado para Thermos
+- ⚠️ **MIGRACIÓN FUTURA:** En el futuro se migrará a un ambiente final designado por el DBA
+
+---
+
+## 🔄 MIGRACIÓN AL AMBIENTE FINAL
+
+Cuando el DBA designe el ambiente final para producción:
+
+1. **Crear nuevo App Service** (o usar el designado por el DBA)
+2. **Actualizar workflow** (`.github/workflows/main_thermos-dev.yml`):
+   - Cambiar `app-name` al nuevo App Service
+   - Agregar nuevo `publish-profile` secret si es necesario
+3. **Configurar variables de entorno** en el nuevo App Service
+4. **Actualizar esta documentación** con la nueva URL y configuración
 
 ---
 
 **Fecha:** Noviembre 2025  
-**Status:** ✅ Listo para deploy  
-**Próximo paso:** Commit y push para iniciar el deploy automático
+**Status:** ✅ Deploy automático funcionando  
+**Ambiente actual:** Desarrollo/Prueba (`agromigiva-joysense-dev`)
 
