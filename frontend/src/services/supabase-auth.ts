@@ -165,5 +165,41 @@ export const authService = {
         callback(null);
       }
     });
+  },
+
+  // Reset de contraseña
+  async resetPassword(login: string): Promise<{ success: boolean; message?: string; error?: string }> {
+    try {
+      const response = await fetch(`${BACKEND_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ login })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        console.error('❌ Error al resetear contraseña:', result.error);
+        return { 
+          success: false, 
+          error: result.error || 'Error al resetear la contraseña' 
+        };
+      }
+
+      console.log('✅ Reset de contraseña exitoso');
+      return { 
+        success: true, 
+        message: result.message || 'Se ha enviado una nueva contraseña al correo registrado' 
+      };
+
+    } catch (error) {
+      console.error('❌ Error inesperado durante reset de contraseña:', error);
+      return { 
+        success: false, 
+        error: 'Error inesperado durante el reset de contraseña' 
+      };
+    }
   }
 };

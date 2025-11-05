@@ -1139,6 +1139,50 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Endpoint para reset de contraseña
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { login } = req.body;
+    
+    if (!login || login.trim() === '') {
+      return res.status(400).json({ 
+        success: false,
+        error: 'El login es requerido' 
+      });
+    }
+
+    logger.debug('Solicitando reset de contraseña para:', login);
+
+    // Llamar a la función de PostgreSQL para reset de contraseña
+    // La función se llama 'fn_reset_password' en el schema 'thermo'
+    // y recibe el parámetro 'p_login'
+    const { data, error } = await supabase.rpc('fn_reset_password', {
+      p_login: login.trim()
+    });
+
+    if (error) {
+      logger.error('Error al resetear contraseña:', error);
+      return res.status(500).json({ 
+        success: false,
+        error: error.message || 'Error al resetear la contraseña. Verifique que el usuario existe y tiene un correo activo.' 
+      });
+    }
+
+    logger.info('Reset de contraseña exitoso para:', login);
+    res.json({ 
+      success: true,
+      message: data || 'Se ha enviado una nueva contraseña al correo registrado'
+    });
+
+  } catch (error) {
+    logger.error('Error inesperado durante reset de contraseña:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Error interno del servidor' 
+    });
+  }
+});
+
 // Endpoint para verificar autenticación
 app.get('/api/auth/verify', verifyAuth, (req, res) => {
   if (req.user) {
