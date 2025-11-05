@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const path = require('path');
+const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
 
 // Constantes de validación
@@ -2196,92 +2198,36 @@ app.get('/api/thermo/test-metadata-function', async (req, res) => {
 // Ruta para detectar schema disponible (THERMOS)
 app.get('/api/thermo/detect', async (req, res) => {
   try {
-    console.log('🔍 Detectando schema disponible via /api/thermo/detect...');
-    console.log(`📊 Configuración actual: URL=${supabaseUrl}, Schema=${dbSchema}`);
-    console.log(`🔑 Service Role Key (primeros 30 chars): ${supabaseKey ? supabaseKey.substring(0, 30) + '...' : 'NO KEY'}`);
+    logger.debug('Detectando schema disponible via /api/thermo/detect...');
     
     // Probar schema 'thermo' usando una tabla conocida
-    console.log('🔍 Probando conexión al schema thermo con tabla "pais"...');
-    
-    // Test 1: Verificar si la tabla existe
-    console.log('📋 Test 1: Verificando existencia de tabla "pais"...');
     const { data: thermoData, error: thermoError } = await supabase
       .from('pais')
       .select('paisid')
       .limit(1);
 
-    console.log('📋 Resultado Test 1:', { 
-      data: thermoData, 
-      error: thermoError,
-      errorMessage: thermoError?.message,
-      errorCode: thermoError?.code,
-      errorDetails: thermoError?.details,
-      errorHint: thermoError?.hint
-    });
-
-    // Test 2: Probar con schema explícito
-    console.log('📋 Test 2: Probando con schema explícito...');
-    const { data: explicitData, error: explicitError } = await supabase
-      .from('thermo.pais')
-      .select('paisid')
-      .limit(1);
-
-    console.log('📋 Resultado Test 2:', { 
-      data: explicitData, 
-      error: explicitError,
-      errorMessage: explicitError?.message,
-      errorCode: explicitError?.code
-    });
-
-    // Test 3: Probar información del schema
-    console.log('📋 Test 3: Verificando información del schema...');
-    let schemaInfo, schemaError;
-    try {
-      const result = await supabase.rpc('get_schema_info', { schema_name: 'thermo' });
-      schemaInfo = result.data;
-      schemaError = result.error;
-    } catch (err) {
-      schemaInfo = null;
-      schemaError = { message: 'RPC no disponible', details: err.message };
-    }
-
-    console.log('📋 Resultado Test 3:', { 
-      data: schemaInfo, 
-      error: schemaError
-    });
-
     if (!thermoError && thermoData) {
-      console.log('✅ Schema "thermo" detectado y disponible');
-      console.log(`📊 Datos de prueba: ${JSON.stringify(thermoData)}`);
+      logger.info('Schema "thermo" detectado y disponible');
       res.json({ 
         available: true, 
         schema: 'thermo', 
-        data: thermoData,
-        tests: {
-          test1: { success: true, data: thermoData },
-          test2: { success: !explicitError, data: explicitData },
-          test3: { success: !schemaError, data: schemaInfo }
-        }
+        data: thermoData
       });
     } else {
-      console.log('❌ Schema "thermo" no disponible');
-      console.log(`❌ Error principal: ${JSON.stringify(thermoError)}`);
-      console.log(`❌ Error explícito: ${JSON.stringify(explicitError)}`);
+      logger.warn('Schema "thermo" no disponible');
       res.json({ 
         available: false, 
         schema: 'public', 
-        error: thermoError,
-        tests: {
-          test1: { success: false, error: thermoError },
-          test2: { success: !explicitError, error: explicitError },
-          test3: { success: !schemaError, error: schemaError }
-        }
+        error: thermoError?.message || 'Unknown error'
       });
     }
   } catch (error) {
-    console.error('❌ Error detectando schema:', error);
-    console.error('❌ Stack trace:', error.stack);
-    res.json({ available: false, schema: 'public', error: error.message, stack: error.stack });
+    logger.error('Error detectando schema:', error.message);
+    res.json({ 
+      available: false, 
+      schema: 'public', 
+      error: error.message 
+    });
   }
 });
 
@@ -3469,6 +3415,42 @@ app.get('/api/public/zona', async (req, res) => {
   }
 });
 
+// ============================================================================
+// SERVIR ARCHIVOS ESTÁTICOS DEL FRONTEND (PRODUCCIÓN)
+// ============================================================================
+
+// Servir archivos estáticos del frontend build
+const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
+const frontendStaticPath = path.join(frontendBuildPath, 'static');
+
+// Servir archivos estáticos (JS, CSS, imágenes, etc.)
+app.use('/static', express.static(frontendStaticPath));
+
+// Servir otros archivos estáticos del build (favicon, manifest, etc.)
+app.use(express.static(frontendBuildPath, {
+  // Solo servir archivos que existen, no directorios
+  index: false,
+  // No mostrar directorios
+  dotfiles: 'ignore'
+}));
+
+// Ruta catch-all: servir index.html para todas las rutas que no sean /api/*
+// Esto permite que React Router maneje el routing del lado del cliente
+app.get('*', (req, res, next) => {
+  // Si es una ruta de API, no hacer nada (dejar que las rutas de API manejen)
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  
+  // Para todas las demás rutas, servir index.html
+  res.sendFile(path.join(frontendBuildPath, 'index.html'), (err) => {
+    if (err) {
+      console.error('❌ Error sirviendo index.html:', err);
+      res.status(500).send('Error loading application');
+    }
+  });
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Thermos Backend API running on port ${PORT}`);
@@ -3476,6 +3458,14 @@ app.listen(PORT, () => {
   console.log(`🌐 API URL: http://localhost:${PORT}/api`);
   console.log(`📊 Schema configurado: ${dbSchema}`);
   console.log(`📡 Servidor listo para recibir conexiones...`);
+  
+  // Verificar si existe el directorio del frontend build
+  if (fs.existsSync(frontendBuildPath)) {
+    console.log(`✅ Frontend build encontrado en: ${frontendBuildPath}`);
+  } else {
+    console.warn(`⚠️ Frontend build no encontrado en: ${frontendBuildPath}`);
+    console.warn(`   La aplicación solo servirá la API.`);
+  }
 }).on('error', (error) => {
   console.error('❌ Error al iniciar el servidor:', error);
   process.exit(1);
